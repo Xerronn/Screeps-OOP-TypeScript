@@ -1,4 +1,4 @@
-import { ErrorMapper } from "utils/ErrorMapper";
+import { ErrorMapper } from "thirdParty/ErrorMapper";
 import { Imperator } from './administrators/imperator';
 
 declare global {
