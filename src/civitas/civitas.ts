@@ -6,7 +6,7 @@ export abstract class Civitas extends GameObj {
     liveObj: Creep;
     pos: RoomPosition;
     room: string;
-    hits: number; 
+    hits: number;
     hitsMax: number;
 
     //basic creep attributes
@@ -14,16 +14,16 @@ export abstract class Civitas extends GameObj {
     memory: CreepMemory;
     body: string[];
     spawning: boolean;
-    
+
     constructor(civitas: Creep) {
         super();
         this.liveObj = civitas;
-        
+
         this.id = civitas.id;
         this.name = civitas.name;
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
-        
+
         //attributes that change every tick
         this.memory = civitas.memory;
         this.pos = civitas.pos;
@@ -53,7 +53,7 @@ export abstract class Civitas extends GameObj {
 
     /**
      * Method to boost the creep with a already prepared lab
-     * @param {string[]} boostType 
+     * @param {string[]} boostType
      */
     boost(boostTypes: string[]) {
         // for (let boost of boostTypes) {
