@@ -1,9 +1,9 @@
 declare const enum CASTRUM_TYPES {
-    BASTION = 'tower',
-    CONDUIT = 'link',
-    MARKET = 'terminal',
-    NEXUS = 'spawn',
-    WORKSHOP = 'lab'
+    BASTION = 'bastion',
+    CONDUIT = 'conduit',
+    MARKET = 'market',
+    NEXUS = 'nexus',
+    WORKSHOP = 'workshop'
 }
 
 declare const enum CIVITAS_TYPES {
