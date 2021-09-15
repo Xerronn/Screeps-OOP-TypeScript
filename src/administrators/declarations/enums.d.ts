@@ -1,4 +1,4 @@
-declare const enum WRAPPER_TYPES {
+declare const enum CASTRUM_TYPES {
     BASTION = 'tower',
     CONDUIT = 'link',
     MARKET = 'terminal',
