@@ -5,3 +5,7 @@ declare const enum CASTRUM_TYPES {
     NEXUS = 'spawn',
     WORKSHOP = 'lab'
 }
+
+declare const enum CIVITAS_TYPES {
+    MINER = 'miner'
+}

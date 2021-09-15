@@ -1,6 +1,6 @@
 interface CreepMemory {
     name: string;
-    type: string;
+    type: CIVITAS_TYPES;
     spawnRoom: string;
     body: string[];
 }
@@ -23,4 +23,9 @@ interface Memory {
             }
         }
     };
+}
+
+interface RoomAnchor {
+    x: number,
+    y: number,
 }

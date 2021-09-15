@@ -13,21 +13,23 @@ export abstract class Civitas extends GameObj {
     name: string;
     memory: CreepMemory;
     body: string[];
+    spawning: boolean;
     
-    constructor(creep: Creep) {
+    constructor(civitas: Creep) {
         super();
-        this.liveObj = creep;
+        this.liveObj = civitas;
         
-        this.id = creep.id;
-        this.name = creep.name;
-        this.hitsMax = creep.hitsMax;
-        this.body = creep.body.map(b => b.type);
+        this.id = civitas.id;
+        this.name = civitas.name;
+        this.hitsMax = civitas.hitsMax;
+        this.body = civitas.body.map(b => b.type);
         
         //attributes that change every tick
-        this.memory = creep.memory;
-        this.pos = creep.pos;
-        this.room = creep.room.name;
-        this.hits = creep.hits;
+        this.memory = civitas.memory;
+        this.pos = civitas.pos;
+        this.room = civitas.room.name;
+        this.hits = civitas.hits;
+        this.spawning = civitas.spawning;
     }
 
     update(): boolean {
