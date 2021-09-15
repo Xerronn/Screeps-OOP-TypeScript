@@ -2,6 +2,7 @@ interface CreepMemory {
     name: string;
     type: CIVITAS_TYPES;
     spawnRoom: string;
+    generation: number | undefined;
     body: string[];
 }
 
