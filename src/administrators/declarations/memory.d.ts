@@ -19,7 +19,7 @@ interface Memory {
                         string[],
                         string,
                         object
-                    ]
+                    ] | undefined
                 }
             }
         }
