@@ -15,11 +15,7 @@ interface Memory {
             [tick: number]: {
                 [taskId: string]: {
                     script: string,
-                    objArr: [
-                        string[],
-                        string,
-                        object
-                    ] | undefined
+                    objArr: Array<any> | undefined
                 }
             }
         }

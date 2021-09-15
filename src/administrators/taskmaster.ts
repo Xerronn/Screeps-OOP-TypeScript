@@ -22,7 +22,7 @@ export class TaskMaster {
      * @param {String} task
      * @param {Array} objArr
      */
-    static schedule(room: string, tick: number, task: string, objArr=undefined) {
+    static schedule(room: string, tick: number, task: string, objArr: Array<any> | undefined) {
         if (!Memory.scheduler[room]) {
             Memory.scheduler[room] = {};
         }
