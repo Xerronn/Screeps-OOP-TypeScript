@@ -11,7 +11,7 @@ export abstract class Castrum extends GameObj {
     hitsMax: number;
 
     //basic structure attributes
-    type: CASTRUM_TYPES | undefined;
+    type: CASTRUM_TYPES;
 
     constructor(structure: Structure) {
         super();
@@ -36,5 +36,9 @@ export abstract class Castrum extends GameObj {
         this.hits = this.liveObj.hits;
         this.hitsMax = this.liveObj.hitsMax;
         return true;
+    }
+
+    run(): boolean {
+        return false
     }
 }
