@@ -11,6 +11,7 @@ export abstract class Civitas extends GameObj {
 
     //basic creep attributes
     name: string;
+    type: CIVITAS_TYPES;
     memory: CreepMemory;
     body: string[];
     spawning: boolean;
@@ -21,6 +22,7 @@ export abstract class Civitas extends GameObj {
 
         this.id = civitas.id;
         this.name = civitas.name;
+        this.type = civitas.memory.type;
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
 
