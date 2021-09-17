@@ -1,4 +1,44 @@
+import { Castrum } from "castrum/castrum";
+import { Civitas } from "civitas/civitas";
+
 export class Informant {
+
+    /**
+     * Method that returns the wrapper for a given game object id
+     * @param {String} id
+     */
+    static getWrapper(id: Id<any>): Castrum | Civitas | undefined {
+        let liveObj = Game.getObjectById(id);
+        if (!liveObj || !liveObj.my) {
+            return undefined;
+        }
+
+        let room = liveObj.room;
+
+        if (liveObj.structureType !== undefined) {
+            //is a structure
+            let supervisor = global.Imperator.administrators[room.name].supervisor;
+            let castrumType = Informant.mapGameToClass(liveObj.structureType);
+            if (castrumType === undefined) return undefined;
+            let structures = supervisor.castrum[castrumType];
+            for (let struc of structures) {
+                if (struc.id == id) {
+                    return struc;
+                }
+            }
+            return undefined;
+        } else {
+            //is a creep
+            let supervisor = global.Imperator.administrators[liveObj.memory.spawnRoom].supervisor;
+            let creeps = supervisor.civitas[liveObj.memory.type]
+            for (let creep of creeps) {
+                if (creep.id === id) {
+                    return creep;
+                }
+            }
+            return undefined;
+        }
+    }
 
     /**
      * Bunker schema adopted from HallowNest 2.0
@@ -47,7 +87,7 @@ export class Informant {
      * @param structureType
      * @returns
      */
-    static mapGameToClass(structureType: StructureConstant): CASTRUM_TYPES | undefined {
+    static mapGameToClass(structureType: StructureConstant): CASTRUM_TYPES {
         switch (structureType) {
             case STRUCTURE_SPAWN:
                 return CASTRUM_TYPES.NEXUS;
@@ -60,7 +100,7 @@ export class Informant {
             case STRUCTURE_TERMINAL:
                 return CASTRUM_TYPES.MARKET;
             default:
-                return undefined;
+                return CASTRUM_TYPES.UNDEFINED;
         }
     }
 }
