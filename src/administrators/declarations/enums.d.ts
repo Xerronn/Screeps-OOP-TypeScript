@@ -3,9 +3,11 @@ declare const enum CASTRUM_TYPES {
     CONDUIT = 'conduit',
     MARKET = 'market',
     NEXUS = 'nexus',
-    WORKSHOP = 'workshop'
+    WORKSHOP = 'workshop',
+    UNDEFINED = 'undefined'
 }
 
 declare const enum CIVITAS_TYPES {
+    ARBITER = 'arbiter',
     MINER = 'miner'
 }
