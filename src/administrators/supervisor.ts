@@ -57,8 +57,7 @@ export class Supervisor {
         for (var structure of thisRoom.find(FIND_MY_STRUCTURES)) {
 
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (castrumType !== undefined) {
-                !(castrumType in this.castrum) && (this.castrum[castrumType] = []);
+            if (castrumType !== 'undefined') {
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
@@ -70,8 +69,6 @@ export class Supervisor {
         //initialize all creeps in the room to their respective classes
         this.civitas = {};
         for (let creepMem of _.filter(Memory.creeps, c => c.spawnRoom == this.room)) {
-            !(creepMem.type in this.civitas) && (this.civitas[creepMem.type] = []);
-
             if (Game.creeps[creepMem.name]) {
                 let createObjStr = "this.civitates[\"" + creepMem.type + "\"].push(new " + creepMem.type.charAt(0).toUpperCase() +
                     creepMem.type.slice(1) + "(Game.creeps[\"" + creepMem.name + "\"]));";
