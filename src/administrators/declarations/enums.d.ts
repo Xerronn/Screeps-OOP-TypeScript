@@ -9,5 +9,19 @@ declare const enum CASTRUM_TYPES {
 
 declare const enum CIVITAS_TYPES {
     ARBITER = 'arbiter',
-    MINER = 'miner'
+    CHEMIST = 'chemist',
+    CONTRACTOR = 'contractor',
+    CURATOR = 'curator',
+    EMISSARY = 'emissary',
+    EXCAVATOR = 'excavator',
+    MINER = 'miner',
+    RUNNER = 'runner',
+    SCHOLAR = 'scholar',
+    SCOUT = 'scout',
+}
+
+declare const enum LEGION_TYPES {
+    EXECUTIONER = 'executioner',
+    GARRISON = 'garrison',
+    JESTER = 'jester',
 }

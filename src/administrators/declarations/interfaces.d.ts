@@ -1,10 +1,13 @@
 interface CreepMemory {
-    name: string;
-    type: CIVITAS_TYPES;
-    spawnRoom: string;
-    generation: number | undefined;
-    body: BodyPartConstant[];
-    boost: Array<MineralBoostConstant>
+    name?: string;
+    type?: CIVITAS_TYPES | LEGION_TYPES;
+    spawnRoom?: string;
+    generation?: number | undefined;
+    body?: BodyPartConstant[];
+    boost?: Array<MineralBoostConstant>;
+    offRoading?: boolean;
+    task?: string;
+    targetRoom?: string;
 }
 
 interface Memory {
@@ -30,6 +33,6 @@ interface RoomAnchor {
 
 interface RenewalTemplate {
     body: BodyPartConstant[];
-    type: CIVITAS_TYPES;
+    type: CIVITAS_TYPES | LEGION_TYPES;
     memory: CreepMemory;
 }
