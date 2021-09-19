@@ -29,8 +29,16 @@ export class Supervisor {
 
     constructor(room: string) {
         this.room = room;
+
         this.castrum = {};
+        for (let castrumType of Object.values(CASTRUM_TYPES)) {
+            this.castrum[castrumType] = [];
+        }
+
         this.civitas = {};
+        for (let civitasType of Object.values(CIVITAS_TYPES)) {
+            this.civitas[civitasType] = [];
+        }
 
         this.nexusReservation = 0;
         this.workshopReservation = 0;
@@ -147,7 +155,6 @@ export class Supervisor {
      * @param {boolean} rebirth whether or not this is a rebirth
      */
      initiate(template: RenewalTemplate, boost=true) {
-        //to make sure that we actually find a nexus that can spawn this request.
         let foundNexus = false;
         let generationIncremented = 0;
 
