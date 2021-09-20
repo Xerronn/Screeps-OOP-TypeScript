@@ -1,3 +1,5 @@
+import { RemoteInfo } from "dgram";
+
 export class Archivist {
 
     static anchor: object;
@@ -112,8 +114,8 @@ export class Archivist {
      * @param {String} room string representing the room
      * @returns remotes object
      */
-    static getRemotes(room: string): object {
-        return Memory.rooms[room].remotes || {};
+    static getRemotes(room: string): Remotes {
+        return Memory.rooms[room].remotes;
     }
 
     /**
@@ -154,22 +156,6 @@ export class Archivist {
             return Memory.rooms[room].statistics[stat];
         } catch (err) {
             return 0;
-        }
-    }
-
-    /**
-     * Get all instances of a certain structure within a room
-     * @param {String} room string representing the room
-     * @param {String} structure screeps constant type of structure to get
-     * @returns an array of live game objects
-     */
-    static getStructures(room: string, structure:StructureConstant): Array<any> {
-        let structureString = structure + "s";
-        let call = "Memory.rooms[\"" + room + "\"].structures." + structureString + ".map(obj => Game.getObjectById(obj))";
-        try {
-            return eval(call);
-        } catch (err) {
-            return [];
         }
     }
 
