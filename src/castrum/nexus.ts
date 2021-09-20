@@ -70,7 +70,7 @@ export class Nexus extends Castrum {
 
         let spawnBody = body;
         //reduce move parts when roads are built
-        if (global.Archivist.getRoadsBuilt(this.room) && !memory.noRoads) {
+        if (Archivist.getRoadsBuilt(this.room) && !memory.noRoads) {
             //build a list of all non move body parts
             let noMoves = [];
             for (let part of spawnBody) {
