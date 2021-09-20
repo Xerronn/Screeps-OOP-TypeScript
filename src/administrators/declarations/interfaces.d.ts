@@ -1,9 +1,9 @@
 interface CreepMemory {
-    name?: string;
-    type?: CIVITAS_TYPES | LEGION_TYPES;
-    spawnRoom?: string;
-    generation?: number | undefined;
-    body?: BodyPartConstant[];
+    name: string;
+    type: CIVITAS_TYPES | LEGION_TYPES;
+    spawnRoom: string;
+    generation: number | undefined;
+    body: BodyPartConstant[];
     boost?: Array<MineralBoostConstant>;
     offRoading?: boolean;
     task?: string;
@@ -34,5 +34,13 @@ interface RoomAnchor {
 interface RenewalTemplate {
     body: BodyPartConstant[];
     type: CIVITAS_TYPES | LEGION_TYPES;
-    memory: CreepMemory;
+    memory: CreepMemory | any;
+}
+
+interface Remotes {
+    [roomName: string]: {
+        status: REMOTE_STATUSES;
+        distances: number[];
+        selected?: boolean;
+    }
 }
