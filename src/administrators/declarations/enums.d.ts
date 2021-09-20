@@ -20,8 +20,14 @@ declare enum CIVITAS_TYPES {
     SCOUT = 'scout',
 }
 
-declare const enum LEGION_TYPES {
+declare enum LEGION_TYPES {
     EXECUTIONER = 'executioner',
     GARRISON = 'garrison',
     JESTER = 'jester',
+}
+
+declare enum REMOTE_STATUSES {
+    SAFE = 'safe',
+    DANGEROUS = 'dangerous',
+    UNINTERESTING = 'uninteresting'
 }
