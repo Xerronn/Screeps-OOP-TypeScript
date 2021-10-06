@@ -14,7 +14,7 @@ interface Memory {
     creeps: {[creepName: string]: CreepMemory}
     gFlags: {[flagName: string]: string | boolean};
     rooms: {[roomName: string]: any};
-    scheduler: {
+    directives: {
         [roomName: string]: {
             [tick: number]: {
                 [taskId: string]: {
