@@ -1,6 +1,6 @@
 import { Architect } from "./architect";
 import { Archivist } from "./archivist";
-import { TaskMaster } from "./taskmaster";
+import { Director } from "./director";
 
 //entity that executes room logic
 export class Executive {
@@ -82,7 +82,7 @@ export class Executive {
         for (var i = 0; i < 6; i++) {
             let memory = { "generation": 0 };
             let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
-            TaskMaster.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
+            Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
         }
     }
 
@@ -133,10 +133,11 @@ export class Executive {
         `if (global.Imperator.administrators[objArr[0]].supervisor.storageLink) {
             global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1])
         } else {
-            global.TaskMaster.schedule(objArr[0], Game.time + 50, objArr[2], objArr);
+            global.Director.schedule(objArr[0], Game.time + 50, objArr[2], objArr);
         }`
+        //todo: fix this, as director is no longer in the global scope
 
-        TaskMaster.schedule(this.room, Game.time, task, [this.room, arbiter, task]);
+        Director.schedule(this.room, Game.time, task, [this.room, arbiter, task]);
     }
 
     /**
