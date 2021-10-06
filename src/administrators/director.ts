@@ -1,18 +1,10 @@
 //Entity that manages task execution
-export class TaskMaster {
+export class Director {
     constructor() {
-        //TaskMaster manages a scheduler system that can schedule tasks for ticks in the future
+        //Director manages a scheduler system that can schedule tasks for ticks in the future
         //Due to global resets, this will have to be stored in memory.
-        TaskMaster.initScheduler();
-    }
-
-    /**
-     * Function that checks to see if the scheduler memory pathway has been created
-     * If it has, it will set references to the memory pathway, if not it will create it.
-     */
-    static initScheduler() {
-        if (!Memory.scheduler) {
-            Memory.scheduler = {};
+        if (!Memory.directives) {
+            Memory.directives = {};
         }
     }
 
@@ -23,33 +15,33 @@ export class TaskMaster {
      * @param {Array} objArr
      */
     static schedule(room: string, tick: number, task: string, objArr: Array<any> | undefined) {
-        if (!Memory.scheduler[room]) {
-            Memory.scheduler[room] = {};
+        if (!Memory.directives[room]) {
+            Memory.directives[room] = {};
         }
-        if (!Memory.scheduler[room][tick]) {
-            Memory.scheduler[room][tick] = {};
+        if (!Memory.directives[room][tick]) {
+            Memory.directives[room][tick] = {};
         }
         let taskObj = {
             script: task,
             objArr: objArr
         };
         let taskId = this.makeId();
-        Memory.scheduler[room][tick][taskId] = taskObj;
+        Memory.directives[room][tick][taskId] = taskObj;
     }
 
     /**
      * Function that executes the schedule
      */
     static run(): void {
-        for (let room in Memory.scheduler) {
-            for (let tick in Memory.scheduler[room]) {
+        for (let room in Memory.directives) {
+            for (let tick in Memory.directives[room]) {
                 if (parseInt(tick) <= Game.time) {
-                    for (let id in Memory.scheduler[room][tick]) {
-                        let task = Memory.scheduler[room][tick][id];
+                    for (let id in Memory.directives[room][tick]) {
+                        let task = Memory.directives[room][tick][id];
                         let objArr = task.objArr;
                         eval(task.script);
                     }
-                    delete Memory.scheduler[room][tick];
+                    delete Memory.directives[room][tick];
                 }
             }
         }
@@ -61,14 +53,14 @@ export class TaskMaster {
      * @param {String} taskId
      * @returns
      */
-    static runTask(room: string, taskId: string): boolean {
-        for (let tick in Memory.scheduler[room]) {
-            for (let id in Memory.scheduler[room][tick]) {
+    static runDirective(room: string, taskId: string): boolean {
+        for (let tick in Memory.directives[room]) {
+            for (let id in Memory.directives[room][tick]) {
                 if (id === taskId) {
-                    let task = Memory.scheduler[room][tick][id];
+                    let task = Memory.directives[room][tick][id];
                     let objArr = task.objArr;
                     eval(task.script);
-                    delete Memory.scheduler[room][tick][id];
+                    delete Memory.directives[room][tick][id];
                     return true;
                 }
             }
@@ -80,8 +72,8 @@ export class TaskMaster {
      * Delete all instances of tasks using provided script
      * @param {String} script the script to find
      */
-    static deleteTask(script: string): void {
-        let schedule = Memory.scheduler;
+    static deleteDirective(script: string): void {
+        let schedule = Memory.directives;
     }
 
     /**
@@ -97,4 +89,4 @@ export class TaskMaster {
     }
 }
 
-module.exports = TaskMaster;
+module.exports = Director;
