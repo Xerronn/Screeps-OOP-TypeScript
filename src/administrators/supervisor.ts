@@ -1,6 +1,6 @@
 //administrator imports
 import { Informant } from './informant';
-import { TaskMaster } from './taskmaster';
+import { Director } from './director';
 import { Executive } from './executive';
 
 //creep imports
@@ -16,8 +16,8 @@ import { Market } from '../castrum/market';
 
 export class Supervisor {
     room: string;
-    civitas: {[creepType: string]: Array<Civitas>};
-    castrum: {[structureType: string]: Array<Castrum>};
+    civitas: {[civitasType: string]: Array<Civitas>};       //todo: get proper typing on the keys, not sure how atm
+    castrum: {[castrumType: string]: Array<Castrum>};
 
     nexusReservation: number;
     workshopReservation: number;
@@ -31,14 +31,7 @@ export class Supervisor {
         this.room = room;
 
         this.castrum = {};
-        for (let castrumType of Object.values(CASTRUM_TYPES)) {
-            this.castrum[castrumType] = [];
-        }
-
         this.civitas = {};
-        for (let civitasType of Object.values(CIVITAS_TYPES)) {
-            this.civitas[civitasType] = [];
-        }
 
         this.nexusReservation = 0;
         this.workshopReservation = 0;
@@ -96,7 +89,7 @@ export class Supervisor {
     run() {
         try {
             //first all creeps
-            for (var type of Object.keys(this.civitas)) {
+            for (var type in this.civitas) {
                 for (var civ of this.civitas[type]) {
                     if (civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
@@ -207,7 +200,7 @@ export class Supervisor {
             }
             //if the request fails, schedule it for 5 ticks in the future
             let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1]);";
-            TaskMaster.schedule(this.room, Game.time + 5, task, [this.room, {...template}]);
+            Director.schedule(this.room, Game.time + 5, task, [this.room, {...template}]);
         }
     }
 
