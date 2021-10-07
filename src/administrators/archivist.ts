@@ -1,8 +1,7 @@
-import { RemoteInfo } from "dgram";
-
 export class Archivist {
 
     static anchor: object;
+
     /**
      * Method that builds the memory object at the beginning and after global resets
      * @param {boolean} reset reset the memory
@@ -19,6 +18,10 @@ export class Archivist {
         if (!Memory.gFlags || reset) {
             Memory.gFlags = {};
             Memory.gFlags.memoryInit = false;
+        }
+
+        if (!Memory.directives || reset) {
+            Memory.directives = {};
         }
 
         for (var room of global.Imperator.dominion) {
