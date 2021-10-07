@@ -24,6 +24,5 @@
         "typings/**": true
     },
     "typescript.tsdk": "./node_modules/typescript/lib",
-    "eslint.enable": true,
-    "cSpell.words": ["Roading", "struc"]
+    "eslint.enable": true
 }
