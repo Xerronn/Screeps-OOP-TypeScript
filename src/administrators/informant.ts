@@ -106,3 +106,111 @@ export class Informant {
         }
     }
 }
+declare global {
+    /**
+     * TYPES AND ENUMS
+     */
+    const enum CASTRUM_TYPES {
+        BASTION = 'bastion',
+        CONDUIT = 'conduit',
+        MARKET = 'market',
+        NEXUS = 'nexus',
+        WORKSHOP = 'workshop',
+        UNDEFINED = 'undefined'
+    }
+
+    type CastrumType =
+        'bastion' | 'conduit' | 'market' | 'nexus' | 'workshop' | 'undefined';
+
+    const enum CIVITAS_TYPES {
+        ARBITER = 'arbiter',
+        CHEMIST = 'chemist',
+        CONTRACTOR = 'contractor',
+        COURIER = 'courier',
+        CURATOR = 'curator',
+        EMISSARY = 'emissary',
+        EXCAVATOR = 'excavator',
+        MINER = 'miner',
+        RUNNER = 'runner',
+        SCHOLAR = 'scholar',
+        SCOUT = 'scout',
+    }
+
+    type CivitasType =
+        'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
+        'emissary' | 'excavator' | 'miner' | 'runner' | 'scholar' | 'scout';
+
+    const enum LEGION_TYPES {
+        EXECUTIONER = 'executioner',
+        GARRISON = 'garrison',
+        JESTER = 'jester',
+    }
+
+    type LegionType =
+        'executioner' | 'garrison' | 'jester';
+
+    const enum REMOTE_STATUSES {
+        SAFE = 'safe',
+        DANGEROUS = 'dangerous',
+        UNINTERESTING = 'uninteresting'
+    }
+
+    /**
+     * INTERFACES
+     */
+    interface CreepMemory {
+        name: string;
+        type: CIVITAS_TYPES | LEGION_TYPES;
+        spawnRoom: string;
+        generation: number | undefined;
+        body: BodyPartConstant[];
+        boost?: Array<MineralBoostConstant>;
+        offRoading?: boolean;
+        task?: string;
+        targetRoom?: string;
+    }
+
+    //todo: better typing here
+    interface RoomMemory {
+        flags?: any;
+        statistics?: any;
+        sources?: any;
+        remotes?: Remotes;
+    }
+
+    interface Memory {
+        creeps: {[creepName: string]: CreepMemory}
+        gFlags: {[flagName: string]: string | boolean};
+        rooms: {[roomName: string]: RoomMemory};
+        directives: {
+            [roomName: string]: {
+                [tick: number]: {
+                    [taskId: string]: {
+                        script: string,
+                        objArr: Array<any> | undefined
+                    }
+                }
+            }
+        };
+    }
+
+    interface RoomAnchor {
+        x: number;
+        y: number;
+    }
+
+    interface RenewalTemplate {
+        body: BodyPartConstant[];
+        type: CIVITAS_TYPES | LEGION_TYPES;
+        memory: CreepMemory | any;
+    }
+
+    interface Remotes {
+        [roomName: string]: {
+            status: REMOTE_STATUSES;
+            distances: number[];
+            selected?: boolean;
+        }
+    }
+}
+
