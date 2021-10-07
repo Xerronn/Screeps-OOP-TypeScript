@@ -114,7 +114,7 @@ export class Archivist {
      * @param {String} room string representing the room
      * @returns remotes object
      */
-    static getRemotes(room: string): Remotes {
+    static getRemotes(room: string): Remotes | undefined {
         return Memory.rooms[room].remotes;
     }
 
