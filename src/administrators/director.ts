@@ -1,13 +1,5 @@
 //Entity that manages task execution
 export class Director {
-    constructor() {
-        //Director manages a scheduler system that can schedule tasks for ticks in the future
-        //Due to global resets, this will have to be stored in memory.
-        if (!Memory.directives) {
-            Memory.directives = {};
-        }
-    }
-
     /**
      * Function that schedules task on tick referencing objects in objArr if needed
      * @param {Number} tick
