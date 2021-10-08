@@ -164,6 +164,7 @@ declare global {
         spawnRoom: string;
         generation: number | undefined;
         body: BodyPartConstant[];
+        remote?: boolean;
         boost?: Array<MineralBoostConstant>;
         offRoading?: boolean;
         task?: string;
