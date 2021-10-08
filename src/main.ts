@@ -1,10 +1,10 @@
 import { Archivist } from "./administrators/archivist";
 import { Imperator } from './administrators/imperator';
+import { Director } from "./administrators/director";
 declare global {
     namespace NodeJS {
         interface Global {
             Imperator: Imperator;
-            Archivist: Archivist;
             logger: boolean;
         }
     }
@@ -12,6 +12,19 @@ declare global {
 
 
 global.Imperator = new Imperator();
-export const loop = () => {
-    console.log(`Current game tick is ${Game.time}`);
-};
+Archivist.build();
+
+function mainLoop(): void {
+    console.log(Game.time);
+    Director.run();
+}
+
+function globalReset(): void {
+    console.log("<b>--------Global Reset--------</b>");
+}
+
+export const loop = mainLoop;
+
+globalReset();
+
+
