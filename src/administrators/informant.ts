@@ -105,6 +105,20 @@ export class Informant {
                 return CASTRUM_TYPES.UNDEFINED;
         }
     }
+
+    /**
+     * Method that takes a body array and returns the energy cost
+     * @param {Array} body A body parts array
+     * @returns the energy cost of a body
+     */
+    static calculateBodyCost(body: BodyPartConstant[]) {
+        let cost = 0;
+        for (let part of body) {
+            cost += BODYPART_COST[part];
+        }
+
+        return cost;
+    }
 }
 declare global {
     /**
@@ -164,6 +178,7 @@ declare global {
         spawnRoom: string;
         generation: number | undefined;
         body: BodyPartConstant[];
+        spawnDirection?: DirectionConstant;
         remote?: boolean;
         boost?: Array<MineralBoostConstant>;
         offRoading?: boolean;
