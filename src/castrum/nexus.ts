@@ -66,55 +66,56 @@ export class Nexus extends Castrum {
      * @returns
      */
     spawnCreep(body: BodyPartConstant[], type: CivitasType | LegionType , memory: CreepMemory) {
-        return OK
-        // let name = type + "<" + Game.time + ">"
+        let name = type + "<" + Game.time + ">"
 
-        // let spawnBody = body;
-        // //reduce move parts when roads are built
-        // if (Archivist.getRoadsBuilt(this.room) && !memory.noRoads) {
-        //     //build a list of all non move body parts
-        //     let noMoves = [];
-        //     for (let part of spawnBody) {
-        //         if (part != MOVE) {
-        //             if (part == WORK) {
-        //                 noMoves.unshift(part);
-        //             } else noMoves.push(part);
-        //         }
-        //     }
+        let spawnBody = body;
+        //reduce move parts when roads are built
+        if (Archivist.getRoadsBuilt(this.room) && !memory.offRoading) {
+            //build a list of all non move body parts
+            let noMoves: BodyPartConstant[] = [];
+            for (let part of spawnBody) {
+                if (part != MOVE) {
+                    if (part == WORK) {
+                        noMoves.unshift(part);
+                    } else noMoves.push(part);
+                }
+            }
 
-        //     //if noMoves is empty, body was entirely moves
-        //     if (noMoves.length > 0) {
-        //         //add moves onto that list until moves are equal to half the non moves
-        //         let targetMoves = Math.ceil(noMoves.length / 2);
-        //         for (let i = 0; i < targetMoves; i++) {
-        //             noMoves.push(MOVE);
-        //         }
-        //         spawnBody = noMoves;
-        //     }
-        // }
+            //if noMoves is empty, body was entirely moves
+            if (noMoves.length > 0) {
+                //add moves onto that list until moves are equal to half the non moves
+                let targetMoves = Math.ceil(noMoves.length / 2);
+                for (let i = 0; i < targetMoves; i++) {
+                    noMoves.push(MOVE);
+                }
+                spawnBody = noMoves;
+            }
+        }
 
-        // memory["name"] = name;
-        // memory["type"] = type;
-        // memory["spawnRoom"] = this.room;
-        // memory["body"] = spawnBody;
+        memory.name = name;
+        memory.type = type;
+        memory.spawnRoom = this.room;
+        memory.body = spawnBody;
 
-        // let options = {"memory": memory};
+        let options: any = {
+            'memory': memory
+        };
 
-        // //the arbiter will always get spawned by the prime nexus and pushed to the right
-        // if (type == "arbiter") {
-        //     options["directions"] = [RIGHT];
-        // }
-        // let success = this.liveObj.spawnCreep(spawnBody, name, options);
+        //the arbiter will always get spawned by the prime nexus and pushed to the right
+        if (type == "arbiter") {
+            options.spawnDirection = [RIGHT];
+        }
+        let success = this.liveObj.spawnCreep(spawnBody, name, options);
 
-        // if (success == OK) {
-        //     this.spawningThisTick = true;
+        if (success == OK) {
+            this.spawningThisTick = true;
 
-        //     //keeping some energy expenditure stats
-        //     if (["hauler", "emissary", "prospector", "curator", "garrison"].includes(type)) {
-        //         this.statTracking(body);
-        //     }
-        // }
-        // return success;
+            //keeping some energy expenditure stats
+            if (["hauler", "emissary", "prospector", "curator", "garrison"].includes(type)) {
+                this.statTracking(body);
+            }
+        }
+        return success;
     }
 
     /**
@@ -122,10 +123,10 @@ export class Nexus extends Castrum {
      * @param {String} type the type of the creep
      * @param {String} body the body of the creep
      */
-    // statTracking(body) {
-    //     let bodyCost = Informant.calculateBodyCost(body);
+    statTracking(body: BodyPartConstant[]) {
+        let bodyCost = Informant.calculateBodyCost(body);
 
-    //     let currentValue = global.Archivist.getStatistic(this.room, "RemoteEnergySpent");
-    //     global.Archivist.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
-    // }
+        let currentValue = Archivist.getStatistic(this.room, "RemoteEnergySpent");
+        Archivist.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
+    }
 }
