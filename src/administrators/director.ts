@@ -25,18 +25,18 @@ export class Director {
      * Function that executes the schedule
      */
     static run(): void {
-        // for (let room in Memory.directives) {
-        //     for (let tick in Memory.directives[room]) {
-        //         if (parseInt(tick) <= Game.time) {
-        //             for (let id in Memory.directives[room][tick]) {
-        //                 let task = Memory.directives[room][tick][id];
-        //                 let objArr = task.objArr;
-        //                 eval(task.script);
-        //             }
-        //             delete Memory.directives[room][tick];
-        //         }
-        //     }
-        // }
+        for (let room in Memory.directives) {
+            for (let tick in Memory.directives[room]) {
+                if (parseInt(tick) <= Game.time) {
+                    for (let id in Memory.directives[room][tick]) {
+                        let task = Memory.directives[room][tick][id];
+                        let objArr = task.objArr;
+                        eval(task.script);
+                    }
+                    delete Memory.directives[room][tick];
+                }
+            }
+        }
     }
 
     /**
