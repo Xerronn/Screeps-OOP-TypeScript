@@ -24,6 +24,10 @@ export class Imperator {
                 executive: new Executive(room)
             }
         }
+
+        for (let room of this.dominion) {
+            this.administrators[room].supervisor.wrap();
+        }
     }
 
     /**
