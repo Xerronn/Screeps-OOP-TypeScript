@@ -230,6 +230,7 @@ export class Architect {
         //TODO: figure out a way to avoid user error in spawn placement. possible switch around spawn positions
         let spawns = liveRoom.find(FIND_MY_SPAWNS);
         if (spawns.length > 0) {
+            Archivist.build(true)       //reset memory if this is the first spawn
             let spawnPos = {
                 "x": spawns[0].pos.x - bunkerSchema["spawn"]["pos"][0].x,
                 "y": spawns[0].pos.y - bunkerSchema["spawn"]["pos"][0].y
