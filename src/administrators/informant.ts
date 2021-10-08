@@ -203,7 +203,7 @@ declare global {
                 [tick: number]: {
                     [taskId: string]: {
                         script: string,
-                        objArr: Array<any> | undefined
+                        objArr: any[]
                     }
                 }
             }
