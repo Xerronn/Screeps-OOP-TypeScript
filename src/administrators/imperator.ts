@@ -1,5 +1,6 @@
 import {Supervisor} from './supervisor';
 import {Executive} from './executive';
+import { Archivist } from './archivist';
 
 //highest level class overseeing all operations in the game
 export class Imperator {
@@ -42,6 +43,20 @@ export class Imperator {
         for (let room of this.dominion) {
             this.administrators[room].supervisor.refresh();
         }
+    }
+
+    /**
+     * Method that creates a supervisor and executive for a newly claimed room
+     * @param {String} room String representing the room
+     */
+    initRoom(room: string, originRoom: string) {
+        this.refreshDominion();
+        Archivist.build();
+        this.administrators[room] = {
+            supervisor: new Supervisor(room),
+            executive: new Executive(room)
+        }
+        this.administrators[originRoom].executive.spawnDevelopers(room);
     }
 
     /**
