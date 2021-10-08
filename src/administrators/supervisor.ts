@@ -51,6 +51,7 @@ export class Supervisor {
 
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (castrumType !== 'undefined') {
+                if (!this.castrum[castrumType]) this.castrum[castrumType] = [];
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
@@ -63,7 +64,8 @@ export class Supervisor {
         this.civitas = {};
         for (let creepMem of _.filter(Memory.creeps, c => c.spawnRoom == this.room)) {
             if (Game.creeps[creepMem.name]) {
-                let createObjStr = "this.civitates[\"" + creepMem.type + "\"].push(new " + creepMem.type.charAt(0).toUpperCase() +
+                if (!this.civitas[creepMem.type]) this.civitas[creepMem.type] = [];
+                let createObjStr = "this.civitas[\"" + creepMem.type + "\"].push(new " + creepMem.type.charAt(0).toUpperCase() +
                     creepMem.type.slice(1) + "(Game.creeps[\"" + creepMem.name + "\"]));";
 
                 eval(createObjStr);
@@ -144,10 +146,9 @@ export class Supervisor {
      * @param {Object} template An object that contains body, type, and memory
      * @param {boolean} rebirth whether or not this is a rebirth
      */
-     initiate(template: RenewalTemplate, boost=true) {
+     initiate(template: RenewalTemplate, boost=true): void {
         let foundNexus = false;
         let generationIncremented = 0;
-
         if (this.nexusReservation <= Game.time) {
             //loop through the spawns until an available one is found
             for (let nexus of this.castrum[CASTRUM_TYPES.NEXUS]) {
@@ -216,7 +217,7 @@ export class Supervisor {
         }
         //check if the creep has already been wrapped
         if (!Informant.getWrapper(creep.id)) {
-            let createObjStr = "this.civitates[\"" + creep.memory.type + "\"].push(new " + creep.memory.type.charAt(0).toUpperCase() +
+            let createObjStr = "this.civitas[\"" + creep.memory.type + "\"].push(new " + creep.memory.type.charAt(0).toUpperCase() +
                 creep.memory.type.slice(1) + "(Game.creeps[\"" + creep.name + "\"]));";
 
             eval(createObjStr);
