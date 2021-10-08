@@ -15,6 +15,7 @@ export abstract class Civitas extends GameObj {
     memory: CreepMemory;
     body: string[];
     spawning: boolean;
+    remote?: boolean;
 
     constructor(civitas: Creep) {
         super();
@@ -25,6 +26,7 @@ export abstract class Civitas extends GameObj {
         this.type = civitas.memory.type;
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
+        this.remote = civitas.memory.remote;
 
         //attributes that change every tick
         this.memory = civitas.memory;
