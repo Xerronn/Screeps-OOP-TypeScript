@@ -6,7 +6,7 @@ export class Director {
      * @param {String} task
      * @param {Array} objArr
      */
-    static schedule(room: string, tick: number, task: string, objArr: Array<any> | undefined) {
+    static schedule(room: string, tick: number, task: string, objArr: any[]) {
         if (!Memory.directives[room]) {
             Memory.directives[room] = {};
         }
@@ -31,7 +31,9 @@ export class Director {
                     for (let id in Memory.directives[room][tick]) {
                         let task = Memory.directives[room][tick][id];
                         let objArr = task.objArr;
-                        eval(task.script);
+                        if (objArr) {   //needed because of typescript shenanigans
+                            eval(task.script);
+                        }
                     }
                     delete Memory.directives[room][tick];
                 }
@@ -51,7 +53,9 @@ export class Director {
                 if (id === taskId) {
                     let task = Memory.directives[room][tick][id];
                     let objArr = task.objArr;
-                    eval(task.script);
+                    if (objArr) {   //needed because of typescript shenanigans
+                        eval(task.script);
+                    }
                     delete Memory.directives[room][tick][id];
                     return true;
                 }
