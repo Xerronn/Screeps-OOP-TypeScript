@@ -11,7 +11,7 @@ export abstract class Civitas extends GameObj {
 
     //basic creep attributes
     name: string;
-    type: CIVITAS_TYPES | LEGION_TYPES;
+    type: CivitasType | LegionType;;
     memory: CreepMemory;
     body: string[];
     spawning: boolean;

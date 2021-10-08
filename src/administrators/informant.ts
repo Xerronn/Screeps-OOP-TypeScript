@@ -160,7 +160,7 @@ declare global {
      */
     interface CreepMemory {
         name: string;
-        type: CIVITAS_TYPES | LEGION_TYPES;
+        type: CivitasType | LegionType;
         spawnRoom: string;
         generation: number | undefined;
         body: BodyPartConstant[];
@@ -202,7 +202,7 @@ declare global {
 
     interface RenewalTemplate {
         body: BodyPartConstant[];
-        type: CIVITAS_TYPES | LEGION_TYPES;
+        type: CivitasType | LegionType;
         memory: CreepMemory | any;
     }
 
