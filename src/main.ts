@@ -15,8 +15,9 @@ global.Imperator = new Imperator();
 Archivist.build();
 
 function mainLoop(): void {
-    console.log(Game.time);
+    global.Imperator.refresh();
     Director.run();
+    global.Imperator.run();
 }
 
 function globalReset(): void {

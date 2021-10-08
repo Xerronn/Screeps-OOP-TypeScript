@@ -318,5 +318,3 @@ export class Executive {
         // }
     }
 }
-
-module.exports = Executive;

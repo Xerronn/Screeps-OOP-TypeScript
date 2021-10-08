@@ -129,5 +129,3 @@ export class Nexus extends Castrum {
     //     global.Archivist.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
     // }
 }
-
-module.exports = Nexus;
