@@ -18,6 +18,12 @@ export class Supervisor {
     room: string;
     civitas: {[civitasType: string]: Array<Civitas>};       //todo: get proper typing on the keys, not sure how atm
     castrum: {[castrumType: string]: Array<Castrum>};
+    primitives: {                                           //castrum that I don't need full logic wrappers for
+        [castrumType: string]: Id<any>[]
+    };
+    _primitives: {                                          //cached version of primitives for each tick
+        [castrumType: string]: Structure[]
+    };
 
     nexusReservation: number;
     workshopReservation: number;
@@ -32,6 +38,8 @@ export class Supervisor {
 
         this.castrum = {};
         this.civitas = {};
+        this.primitives = {};
+        this._primitives = {};
 
         this.nexusReservation = 0;
         this.workshopReservation = 0;
@@ -47,14 +55,18 @@ export class Supervisor {
         let thisRoom = Game.rooms[this.room];
         //initialize all structures in the room to their respective classes
         this.castrum = {};
-        for (var structure of thisRoom.find(FIND_MY_STRUCTURES)) {
+        for (var structure of thisRoom.find(FIND_STRUCTURES)) {
 
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (castrumType !== 'undefined') {
+            if (!['undefined', 'container', 'road'].includes(castrumType)) {
                 if (!this.castrum[castrumType]) this.castrum[castrumType] = [];
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
+            } else if (['container', 'road'].includes(castrumType)) {
+                //cache for basic structures like roads and containers
+                if (!this.primitives[castrumType]) this.primitives[castrumType] = [];
+                this.primitives[castrumType].push(structure.id);
             }
         }
 
@@ -89,6 +101,8 @@ export class Supervisor {
      * Function that runs all objects in the room
      */
     run() {
+        //first delete last tick's cache of primitives
+        this._primitives = {};
         try {
             //first all creeps
             for (var type in this.civitas) {
@@ -265,7 +279,21 @@ export class Supervisor {
      * function to return the room's executive
      * @returns Executive
      */
-    getExecutive(): Executive {
+    get executive(): Executive {
         return global.Imperator.administrators[this.room].executive;
+    }
+
+    get containers(): StructureContainer[] {
+        if (this._primitives[CASTRUM_TYPES.CONTAINER].length === 0) {
+            this._primitives[CASTRUM_TYPES.CONTAINER] = this.primitives[CASTRUM_TYPES.CONTAINER].map((s) => Game.getObjectById(s))
+        }
+        return this._primitives[CASTRUM_TYPES.CONTAINER] as StructureContainer[];
+    }
+
+    get roads(): StructureRoad[] {
+        if (this._primitives[CASTRUM_TYPES.ROAD].length === 0) {
+            this._primitives[CASTRUM_TYPES.ROAD] = this.primitives[CASTRUM_TYPES.ROAD].map((s) => Game.getObjectById(s))
+        }
+        return this._primitives[CASTRUM_TYPES.ROAD] as StructureRoad[];
     }
 }

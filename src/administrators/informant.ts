@@ -91,6 +91,7 @@ export class Informant {
      */
     static mapGameToClass(structureType: StructureConstant): CASTRUM_TYPES {
         switch (structureType) {
+            //structures with wrappers to execute logic
             case STRUCTURE_SPAWN:
                 return CASTRUM_TYPES.NEXUS;
             case STRUCTURE_TOWER:
@@ -101,6 +102,14 @@ export class Informant {
                 return CASTRUM_TYPES.WORKSHOP;
             case STRUCTURE_TERMINAL:
                 return CASTRUM_TYPES.MARKET;
+
+            //structures that are stored in a list an updated on demand
+            case STRUCTURE_CONTAINER:
+                return CASTRUM_TYPES.CONTAINER
+            case STRUCTURE_ROAD:
+                return CASTRUM_TYPES.ROAD
+
+            //things I don't care about
             default:
                 return CASTRUM_TYPES.UNDEFINED;
         }
@@ -125,11 +134,18 @@ declare global {
      * TYPES AND ENUMS
      */
     const enum CASTRUM_TYPES {
+        //wrappers
         BASTION = 'bastion',
         CONDUIT = 'conduit',
         MARKET = 'market',
         NEXUS = 'nexus',
         WORKSHOP = 'workshop',
+
+        //primitives
+        CONTAINER = 'container',
+        ROAD = 'road',
+
+        //everything else
         UNDEFINED = 'undefined'
     }
 
