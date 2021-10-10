@@ -190,8 +190,8 @@ declare global {
     interface RoomMemory {
         flags?: any;
         statistics?: any;
-        sources?: any;
-        remotes?: Remotes;
+        sources: SourceMemory;
+        remotes?: RemoteMemory;
     }
 
     interface Memory {
@@ -203,11 +203,21 @@ declare global {
                 [tick: number]: {
                     [taskId: string]: {
                         script: string,
-                        objArr: any[]
+                        objArr: {
+                            [creepType: string]: number
+                        }
                     }
                 }
             }
         };
+    }
+
+    interface SourceMemory {
+        [sourceId: Id<Source>]: {
+            workers: {
+                [creepType: string]: string[]
+            }
+        }
     }
 
     interface RoomAnchor {
@@ -221,7 +231,7 @@ declare global {
         memory: CreepMemory | any;
     }
 
-    interface Remotes {
+    interface RemoteMemory {
         [roomName: string]: {
             status: REMOTE_STATUSES;
             distances: number[];

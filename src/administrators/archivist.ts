@@ -26,16 +26,19 @@ export class Archivist {
 
         for (var room of global.Imperator.dominion) {
             if (!Memory.rooms[room]) {
-                Memory.rooms[room] = {};
-                Memory.rooms[room].flags = {}
-                Memory.rooms[room].statistics = {};
-                Memory.rooms[room].flags.gameStage = '0';       //must be a string to store floats in memory
+                Memory.rooms[room] = {
+                    sources: {},
+                    flags: {
+                        gameStage: '0'                  //must be a string to store floats in memory
+                    },
+                    statistics: {},
+                };
 
-                Memory.rooms[room].sources = {};
                 let sources = Game.rooms[room].find(FIND_SOURCES).map(source => source.id);
                 for (let source of sources) {
-                    Memory.rooms[room].sources[source] = {};
-                    Memory.rooms[room].sources[source].workers = {};
+                    Memory.rooms[room].sources[source] = {
+                        workers: {}
+                    };
                 }
             }
         }
@@ -117,7 +120,7 @@ export class Archivist {
      * @param {String} room string representing the room
      * @returns remotes object
      */
-    static getRemotes(room: string): Remotes | undefined {
+    static getRemotes(room: string): RemoteMemory | undefined {
         return Memory.rooms[room].remotes;
     }
 
@@ -144,7 +147,7 @@ export class Archivist {
      * @param {String} room string representing the room
      * @returns  room sources object
      */
-    static getSources(room: string): object {
+    static getSources(room: string): SourceMemory {
         return Memory.rooms[room].sources;
     }
 
