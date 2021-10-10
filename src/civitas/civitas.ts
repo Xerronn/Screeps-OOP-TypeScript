@@ -1,3 +1,5 @@
+import { Executive } from 'administrators/executive';
+import { Supervisor } from 'administrators/supervisor';
 import { GameObj } from '../gameObj';
 
 export abstract class Civitas extends GameObj {
@@ -80,5 +82,13 @@ export abstract class Civitas extends GameObj {
         //     return true;
         // }
         // return false;
+    }
+
+    get supervisor(): Supervisor {
+        return global.Imperator.administrators[this.memory.spawnRoom].supervisor;
+    }
+
+    get executive(): Executive {
+        return global.Imperator.administrators[this.memory.spawnRoom].executive;
     }
 }
