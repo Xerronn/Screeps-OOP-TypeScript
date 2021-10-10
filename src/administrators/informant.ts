@@ -219,9 +219,7 @@ declare global {
                 [tick: number]: {
                     [taskId: string]: {
                         script: string,
-                        objArr: {
-                            [creepType: string]: number
-                        }
+                        objArr: any
                     }
                 }
             }
