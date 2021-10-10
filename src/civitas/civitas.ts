@@ -15,6 +15,7 @@ export abstract class Civitas extends GameObj {
     name: string;
     type: CivitasType | LegionType;;
     memory: CreepMemory;
+    store: StoreDefinition;
     body: string[];
     spawning: boolean;
     remote?: boolean;
@@ -32,6 +33,7 @@ export abstract class Civitas extends GameObj {
 
         //attributes that change every tick
         this.memory = civitas.memory;
+        this.store = civitas.store;
         this.pos = civitas.pos;
         this.room = civitas.room.name;
         this.hits = civitas.hits;
@@ -43,6 +45,7 @@ export abstract class Civitas extends GameObj {
         if (this.liveObj === null) return false; //creep is dead
 
         this.memory = this.liveObj.memory;
+        this.store = this.liveObj.store;
         this.pos = this.liveObj.pos;
         this.room = this.liveObj.room.name;
         this.hits = this.liveObj.hits;
