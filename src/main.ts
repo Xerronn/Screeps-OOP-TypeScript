@@ -10,9 +10,9 @@ declare global {
     }
 }
 
-
 global.Imperator = new Imperator();
 Archivist.build();
+global.Imperator.initialize();
 
 function mainLoop(): void {
     global.Imperator.refresh();

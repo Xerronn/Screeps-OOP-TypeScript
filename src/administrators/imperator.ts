@@ -10,7 +10,6 @@ export class Imperator {
     constructor() {
         this.dominion = _.filter(Game.rooms, room => room.controller && room.controller.my).map(room => room.name);
         this.administrators = {};
-        this.initialize();
     }
 
     /**
