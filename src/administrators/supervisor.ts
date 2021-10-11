@@ -61,12 +61,12 @@ export class Supervisor {
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
 
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (!['undefined', 'container', 'road'].includes(castrumType)) {
+            if (!['undefined', 'container', 'extension', 'road'].includes(castrumType)) {
                 if (!this.castrum[castrumType]) this.castrum[castrumType] = [];
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
-            } else if (['container', 'road'].includes(castrumType)) {
+            } else if (['container', 'extension', 'road'].includes(castrumType)) {
                 //cache for basic structures like roads and containers
                 if (!this.primitives[castrumType]) this.primitives[castrumType] = [];
                 this.primitives[castrumType].push(structure.id);
@@ -292,6 +292,14 @@ export class Supervisor {
             this._primitives[CASTRUM_TYPES.CONTAINER] = this.primitives[CASTRUM_TYPES.CONTAINER].map((s) => Game.getObjectById(s));
         }
         return this._primitives[CASTRUM_TYPES.CONTAINER] as StructureContainer[];
+    }
+
+    get extensions(): StructureExtension[] {
+        if (this._primitives[CASTRUM_TYPES.EXTENSION] === undefined) {
+            if (!this.primitives[CASTRUM_TYPES.EXTENSION]) this.primitives[CASTRUM_TYPES.EXTENSION] = [];
+            this._primitives[CASTRUM_TYPES.EXTENSION] = this.primitives[CASTRUM_TYPES.EXTENSION].map((s) => Game.getObjectById(s));
+        }
+        return this._primitives[CASTRUM_TYPES.EXTENSION] as StructureExtension[];
     }
 
     get roads(): StructureRoad[] {
