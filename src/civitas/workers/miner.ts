@@ -1,7 +1,7 @@
 import { Archivist } from 'administrators/archivist';
-import { Worker } from './worker';
+import { Worker, WorkerMemory } from './worker';
 
-interface MinerMemory extends CreepMemory {
+interface MinerMemory extends WorkerMemory {
     sourceId: Id<Source>;
     containerId?: Id<StructureContainer>;
 }
@@ -109,8 +109,9 @@ export class Miner extends Worker {
 
         if (this.memory.sourceId) {
             //for creep rebirth and object init
-            !(this.constructor.name in roomSources[this.memory.sourceId].workers) &&       //cool snippet of code that will create an empty array if one doesn't exist
-                (roomSources[this.memory.sourceId].workers[this.constructor.name] = []);
+            if (roomSources[this.memory.sourceId].workers[this.constructor.name] === undefined) {
+                roomSources[this.memory.sourceId].workers[this.constructor.name] = [];
+            }
 
             let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
             if (index < 0) {
@@ -126,8 +127,9 @@ export class Miner extends Worker {
             );
             let currentBest = "" as Id<Source>;
             for (let source of sortedSources) {
-                !(this.constructor.name in roomSources[source].workers) &&
-                (roomSources[source].workers[this.constructor.name] = []);
+                if (roomSources[source].workers[this.constructor.name] === undefined) {
+                    roomSources[source].workers[this.constructor.name] = [];
+                }
 
                 //find the source with the least workers assigned
                 if (currentBest == "" || roomSources[source].workers[this.constructor.name].length < roomSources[currentBest].workers[this.constructor.name].length) {
