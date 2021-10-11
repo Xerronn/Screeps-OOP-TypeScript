@@ -222,6 +222,8 @@ export class Supervisor {
         }
     }
 
+    //todo: write wrapStructure so we don't have to wrap all structures whenever one is built
+
     /**
      * Function to wrap a newly created creep
      * @param {String} creepName Name of the creep
