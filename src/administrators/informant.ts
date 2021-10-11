@@ -106,6 +106,8 @@ export class Informant {
             //structures that are stored in a list an updated on demand
             case STRUCTURE_CONTAINER:
                 return CASTRUM_TYPES.CONTAINER
+            case STRUCTURE_EXTENSION:
+                return CASTRUM_TYPES.EXTENSION
             case STRUCTURE_ROAD:
                 return CASTRUM_TYPES.ROAD
 
@@ -143,6 +145,7 @@ declare global {
 
         //primitives
         CONTAINER = 'container',
+        EXTENSION = 'extension',
         ROAD = 'road',
 
         //everything else
