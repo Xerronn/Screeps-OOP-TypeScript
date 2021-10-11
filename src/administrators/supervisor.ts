@@ -5,6 +5,8 @@ import { Executive } from './executive';
 
 //creep imports
 import { Civitas } from '../civitas/civitas';
+import { Miner } from '../civitas/workers/miner';       Miner;            //needed or rollup removes the unused imports
+import { Engineer } from '../civitas/workers/engineer'; Engineer;
 
 //structure imports
 import { Castrum } from '../castrum/castrum';
@@ -13,6 +15,7 @@ import { Workshop } from '../castrum/workshop';
 import { Nexus } from '../castrum/nexus';
 import { Bastion } from '../castrum/bastion';
 import { Market } from '../castrum/market';
+import { timeStamp } from 'console';
 
 export class Supervisor {
     room: string;
@@ -284,15 +287,17 @@ export class Supervisor {
     }
 
     get containers(): StructureContainer[] {
-        if (this._primitives[CASTRUM_TYPES.CONTAINER].length === 0) {
-            this._primitives[CASTRUM_TYPES.CONTAINER] = this.primitives[CASTRUM_TYPES.CONTAINER].map((s) => Game.getObjectById(s))
+        if (this._primitives[CASTRUM_TYPES.CONTAINER] === undefined) {
+            if (!this.primitives[CASTRUM_TYPES.CONTAINER]) this.primitives[CASTRUM_TYPES.CONTAINER] = [];
+            this._primitives[CASTRUM_TYPES.CONTAINER] = this.primitives[CASTRUM_TYPES.CONTAINER].map((s) => Game.getObjectById(s));
         }
         return this._primitives[CASTRUM_TYPES.CONTAINER] as StructureContainer[];
     }
 
     get roads(): StructureRoad[] {
-        if (this._primitives[CASTRUM_TYPES.ROAD].length === 0) {
-            this._primitives[CASTRUM_TYPES.ROAD] = this.primitives[CASTRUM_TYPES.ROAD].map((s) => Game.getObjectById(s))
+        if (this._primitives[CASTRUM_TYPES.ROAD] === undefined) {
+            if (!this.primitives[CASTRUM_TYPES.ROAD]) this.primitives[CASTRUM_TYPES.ROAD] = [];
+            this._primitives[CASTRUM_TYPES.ROAD] = this.primitives[CASTRUM_TYPES.ROAD].map((s) => Game.getObjectById(s));
         }
         return this._primitives[CASTRUM_TYPES.ROAD] as StructureRoad[];
     }
