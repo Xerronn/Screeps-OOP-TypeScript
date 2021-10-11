@@ -16,7 +16,7 @@ export abstract class Civitas extends GameObj {
     type: CivitasType | LegionType;;
     memory: CreepMemory;
     store: StoreDefinition;
-    body: string[];
+    body: BodyPartConstant[];
     spawning: boolean;
     remote?: boolean;
 
@@ -42,7 +42,20 @@ export abstract class Civitas extends GameObj {
 
     update(): boolean {
         this.liveObj = Game.creeps[this.name];
-        if (this.liveObj === null) return false; //creep is dead
+        if (this.liveObj === null) {
+            //only rebirth if the generation flag is there. If you want a creep to rebirth, set generation = 0 in the memory
+            if (this.memory.generation !== undefined) {
+                let template = {
+                    "body": [...this.body],
+                    "type": this.memory.type,
+                    "memory": {...this.memory}
+                };
+                this.supervisor.initiate(template);
+            }
+            //delete this wrapper
+            this.supervisor.dismiss(this);
+            return false; //creep is dead
+        }
 
         this.memory = this.liveObj.memory;
         this.store = this.liveObj.store;
