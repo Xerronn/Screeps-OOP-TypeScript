@@ -8,6 +8,8 @@
         "baseUrl": "src/",
         "sourceMap": true,
         "strict": true,
+        "strictPropertyInitialization": false,
+        "noImplicitThis": false,
         "experimentalDecorators": true,
         "noImplicitReturns": true,
         "allowSyntheticDefaultImports": true,
