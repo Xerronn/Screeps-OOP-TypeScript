@@ -6,14 +6,19 @@ export interface WorkerMemory extends CreepMemory {
 export class Worker extends Civitas {
     memory: WorkerMemory;
 
+    extensionsFilled: boolean;
     constructor(creep: Creep) {
         super(creep);
+
+        this.extensionsFilled = false;
     }
 
     update(): boolean {
         if (!super.update()) {
             return false;
         }
+
+        this.extensionsFilled = Game.rooms[this.room].energyCapacityAvailable === Game.rooms[this.room].energyAvailable;
 
         return true;
     }
