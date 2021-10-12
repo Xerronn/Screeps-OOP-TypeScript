@@ -16,7 +16,7 @@ export class Engineer extends Miner {
         }
         else if (9 < 3/*Archivist.getTowersFilled(this.room) */) {
             this.memory.task = "fillTowers";
-            //this.fillTowers();
+            this.fillTowers();
         } else if (!this.extensionsFilled) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
