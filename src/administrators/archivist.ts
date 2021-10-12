@@ -1,3 +1,5 @@
+import { Architect } from "./architect";
+
 export class Archivist {
 
     static anchor: object;
@@ -29,7 +31,8 @@ export class Archivist {
                 Memory.rooms[room] = {
                     sources: {},
                     flags: {
-                        gameStage: '0'                  //must be a string to store floats in memory
+                        gameStage: '0',                             //must be a string to store floats in memory
+                        anchor: Architect.calculateAnchor(room)
                     },
                     statistics: {},
                 };

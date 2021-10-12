@@ -230,13 +230,9 @@ export class Architect {
         //TODO: figure out a way to avoid user error in spawn placement. possible switch around spawn positions
         let spawns = liveRoom.find(FIND_MY_SPAWNS);
         if (spawns.length > 0) {
-            Archivist.build(true)       //reset memory if this is the first spawn
             let spawnPos = {
                 "x": spawns[0].pos.x - bunkerSchema["spawn"]["pos"][0].x,
                 "y": spawns[0].pos.y - bunkerSchema["spawn"]["pos"][0].y
-            }
-            if (!dry) {
-                Archivist.setAnchor(room, spawnPos)
             }
             console.log(JSON.stringify(spawnPos));
             return spawnPos;
@@ -308,11 +304,6 @@ export class Architect {
                     bestCandidate["x"] = candidate["x"];
                     bestCandidate["y"] = candidate["y"];
                 }
-            }
-
-            //set the anchor to the best candidate
-            if (!dry) {
-                Archivist.setAnchor(room, bestCandidate)
             }
             console.log(JSON.stringify(bestCandidate));
             return bestCandidate;

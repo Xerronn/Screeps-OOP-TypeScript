@@ -1,6 +1,7 @@
 import {Supervisor} from './supervisor';
 import {Executive} from './executive';
 import { Archivist } from './archivist';
+import { Architect } from './architect';
 
 //highest level class overseeing all operations in the game
 export class Imperator {
@@ -67,5 +68,18 @@ export class Imperator {
      */
     refreshDominion(): void {
         this.dominion = _.filter(Game.rooms, room => room.controller && room.controller.my).map(room => room.name);
+    }
+
+    /**
+     * Method that checks if this is a new playthrough
+     * @returns If the Dominion has just respawned
+     */
+    checkRespawn(): boolean {
+        if (this.dominion.length == 1 && Object.keys(Game.spawns).length == 1 && Object.keys(Game.creeps).length == 0) {
+            //fresh respawn detection
+            Archivist.build(true);
+            return true;
+        }
+        return false;
     }
 }

@@ -12,6 +12,7 @@ declare global {
 }
 
 global.Imperator = new Imperator();
+global.Imperator.checkRespawn();
 Archivist.build();
 global.Imperator.initialize();
 
