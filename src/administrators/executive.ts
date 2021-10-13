@@ -77,9 +77,9 @@ export class Executive {
      * Initialize spawning for phase one rooms
      * Phase one is defined as RCL 1-4
      */
-    phaseOne() {
+    phaseOne(numToSpawn=12) {
         //I think 12 engineers is a good starting point
-        for (var i = 0; i < 12; i++) {
+        for (var i = 0; i < numToSpawn; i++) {
             let memory = { "generation": 0 };
             let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
             Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
