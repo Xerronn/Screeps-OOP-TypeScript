@@ -29,7 +29,7 @@ export class Architect {
             //nothing special
             calculation = "3";
         }
-        if (rcl == 3 && supervisor.castrum.bastion.length > 0) {
+        if (rcl == 3 && supervisor.castrum.bastion?.length > 0) {
             //tower is built, time to build containers
             calculation = "3.1";
         }
@@ -119,14 +119,14 @@ export class Architect {
                 Architect.buildBunker(room);
                 break;
             case "3.1":
-                //towers are built, so build containers at sources
-                Architect.buildSourceContainers(room);
+                //towers are built
                 //activate phaseOne at gamestage 3.1 if this isn't the first room
                 if (global.Imperator.dominion.length > 1) {
                     global.Imperator.administrators[room].executive.phaseOne();
                 }
                 break;
             case "4":
+                Architect.buildSourceContainers(room);
                 //just turned rcl 4
                 Architect.buildBunker(room);
                 break;
