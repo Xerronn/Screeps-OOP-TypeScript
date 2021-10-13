@@ -11,10 +11,9 @@ declare global {
     }
 }
 
-global.Imperator = new Imperator();
-global.Imperator.checkRespawn();
-Archivist.build();
-global.Imperator.initialize();
+global.Imperator = new Imperator();             //create a new Imperator instance that manages the whole dominion
+global.Imperator.checkRespawn();                //check if the dominion needs to be initialized after a respawn
+global.Imperator.initialize();                  //wrap all game objects and create room-level administrators
 
 function mainLoop(): void {
     global.Imperator.refresh();
