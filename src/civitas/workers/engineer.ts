@@ -1,3 +1,4 @@
+import { Archivist } from "administrators/archivist";
 import { Miner } from "./miner";
 
 export class Engineer extends Miner {
@@ -13,7 +14,7 @@ export class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (9 < 3/*Archivist.getTowersFilled(this.room) */) {
+        else if (Archivist.getTowersFilled(this.room)) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (!this.extensionsFilled) {
