@@ -251,11 +251,13 @@ declare global {
     }
 
     interface RemoteMemory {
-        [roomName: string]: {
-            status: REMOTE_STATUSES;
-            distances: number[];
-            selected?: boolean;
-        }
+        [roomName: string]: RemoteRoomMemory;
+    }
+
+    interface RemoteRoomMemory {
+        status: REMOTE_STATUSES;
+        distances?: number[];
+        selected?: boolean;
     }
 }
 

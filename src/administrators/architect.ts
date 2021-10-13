@@ -685,6 +685,7 @@ export class Architect {
             let bestRoom = "none";
             for (let option of viable) {
                 let distances = remotes[option].distances;
+                if (distances === undefined) continue;
                 let avg = (distances[0] + distances[1]) / 2;
                 if (avg < best) {
                     best = avg;
