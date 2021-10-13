@@ -20,7 +20,7 @@ export class Engineer extends Miner {
         } else if (!this.extensionsFilled) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
-        } else if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
+        } else if (this.memory.buildTarget !== undefined || Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
         } else {

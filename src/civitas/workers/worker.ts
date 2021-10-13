@@ -57,6 +57,7 @@ export class Worker extends Civitas {
             } else {
                 //if the tmpObj is null, it means that the
                 this.supervisor.wrap(true);
+                delete this.memory.buildTarget;
             }
         }
         if (liveSite === undefined) {
