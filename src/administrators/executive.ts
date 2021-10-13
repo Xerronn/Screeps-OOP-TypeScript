@@ -78,8 +78,8 @@ export class Executive {
      * Phase one is defined as RCL 1-4
      */
     phaseOne() {
-        //I think 6 engineers is a good starting point
-        for (var i = 0; i < 6; i++) {
+        //I think 12 engineers is a good starting point
+        for (var i = 0; i < 12; i++) {
             let memory = { "generation": 0 };
             let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
             Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
