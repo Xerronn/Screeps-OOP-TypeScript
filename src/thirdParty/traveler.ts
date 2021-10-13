@@ -145,7 +145,7 @@
             let nextPos = Traveler.positionAtDirection(creep.pos, nextDirection);
             if (nextPos) {
                 let blockingCreeps = creep.room.lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
-                if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
+                if (blockingCreeps.length > 0 && blockingCreeps[0].my && blockingCreeps[0].memory.type !== creep.memory.type) {
                     blockingCreeps[0].move(this.reverseDirection(nextDirection));
                 }
             }
