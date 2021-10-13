@@ -134,7 +134,7 @@ export class Miner extends Worker {
                 }
 
                 //find the source with the least workers assigned
-                if (currentBest == "" || roomSources[source].openSpots - roomSources[source].workers[this.constructor.name].length < roomSources[source].openSpots - roomSources[currentBest].workers[this.constructor.name].length) {
+                if (currentBest == "" || roomSources[source].workers[this.constructor.name].length < roomSources[currentBest].workers[this.constructor.name].length) {
                     currentBest = source;
                 }
             }
