@@ -32,7 +32,10 @@ export abstract class Castrum extends GameObj {
     update(): boolean {
         this.liveObj = Game.structures[this.id];
 
-        if (this.liveObj === null) return false //structure is dead
+        if (this.liveObj === null) {
+            this.supervisor.decommission(this);
+            return false //structure is dead
+        }
         this.hits = this.liveObj.hits;
         this.hitsMax = this.liveObj.hitsMax;
         return true;
