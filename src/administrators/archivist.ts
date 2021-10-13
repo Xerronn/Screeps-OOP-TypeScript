@@ -59,6 +59,21 @@ export class Archivist {
         }
     }
 
+    /**
+     * Method that logs some information about a scouted remote to memory
+     * @param {String} ownerRoom string representing the room that owns the remote
+     * @param {String} remoteRoom string representing the remote
+     * @param {Object} data data to store in the memory
+     */
+    logRemote(ownerRoom: string, remoteRoom: string, data: RemoteRoomMemory): void {
+        let liveRoom = Memory.rooms[ownerRoom];
+        if (liveRoom === undefined) return;
+        if (liveRoom.remotes === undefined) {
+            liveRoom.remotes = {};
+        }
+        liveRoom.remotes[remoteRoom] = data;
+    }
+
      /**
      * Get the anchor point of a room
      * @param {String} room string representation of a room
