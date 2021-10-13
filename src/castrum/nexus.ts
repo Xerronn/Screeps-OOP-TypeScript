@@ -52,7 +52,7 @@ export class Nexus extends Castrum {
 
     run() {
         if (this.spawning && !this.wrapped) {
-            global.Imperator.administrators[this.room].supervisor.wrapCreep(this.spawning.name);
+            this.supervisor.wrapCreep(this.spawning.name);
             this.wrapped = true;
         }
         return true;
