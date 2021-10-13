@@ -1,4 +1,3 @@
-import { Archivist } from "administrators/archivist";
 import { Miner } from "./miner";
 
 export class Engineer extends Miner {
@@ -28,6 +27,35 @@ export class Engineer extends Miner {
             this.upgradeController();
         }
 
+        //evolve the creep to meet expanding energy availability
+        if (this.ticksToLive !== undefined && this.ticksToLive < 2) {
+            this.evolve();
+        }
+
         return true;
+    }
+
+    evolve(): void {
+        if (Game.rooms[this.room].energyCapacityAvailable >= 500) {
+            this.memory.body = [
+                WORK, WORK,
+                CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE
+            ];
+        }
+        if (Game.rooms[this.room].energyCapacityAvailable >= 750) {
+            this.memory.body = [
+                WORK, WORK, WORK,
+                CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
+            ];
+        }
+        if (Game.rooms[this.room].energyCapacityAvailable >= 1000) {
+            this.memory.body = [
+                WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
+            ];
+        }
     }
 }
