@@ -47,6 +47,7 @@ export class Miner extends Worker {
             let roomSources = Archivist.getSources(this.memory.spawnRoom);
             let index = roomSources[this.sourceId].workers[this.constructor.name].indexOf(this.name);
             roomSources[this.sourceId].workers[this.constructor.name].splice(index, 1);
+            roomSources[this.memory.sourceId].openSpots++;
             return false;
         }
 
@@ -116,6 +117,7 @@ export class Miner extends Worker {
             let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
             if (index < 0) {
                 roomSources[this.memory.sourceId].workers[this.constructor.name].push(this.name);
+                roomSources[this.memory.sourceId].openSpots--;
             }
 
             return this.memory.sourceId;
@@ -132,12 +134,13 @@ export class Miner extends Worker {
                 }
 
                 //find the source with the least workers assigned
-                if (currentBest == "" || roomSources[source].workers[this.constructor.name].length < roomSources[currentBest].workers[this.constructor.name].length) {
+                if (currentBest == "" || roomSources[source].openSpots - roomSources[source].workers[this.constructor.name].length < roomSources[source].openSpots - roomSources[currentBest].workers[this.constructor.name].length) {
                     currentBest = source;
                 }
             }
 
             roomSources[currentBest].workers[this.constructor.name].push(this.name);
+            roomSources[this.memory.sourceId].openSpots--;
             return currentBest;
         }
     }
