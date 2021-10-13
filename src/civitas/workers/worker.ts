@@ -1,3 +1,4 @@
+import { Archivist } from 'administrators/archivist';
 import { Civitas } from '../civitas';
 
 export interface WorkerMemory extends CreepMemory {
@@ -126,32 +127,34 @@ export class Worker extends Civitas {
     /**
      * Function to fill spawn and extensions
      */
-     fillTowers(): void {
-        // let liveObj;
-        // if (this.memory.fillTarget !== undefined) {
-        //     let tmpObj = Game.getObjectById(this.memory.fillTarget);
-        //     if (tmpObj !== null && (tmpObj.structureType === STRUCTURE_EXTENSION || tmpObj.structureType === STRUCTURE_SPAWN)) liveObj = tmpObj;
-        // }
+    fillTowers(): boolean {
+        let liveObj;
+        if (this.memory.fillTarget !== undefined) {
+            let tmpObj = Game.getObjectById(this.memory.fillTarget);
+            if (tmpObj !== null && tmpObj.structureType === STRUCTURE_TOWER) liveObj = tmpObj;
+        }
 
-        // if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-        //     let ext = this.supervisor.extensions;
-        //     let spawns = this.supervisor.castrum.nexus.map(s => s.liveObj as StructureSpawn);
+        if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
+            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj as StructureSpawn);
 
-        //     let fillables = spawns.concat(ext as any[]).filter(
-        //         obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-        //     );
+            let fillables = bastions.filter(
+                obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+            );
 
-        //     liveObj = this.pos.findClosestByRange(fillables);
-        //     if (liveObj === null) return false;
-        //     this.memory.fillTarget = liveObj.id;
-        // }
+            liveObj = this.pos.findClosestByRange(fillables);
+            if (liveObj === null) {
+                Archivist.setTowersFilled(this.room, true);
+                return false;
+            };
+            this.memory.fillTarget = liveObj.id;
+        }
 
-        // if (this.pos.inRangeTo(liveObj, 1)) {
-        //     this.liveObj.transfer(liveObj, RESOURCE_ENERGY);
-        // } else {
-        //     this.liveObj.travelTo(liveObj);
-        // }
-        // return true;
+        if (this.pos.inRangeTo(liveObj, 1)) {
+            this.liveObj.transfer(liveObj, RESOURCE_ENERGY);
+        } else {
+            this.liveObj.travelTo(liveObj);
+        }
+        return true;
     }
 
     /**
