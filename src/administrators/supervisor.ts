@@ -13,9 +13,8 @@ import { Castrum } from '../castrum/castrum';
 import { Conduit } from '../castrum/conduit';
 import { Workshop } from '../castrum/workshop';
 import { Nexus } from '../castrum/nexus';
-import { Bastion } from '../castrum/bastion';
+import { Bastion } from '../castrum/bastion';           Bastion;
 import { Market } from '../castrum/market';
-import { timeStamp } from 'console';
 
 export class Supervisor {
     room: string;
