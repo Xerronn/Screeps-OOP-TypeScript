@@ -37,10 +37,22 @@ export class Archivist {
                     statistics: {},
                 };
 
+                let terrainData = Game.rooms[room].getTerrain();
                 let sources = Game.rooms[room].find(FIND_SOURCES).map(source => source.id);
                 for (let source of sources) {
+                    let liveSource = Game.getObjectById(source);
+                    if (liveSource === null) continue;
+                    let openSpots = 0;
+                    for (let i = 0; i < 3; i++) {   //x values
+                        for (let j = 0; j < 3; j++) {   //y values
+                            if (terrainData.get(liveSource.pos.x + i, liveSource.pos.y + j) == 0) {
+                                openSpots++;
+                            }
+                        }
+                    }
                     Memory.rooms[room].sources[source] = {
-                        workers: {}
+                        workers: {},
+                        openSpots: openSpots
                     };
                 }
             }
