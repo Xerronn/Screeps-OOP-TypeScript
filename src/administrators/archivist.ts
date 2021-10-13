@@ -65,7 +65,7 @@ export class Archivist {
      * @param {String} remoteRoom string representing the remote
      * @param {Object} data data to store in the memory
      */
-    logRemote(ownerRoom: string, remoteRoom: string, data: RemoteRoomMemory): void {
+    static logRemote(ownerRoom: string, remoteRoom: string, data: RemoteRoomMemory): void {
         let liveRoom = Memory.rooms[ownerRoom];
         if (liveRoom === undefined) return;
         if (liveRoom.remotes === undefined) {
