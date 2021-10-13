@@ -235,6 +235,7 @@ declare global {
             workers: {
                 [creepType: string]: string[]
             }
+            openSpots: number;
         }
     }
 
