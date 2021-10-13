@@ -18,7 +18,7 @@ export abstract class Civitas extends GameObj {
     store: StoreDefinition;
     body: BodyPartConstant[];
     spawning: boolean;
-    ticksToLive?: number;
+    ticksToLive: number;
     remote?: boolean;
 
     constructor(civitas: Creep) {
@@ -39,7 +39,7 @@ export abstract class Civitas extends GameObj {
         this.room = civitas.room.name;
         this.hits = civitas.hits;
         this.spawning = civitas.spawning;
-        this.ticksToLive = civitas.ticksToLive;
+        this.ticksToLive = civitas.ticksToLive || 1500;
     }
 
     update(): boolean {
@@ -64,7 +64,7 @@ export abstract class Civitas extends GameObj {
         this.pos = this.liveObj.pos;
         this.room = this.liveObj.room.name;
         this.hits = this.liveObj.hits;
-        this.ticksToLive = this.liveObj.ticksToLive;
+        this.ticksToLive = this.liveObj.ticksToLive || 1500;
         return true;
     }
 
