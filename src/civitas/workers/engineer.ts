@@ -36,6 +36,15 @@ export class Engineer extends Miner {
         return true;
     }
 
+    harvest() {
+        if (this.pos.inRangeTo(this.source, 1)) {
+            this.liveObj.harvest(this.source);
+        } else {
+            //this.liveObj.travelTo(this.source, {allowSwap: false});
+            this.liveObj.moveTo(this.source);
+        }
+    }
+
     evolve(): void {
         if (Game.rooms[this.memory.spawnRoom].energyCapacityAvailable >= 500) {
             this.memory.body = [
