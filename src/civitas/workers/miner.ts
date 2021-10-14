@@ -10,7 +10,7 @@ export class Miner extends Worker {
     memory: MinerMemory;
 
     sourceId: Id<Source>;
-    source: Source;
+    source?: Source;
     containerId?: Id<StructureContainer>;
     container?: StructureContainer;
 
@@ -83,8 +83,8 @@ export class Miner extends Worker {
      * Overridden harvest method that moves to container instead of to source
      */
     //TODO: add automatic container repairing too
-    harvest() {
-        let target: RoomObject;
+    harvest(): boolean {
+        let target: RoomObject | undefined;
         let targetRange: number;
         if (this.container !== undefined) {
             target = this.container;
@@ -93,12 +93,14 @@ export class Miner extends Worker {
             target = this.source;
             targetRange = 1;
         }
+        if (target === undefined || this.source === undefined) return false;
         if (this.pos.inRangeTo(target, targetRange)) {
             this.liveObj.harvest(this.source);
         } else {
             //this.liveObj.travelTo(this.source, {allowSwap: false});
             this.liveObj.moveTo(target);
         }
+        return true;
     }
 
     /**
@@ -151,6 +153,7 @@ export class Miner extends Worker {
      */
     getContainer(): Id<StructureContainer> | undefined {
         let roomContainers = this.supervisor.containers;
+        if (this.source === undefined) return undefined;
         let container = this.source.pos.findInRange(roomContainers, 1)[0];
         if (container !== undefined) {
             return container.id;
