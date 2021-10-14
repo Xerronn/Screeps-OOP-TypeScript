@@ -36,13 +36,15 @@ export class Engineer extends Miner {
         return true;
     }
 
-    harvest() {
+    harvest(): boolean {
+        if (this.source === undefined) return false;
         if (this.pos.inRangeTo(this.source, 1)) {
             this.liveObj.harvest(this.source);
         } else {
             //this.liveObj.travelTo(this.source, {allowSwap: false});
             this.liveObj.moveTo(this.source);
         }
+        return true;
     }
 
     evolve(): void {
