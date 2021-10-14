@@ -58,7 +58,6 @@ export class Supervisor {
         //initialize all structures in the room to their respective classes
         this.castrum = {};
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
-
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (!['undefined', 'container', 'extension', 'road'].includes(castrumType)) {
                 if (!this.castrum[castrumType]) this.castrum[castrumType] = [];
@@ -162,7 +161,7 @@ export class Supervisor {
      * @param {Object} template An object that contains body, type, and memory
      * @param {boolean} rebirth whether or not this is a rebirth
      */
-     initiate(template: RenewalTemplate, boost=true): void {
+    initiate(template: RenewalTemplate, boost=true): void {
         let foundNexus = false;
         let generationIncremented = 0;
         if (this.nexusReservation <= Game.time) {
@@ -248,7 +247,7 @@ export class Supervisor {
      * Delete the wrapper holding the dead creep
      * @param {Civitas} civitas
      */
-     dismiss(civitasType: Civitas): void {
+    dismiss(civitasType: Civitas): void {
         let origArr = this.civitas[civitasType.type];
         let index = origArr.indexOf(civitasType);
         if (index >= 0) origArr.splice(index, 1);
