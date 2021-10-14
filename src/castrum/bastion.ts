@@ -6,11 +6,15 @@ export class Bastion extends Castrum {
     liveObj: StructureTower;
     store: Store<RESOURCE_ENERGY, false>
 
+    repairTargets: Id<StructureRoad | StructureContainer>[];
+
     constructor(bastion: StructureTower) {
         super(bastion);
         this.id = bastion.id;
         this.liveObj = bastion;
         this.store = this.liveObj.store;
+
+        this.repairTargets = [];
     }
 
     update(): boolean {
@@ -28,16 +32,13 @@ export class Bastion extends Castrum {
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY) / 4) {
             Archivist.setTowersFilled(this.room, false);
         }
-        //todo: repair and more complex targeting algo
-        this.simpleAttack();
-        //find new repair targets every 15 ticks
-        // if (Game.time % 15) {
-        //     this.findRepairTargets();
-        // }
-
-        // if (!this.simpleAttack()) {
-        //     this.repair();
-        // }
+        // find new repair targets every 100 ticks
+        if (Game.time % 100) {
+            this.findRepairTargets();
+        }
+        if (!this.simpleAttack()) {     //todo: better attack implementation
+            this.repair();
+        }
         return true;
     }
 
@@ -52,5 +53,39 @@ export class Bastion extends Castrum {
             return true;
         }
         return false;
+    }
+
+    findRepairTargets() {
+        //erase old repairTargets
+        this.repairTargets = [];
+
+        let roads = this.supervisor.roads;
+        let containers = this.supervisor.containers;
+        let repairables = roads.concat(containers as any);
+
+        let sortedRepairables = _.sortBy(repairables, (struc) => struc.hits/struc.hitsMax).map(obj => obj.id);
+        this.repairTargets = sortedRepairables;
+    }
+
+    repair() {
+        let target = undefined;
+        let tempTargets = [...this.repairTargets];
+
+        let index = 0;
+        for (let id of tempTargets) {
+            let liveObj = Game.getObjectById(id)
+            if (!liveObj) continue;
+            if (liveObj.hits < liveObj.hitsMax) {
+                target = liveObj;
+                break;
+            } else {
+                this.repairTargets.splice(index, 1);
+                index++;
+            }
+        }
+
+        if (target && this.store.getUsedCapacity(RESOURCE_ENERGY) > 250) {
+            this.liveObj.repair(target);
+        }
     }
 }
