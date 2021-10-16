@@ -4,6 +4,8 @@ import { Worker, WorkerMemory } from './worker';
 export interface MinerMemory extends WorkerMemory {
     sourceId: Id<Source>;
     containerId?: Id<StructureContainer>;
+    linkId?: Id<StructureLink>;
+    courierSpawned: boolean;
 }
 
 export class Miner extends Worker {
@@ -11,16 +13,20 @@ export class Miner extends Worker {
 
     sourceId: Id<Source>;
     source?: Source;
-    containerId?: Id<StructureContainer>;
     container?: StructureContainer;
+    link?: StructureLink;
 
     replacementTime: number;                //When the creep should spawn its replacement
 
     constructor(miner: Creep) {
         super(miner);
-        _.defaults(this.memory, {
-            sourceId: this.assignToSource()
-        })
+
+        if (this.memory.sourceId === undefined) {
+            this.memory.sourceId = this.assignToSource();
+        }
+        if (this.memory.courierSpawned === undefined) {
+            this.memory.courierSpawned = false;
+        }
 
         this.sourceId = this.memory.sourceId;
         let unkSource = Game.getObjectById(this.sourceId);      //in some cases we might not have vision of the source
@@ -29,7 +35,7 @@ export class Miner extends Worker {
             this.replacementTime = Game.rooms[this.memory.spawnRoom].find(FIND_MY_SPAWNS)[0].pos.findPathTo(this.source).length + (this.body.length * 2);
 
             //container assignment
-            if (this.memory.containerId !== undefined) {
+            if (this.memory.containerId !== undefined && this.memory.linkId === undefined) {
                 let unkContainer = Game.getObjectById(this.memory.containerId);
 
                 if (unkContainer !== null) {
@@ -38,6 +44,17 @@ export class Miner extends Worker {
                     this.memory.containerId = undefined;
                 }
             } else this.memory.containerId = this.getContainer();
+
+            //link assignment
+            if (this.memory.linkId !== undefined) {
+                let unkLink = Game.getObjectById(this.memory.linkId);
+
+                if (unkLink !== null) {
+                    this.link = unkLink;
+                } else {
+                    this.memory.linkId = undefined;
+                }
+            } else this.memory.linkId = this.getLink();
         }
     }
 
@@ -63,8 +80,20 @@ export class Miner extends Worker {
                 } else {
                     this.memory.containerId = undefined;
                 }
-            } else if (Game.time % 25 === 0) {      //check every 25 ticks for a newly built container
+            } else if (Game.time % 25 === 0 && this.memory.linkId === undefined) {      //check every 25 ticks for a newly built link
                 this.memory.containerId = this.getContainer();
+            }
+
+            if (this.memory.linkId !== undefined) {
+                let unkLink = Game.getObjectById(this.memory.linkId);
+
+                if (unkLink !== null) {
+                    this.link = unkLink;
+                } else {
+                    this.memory.linkId = undefined;
+                }
+            } else if (Game.time % 25 === 0) {      //check every 25 ticks for a newly built link
+                this.memory.linkId = this.getLink();
             }
         }
 
@@ -73,8 +102,39 @@ export class Miner extends Worker {
     }
 
     run(): boolean {
-        if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0 ) {
-            this.harvest();
+        //make sure to spawn new miner before the current one dies, to maintain 100% uptime
+        if (this.memory.generation !== undefined && this.ticksToLive <= this.replacementTime) {
+            //basically rebirth but without the dying first
+            this.evolve();
+            this.supervisor.initiate({
+                'body': [...this.body],
+                'type': this.memory.type,
+                'memory': {...this.memory}
+            });
+
+            //no more rebirth for you
+            delete this.memory.generation;
+        }
+
+        //spawn courier
+        if (this.memory.courierSpawned === false) {
+            this.spawnCourier();
+        }
+
+        if (this.link === undefined) {
+            if (this.container !== undefined || this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                this.harvest();
+            } else {
+                this.build();   //build either new container or new link
+            }
+
+        } else {
+            this.depositLink(this.link);
+        }
+
+        //evolve the creep if it has a link
+        if (this.ticksToLive < 2 && this.link !== undefined) {
+            this.evolve();
         }
         return true;
     }
@@ -101,6 +161,17 @@ export class Miner extends Worker {
             this.liveObj.moveTo(target);
         }
         return true;
+    }
+
+    /**
+     * Method that empties all stored energy into the source link
+     */
+    depositLink(link: StructureLink) {
+        if (this.pos.inRangeTo(link, 1)) {
+            this.liveObj.transfer(link, RESOURCE_ENERGY);
+        } else {
+            this.liveObj.moveTo(link);
+        }
     }
 
     /**
@@ -159,5 +230,41 @@ export class Miner extends Worker {
             return container.id;
         } else return undefined;
 
+    }
+
+    /**
+     * Method that checks the source to see if there is a link and then returns the ID
+     * @returns assigned link ID
+     */
+    getLink(): Id<StructureLink> | undefined {
+        let roomSources = Archivist.getSources(this.memory.spawnRoom);
+        return roomSources[this.sourceId].linkId;
+    }
+
+    /**
+     * Method to evolve the body after getting a link
+     */
+     evolve() {
+        if (this.link) {
+            this.memory.body = [
+                WORK, WORK, WORK, WORK, WORK, WORK, WORK,
+                CARRY, CARRY, CARRY, CARRY, CARRY,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
+            ]
+        }
+    }
+
+    spawnCourier() {
+        this.supervisor.initiate({
+            'body': [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE],
+            'type': CIVITAS_TYPES.COURIER,
+            'memory': {
+                'generation' : 0,
+                'container': this.memory.containerId,
+                'resource': RESOURCE_ENERGY
+            }
+        });
+
+        this.memory.courierSpawned = true;
     }
 }
