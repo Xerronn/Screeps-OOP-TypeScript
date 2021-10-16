@@ -45,7 +45,7 @@ export class Archivist {
                     let openSpots = 0;
                     for (let i = 0; i < 3; i++) {   //x values
                         for (let j = 0; j < 3; j++) {   //y values
-                            if (terrainData.get(liveSource.pos.x + i, liveSource.pos.y + j) == 0) {
+                            if (terrainData.get(liveSource.pos.x-1 + i, liveSource.pos.y-1 + j) == 0) {
                                 openSpots++;
                             }
                         }
