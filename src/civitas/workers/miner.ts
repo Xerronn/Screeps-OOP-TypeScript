@@ -213,7 +213,7 @@ export class Miner extends Worker {
             }
 
             roomSources[currentBest].workers[this.constructor.name].push(this.name);
-            roomSources[this.memory.sourceId].openSpots--;
+            roomSources[currentBest].openSpots--;
             return currentBest;
         }
     }
