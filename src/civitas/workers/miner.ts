@@ -1,7 +1,7 @@
 import { Archivist } from 'administrators/archivist';
 import { Worker, WorkerMemory } from './worker';
 
-interface MinerMemory extends WorkerMemory {
+export interface MinerMemory extends WorkerMemory {
     sourceId: Id<Source>;
     containerId?: Id<StructureContainer>;
 }
