@@ -236,6 +236,7 @@ declare global {
                 [creepType: string]: string[]
             }
             openSpots: number;
+            linkId?: Id<StructureLink>;
         }
     }
 
