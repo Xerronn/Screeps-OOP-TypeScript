@@ -157,8 +157,7 @@ export class Miner extends Worker {
         if (this.pos.inRangeTo(target, targetRange)) {
             this.liveObj.harvest(this.source);
         } else {
-            //this.liveObj.travelTo(this.source, {allowSwap: false});
-            this.liveObj.moveTo(target);
+            this.liveObj.travelTo(this.source, {allowSwap: true});
         }
         return true;
     }
@@ -170,7 +169,7 @@ export class Miner extends Worker {
         if (this.pos.inRangeTo(link, 1)) {
             this.liveObj.transfer(link, RESOURCE_ENERGY);
         } else {
-            this.liveObj.moveTo(link);
+            this.liveObj.travelTo(link);
         }
     }
 
