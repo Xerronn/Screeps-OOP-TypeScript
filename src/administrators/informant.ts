@@ -130,6 +130,48 @@ export class Informant {
 
         return cost;
     }
+
+    /**
+     * Method that returns the strcutre matrix of a room
+     * @param {String} roomName
+     * @returns a roomcache
+     */
+    static getCostMatrix(roomName: string) {
+        //! TODO: figure out why the cacheing isnt working
+        //if (this.matrixCache[roomName]) return this.matrixCache[roomName];
+        let room = Game.rooms[roomName];
+        let matrix = new PathFinder.CostMatrix();
+
+        let impassibleStructures = [];
+        for (let structure of room.find(FIND_STRUCTURES)) {
+            if (structure instanceof StructureRampart) {
+                if (!structure.my && !structure.isPublic) {
+                    impassibleStructures.push(structure);
+                }
+            }
+            else if (structure instanceof StructureRoad) {
+                matrix.set(structure.pos.x, structure.pos.y, 1);
+            }
+            else if (structure instanceof StructureContainer) {
+                matrix.set(structure.pos.x, structure.pos.y, 5);
+            }
+            else {
+                impassibleStructures.push(structure);
+            }
+        }
+        for (let site of room.find(FIND_MY_CONSTRUCTION_SITES)) {
+            if (site.structureType === STRUCTURE_CONTAINER || site.structureType === STRUCTURE_ROAD
+                || site.structureType === STRUCTURE_RAMPART) {
+                continue;
+            }
+            matrix.set(site.pos.x, site.pos.y, 0xff);
+        }
+        for (let structure of impassibleStructures) {
+            matrix.set(structure.pos.x, structure.pos.y, 0xff);
+        }
+        //this.matrixCache[roomName] = matrix;
+        return matrix;
+    }
 }
 declare global {
     /**
