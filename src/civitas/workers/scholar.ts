@@ -17,8 +17,29 @@ export class Scholar extends Worker {
     constructor(scholar: Creep) {
         super(scholar);
 
+        _.defaults(this.memory, {
+            storageId: Game.rooms[this.memory.spawnRoom].storage?.id,
+            controllerId: Game.rooms[this.memory.spawnRoom].terminal?.id,
+            linkId: this.supervisor.controllerLink?.id
+        });
+
         this.controller = Game.getObjectById(this.memory.controllerId) || undefined;
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
+    }
+
+    update(): boolean {
+        if (!super.update()) {
+            //creep is dead
+            return false;
+        }
+        if (Game.time % 50 == 0 && this.supervisor.controllerLink !== undefined) {      //check every 50 ticks if the scholar has a new link
+            this.memory.linkId = this.supervisor.controllerLink.id;
+        }
+        //attributes that will change tick to tick
+        this.storage = Game.getObjectById(this.memory.storageId) || undefined;
+        this.controller = Game.getObjectById(this.memory.controllerId) || undefined;
+        this.link = Game.getObjectById(this.memory.linkId) || undefined;
+        return true;
     }
 
     /**
