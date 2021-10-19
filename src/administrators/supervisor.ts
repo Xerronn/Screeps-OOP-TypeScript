@@ -9,6 +9,7 @@ import { Miner } from '../civitas/workers/miner';       Miner;            //need
 import { Engineer } from '../civitas/workers/engineer'; Engineer;
 import { Courier } from '../civitas/workers/courier';   Courier;
 import { Scholar } from '../civitas/workers/scholar';   Scholar;
+import { Host } from '../civitas/workers/host';         Host;
 
 //structure imports
 import { Castrum } from '../castrum/castrum';
