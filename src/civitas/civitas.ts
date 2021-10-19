@@ -103,6 +103,15 @@ export abstract class Civitas extends GameObj {
         // return false;
     }
 
+    /**
+     * Method that returns the number of active body parts on a creep
+     * @param bodyPart Type of Body part to count
+     * @returns number of body part
+     */
+    getActiveBodyParts(bodyPart: BodyPartConstant): number {
+        return this.liveObj.getActiveBodyparts(bodyPart)
+    }
+
     get supervisor(): Supervisor {
         return global.Imperator.administrators[this.memory.spawnRoom].supervisor;
     }
