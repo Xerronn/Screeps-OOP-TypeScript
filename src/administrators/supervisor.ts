@@ -7,6 +7,8 @@ import { Executive } from './executive';
 import { Civitas } from '../civitas/civitas';
 import { Miner } from '../civitas/workers/miner';       Miner;            //needed or rollup removes the unused imports
 import { Engineer } from '../civitas/workers/engineer'; Engineer;
+import { Courier } from '../civitas/workers/courier';   Courier;
+import { Scholar } from '../civitas/workers/scholar';   Scholar;
 
 //structure imports
 import { Castrum } from '../castrum/castrum';
