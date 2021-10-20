@@ -11,8 +11,7 @@ export interface MinerMemory extends WorkerMemory {
 export class Miner extends Worker {
     memory: MinerMemory;
 
-    sourceId: Id<Source>;
-    source?: Source;
+    source: Source;
     container?: StructureContainer;
     link?: StructureLink;
 
@@ -28,8 +27,7 @@ export class Miner extends Worker {
             this.memory.courierSpawned = false;
         }
 
-        this.sourceId = this.memory.sourceId;
-        let unkSource = Game.getObjectById(this.sourceId);      //in some cases we might not have vision of the source
+        let unkSource = Game.getObjectById(this.memory.sourceId);      //in some cases we might not have vision of the source
         if (unkSource !== null) {
             this.source = unkSource;
             this.replacementTime = Game.rooms[this.memory.spawnRoom].find(FIND_MY_SPAWNS)[0].pos.findPathTo(this.source).length + (this.body.length * 2);
@@ -62,13 +60,13 @@ export class Miner extends Worker {
         if (!super.update()) {  //creep is dead
             //remove name from the assigned source worker memory
             let roomSources = Archivist.getSources(this.memory.spawnRoom);
-            let index = roomSources[this.sourceId].workers[this.constructor.name].indexOf(this.name);
-            roomSources[this.sourceId].workers[this.constructor.name].splice(index, 1);
+            let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
+            roomSources[this.memory.sourceId].workers[this.constructor.name].splice(index, 1);
             roomSources[this.memory.sourceId].openSpots++;
             return false;
         }
 
-        let unkSource = Game.getObjectById(this.sourceId);      //in some cases we might not have vision of the source
+        let unkSource = Game.getObjectById(this.memory.sourceId);      //in some cases we might not have vision of the source
         if (unkSource) {
             this.source = unkSource;
 
@@ -157,7 +155,7 @@ export class Miner extends Worker {
         if (this.pos.inRangeTo(target, targetRange)) {
             this.liveObj.harvest(this.source);
         } else {
-            this.liveObj.travelTo(this.source, {allowSwap: true});
+            this.liveObj.travelTo(target, {allowSwap: true});
         }
         return true;
     }
@@ -237,7 +235,7 @@ export class Miner extends Worker {
      */
     getLink(): Id<StructureLink> | undefined {
         let roomSources = Archivist.getSources(this.memory.spawnRoom);
-        return roomSources[this.sourceId].linkId;
+        return roomSources[this.memory.sourceId].linkId;
     }
 
     /**
