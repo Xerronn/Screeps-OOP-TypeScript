@@ -75,7 +75,7 @@ export class Imperator {
      * @returns If the Dominion has just respawned
      */
     checkRespawn(): boolean {
-        if (this.dominion.length == 1 && Object.keys(Game.spawns).length == 1 && Object.keys(Game.creeps).length == 0) {
+        if (this.dominion.length == 1 && Object.keys(Game.structures).length == 1 && Object.keys(Game.creeps).length == 0) {
             //fresh respawn detection
             Archivist.build(true);
             return true;
