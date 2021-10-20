@@ -19,7 +19,7 @@ export class Scholar extends Worker {
 
         _.defaults(this.memory, {
             storageId: Game.rooms[this.memory.spawnRoom].storage?.id,
-            controllerId: Game.rooms[this.memory.spawnRoom].terminal?.id,
+            controllerId: Game.rooms[this.memory.spawnRoom].controller?.id,
             linkId: this.supervisor.controllerLink?.id
         });
 
