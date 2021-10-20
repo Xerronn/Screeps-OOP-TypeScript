@@ -174,12 +174,11 @@ export class Worker extends Civitas {
             let targets = [liveRoom.storage, liveRoom.terminal];
 
             for (let target of targets) {
-                if (target === undefined) continue;
+                if (target === undefined || target.my) continue;
                 if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                     liveObj = target;
                     break;
-                }
-                if (!target.my) target.destroy();
+                } else target.destroy();
             }
 
             if (liveObj === undefined && Game.rooms[this.room].find(FIND_RUINS).length > 0) {
