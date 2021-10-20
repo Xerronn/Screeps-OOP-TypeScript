@@ -219,9 +219,10 @@ export class Architect {
         if (!dry) {
             //clear out any buildings left by enemies
             let enemyBuildings = Game.rooms[room].find(FIND_STRUCTURES, {
-                filter: (struc) => {return struc.structureType != STRUCTURE_STORAGE && struc.structureType != STRUCTURE_TERMINAL}});
+                filter: (struc) => {return struc.structureType != STRUCTURE_STORAGE && struc.structureType != STRUCTURE_TERMINAL}
+            }) as OwnedStructure[];
             for (let struct of enemyBuildings) {
-                if (struct.structureType === STRUCTURE_SPAWN && struct.my) continue;
+                if (struct.my === true) continue;
                 struct.destroy();
             }
         }
