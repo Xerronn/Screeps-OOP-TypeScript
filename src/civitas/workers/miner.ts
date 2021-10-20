@@ -257,7 +257,7 @@ export class Miner extends Worker {
             'type': CIVITAS_TYPES.COURIER,
             'memory': {
                 'generation' : 0,
-                'container': this.memory.containerId,
+                'containerId': this.memory.containerId,
                 'resource': RESOURCE_ENERGY
             }
         });
