@@ -100,7 +100,7 @@ export class Executive {
         let creepsToSpawn = [
             { 'body': [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.SCHOLAR, 'memory': memory },
             { 'body': [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.SCHOLAR, 'memory': memory },
-            { 'body': [CARRY, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.RUNNER, 'memory': memory }
+            { 'body': [CARRY, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.HOST, 'memory': memory }
         ]
 
         for (let source of Object.keys(Archivist.getSources(this.room))) {

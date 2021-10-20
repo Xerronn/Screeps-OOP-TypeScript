@@ -205,15 +205,15 @@ declare global {
         CURATOR = 'curator',
         EMISSARY = 'emissary',
         EXCAVATOR = 'excavator',
+        HOST = 'host',
         MINER = 'miner',
-        RUNNER = 'runner',
         SCHOLAR = 'scholar',
         SCOUT = 'scout',
     }
 
     type CivitasType =
         'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
-        'emissary' | 'excavator' | 'miner' | 'runner' | 'scholar' | 'scout';
+        'emissary' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
 
     const enum LEGION_TYPES {
         EXECUTIONER = 'executioner',
