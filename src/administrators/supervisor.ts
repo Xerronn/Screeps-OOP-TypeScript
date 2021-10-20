@@ -4,20 +4,21 @@ import { Director } from './director';
 import { Executive } from './executive';
 
 //creep imports
-import { Civitas } from '../civitas/civitas';           Civitas;        //needed or rollup removes the unused imports
-import { Miner } from '../civitas/workers/miner';       Miner;
-import { Engineer } from '../civitas/workers/engineer'; Engineer;
-import { Courier } from '../civitas/workers/courier';   Courier;
-import { Scholar } from '../civitas/workers/scholar';   Scholar;
-import { Host } from '../civitas/workers/host';         Host;
+import { Civitas } from '../civitas/civitas';                   Civitas;        //needed or rollup removes the unused imports
+import { Miner } from '../civitas/workers/miner';               Miner;
+import { Engineer } from '../civitas/workers/engineer';         Engineer;
+import { Courier } from '../civitas/workers/courier';           Courier;
+import { Scholar } from '../civitas/workers/scholar';           Scholar;
+import { Host } from '../civitas/workers/host';                 Host;
+import { Contractor } from '../civitas/workers/contractor';     Contractor;
 
 //structure imports
-import { Castrum } from '../castrum/castrum';           Castrum;
-import { Conduit } from '../castrum/conduit';           Conduit;
-import { Workshop } from '../castrum/workshop';         Workshop;
-import { Nexus } from '../castrum/nexus';               Nexus;
-import { Bastion } from '../castrum/bastion';           Bastion;
-import { Market } from '../castrum/market';             Market;
+import { Castrum } from '../castrum/castrum';                   Castrum;
+import { Conduit } from '../castrum/conduit';                   Conduit;
+import { Workshop } from '../castrum/workshop';                 Workshop;
+import { Nexus } from '../castrum/nexus';                       Nexus;
+import { Bastion } from '../castrum/bastion';                   Bastion;
+import { Market } from '../castrum/market';                     Market;
 
 export class Supervisor {
     room: string;
