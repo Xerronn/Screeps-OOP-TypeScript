@@ -28,45 +28,6 @@ export class Contractor extends Worker {
     }
 
     /**
-     * build construction sites closest to storage
-     */
-     build(): boolean {
-        let liveSite;
-        if (this.memory.buildTarget !== undefined) {
-            let tmpObj = Game.getObjectById(this.memory.buildTarget);
-            if (tmpObj !== null) {
-                liveSite = tmpObj;
-            } else {
-                //if the tmpObj is null, it means that the
-                this.supervisor.wrap(true);
-                delete this.memory.buildTarget;
-            }
-        }
-        if (liveSite === undefined) {
-            let sites = Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES);
-
-            let storage = Game.rooms[this.room].storage;
-            if (storage === undefined) {
-                liveSite = this.pos.findClosestByRange(sites);
-            } else {
-                liveSite = storage.pos.findClosestByRange(sites);
-
-            }
-
-        }
-        if (liveSite !== null) {
-            this.memory.buildTarget = liveSite.id;
-        } else return false;
-
-        if (this.pos.inRangeTo(liveSite, 3)) {
-            this.liveObj.build(liveSite);
-        } else {
-            this.liveObj.travelTo(liveSite);
-        }
-        return true;
-    }
-
-    /**
      * Method to remove rebirth and lower archivist contractor count
      */
     conclude() {
