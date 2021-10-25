@@ -103,7 +103,7 @@ export class Nexus extends Castrum {
 
         //the arbiter will always get spawned by the prime nexus and pushed to the right
         if (type == "arbiter") {
-            options.spawnDirection = [RIGHT];
+            options.directions = [RIGHT];
         }
         let success = this.liveObj.spawnCreep(spawnBody, name, options);
 
