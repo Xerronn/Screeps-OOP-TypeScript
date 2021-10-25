@@ -230,6 +230,15 @@ declare global {
         UNINTERESTING = 'uninteresting'
     }
 
+    type LinkType =
+        'storage' | 'controller' | 'container';
+
+    const enum LINK_TYPES {
+        STORAGE = 'storage',
+        CONTROLLER = 'controller',
+        CONTAINER = 'container'
+    }
+
     /**
      * INTERFACES
      */
