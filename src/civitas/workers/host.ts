@@ -50,8 +50,8 @@ export class Host extends Worker {
     /**
      * Method to get the creep to renew itself to help prevent softlocks
      */
-     renew(usePrime=false) {
-        let renewSpawn = Game.getObjectById(this.renewSpawnId || "" as Id<any>);
+    renew(usePrime=false) {
+        let renewSpawn = Game.getObjectById(this.renewSpawnId || "" as Id<any>) || undefined;
 
         if (renewSpawn === undefined) {
             //get all nexuses
@@ -75,7 +75,6 @@ export class Host extends Worker {
             this.renewSpawnId = chosenNexus.liveObj.id;
             renewSpawn = chosenNexus.liveObj;
         }
-
         //reserve the spawn, then renew until its full or no energy left
         this.supervisor.reserveNexus();
 
@@ -94,8 +93,7 @@ export class Host extends Worker {
 
         //if we get to this point, energyAvailable is > 300, so we can set task to just renew fully
         this.memory.task = "renew";
-
-        if (!renewSpawn.spawning) {
+        if (renewSpawn !== undefined && !renewSpawn.spawning) {
             if (this.pos.inRangeTo(renewSpawn, 1)) {
                 renewSpawn.renewCreep(this.liveObj);
             } else {
