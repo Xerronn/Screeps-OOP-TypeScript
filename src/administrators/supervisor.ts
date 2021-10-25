@@ -35,8 +35,8 @@ export class Supervisor {
     nexusReservation: number;
     workshopReservation: number;
 
-    controllerLink: Conduit | undefined;
-    storageLink: Conduit | undefined;
+    controllerLink: Conduit | undefined;                    //these get set in the conduit class when they self-classify
+    storageLink: Conduit | undefined;                       //
     reagentWorkshops: Array<Workshop>;
     productWorkshops: Array<Workshop>;
 
