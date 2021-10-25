@@ -72,13 +72,13 @@ export class Scholar extends Worker {
      * Method to withdraw from link
      */
     withdrawLink(): boolean {
-        if (this.link === undefined) return false;
-        if (this.link.store.getUsedCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY)) {
-            if (this.pos.inRangeTo(this.link, 1)) {
+        if (this.link === undefined) return false
+        if (this.pos.inRangeTo(this.link, 1)) {
+            if (this.link.store.getUsedCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY)) {
                 this.liveObj.withdraw(this.link, RESOURCE_ENERGY);
-            } else {
-                this.liveObj.moveTo(this.link);
             }
+        } else {
+            this.liveObj.moveTo(this.link);
         }
         return true;
     }
