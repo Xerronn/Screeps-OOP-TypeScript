@@ -166,7 +166,7 @@ export class Courier extends Worker {
             }
         } else {
             if (!this.pathing) {
-                this.liveObj.moveTo(this.container);
+                this.liveObj.travelTo(this.container);
             }
         }
         return true;
@@ -180,7 +180,7 @@ export class Courier extends Worker {
         if (this.pos.inRangeTo(this.storage, 1)) {
             this.liveObj.transfer(this.storage, resourceType);
         } else if (!this.pathing) {
-            this.liveObj.moveTo(this.storage);
+            this.liveObj.travelTo(this.storage);
         }
         return true;
     }
@@ -194,7 +194,7 @@ export class Courier extends Worker {
         if (this.pos.inRangeTo(this.terminal, 1)) {
             this.liveObj.transfer(this.terminal, resourceType);
         } else if (!this.pathing) {
-            this.liveObj.moveTo(this.terminal);
+            this.liveObj.travelTo(this.terminal);
         }
         return true;
     }
