@@ -33,6 +33,7 @@ export class Conduit extends Castrum {
                 this.linkType = LINK_TYPES.STORAGE
                 this.supervisor.storageLink = this;
             } else {
+                this.linkType = LINK_TYPES.CONTROLLER;
                 this.supervisor.controllerLink = this;
             }
         } else {
