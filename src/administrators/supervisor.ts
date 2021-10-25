@@ -11,6 +11,7 @@ import { Courier } from '../civitas/workers/courier';           Courier;
 import { Scholar } from '../civitas/workers/scholar';           Scholar;
 import { Host } from '../civitas/workers/host';                 Host;
 import { Contractor } from '../civitas/workers/contractor';     Contractor;
+import { Arbiter } from '../civitas/workers/arbiter';           Arbiter;
 
 //structure imports
 import { Castrum } from '../castrum/castrum';                   Castrum;
