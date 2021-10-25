@@ -20,6 +20,12 @@
 
     public static travelTo(creep: Creep, destination: HasPos|RoomPosition, options: TravelToOptions = {}): number {
 
+        if (options.allowSwap === undefined) {
+            options.allowSwap = true;
+            if (['executioner'].includes(creep.memory.type)) {
+                options.allowSwap = false;
+            }
+        }
         // uncomment if you would like to register hostile rooms entered
         // this.updateRoomStatus(creep.room);
 
