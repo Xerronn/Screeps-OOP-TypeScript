@@ -208,13 +208,10 @@ export class Executive {
      * Method that spawns the excavator to mine out minerals
      */
     spawnExcavator() {
-        //todo: this is unbuildable at rcl 6
         this.getSupervisor().initiate({
             'body': [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+                MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ],
             'type': CIVITAS_TYPES.EXCAVATOR,
             'memory': {'generation':0}
