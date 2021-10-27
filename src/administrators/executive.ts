@@ -117,27 +117,16 @@ export class Executive {
      * Method that starts phase three, the arbiter creep
      */
     spawnArbiter() {
-        let arbiter = {
+        this.getSupervisor().initiate({
             'body': [
                 CARRY, CARRY, CARRY, CARRY
             ],
-            'type': 'arbiter',
+            'type': CIVITAS_TYPES.ARBITER,
             'memory': {
                 "generation": 0,
                 "offRoading": true
             }
-        };
-
-        //this is actually kinda insane
-        let task =
-        `if (global.Imperator.administrators[objArr[0]].supervisor.storageLink) {
-            global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1])
-        } else {
-            global.Director.schedule(objArr[0], Game.time + 50, objArr[2], objArr);
-        }`
-        //todo: fix this, as director is no longer in the global scope
-
-        Director.schedule(this.room, Game.time, task, [this.room, arbiter, task]);
+        });
     }
 
     /**
