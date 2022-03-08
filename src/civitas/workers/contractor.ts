@@ -1,7 +1,7 @@
-import { Archivist } from "administrators/archivist";
-import { Worker } from "./worker";
+import Chronicler from "controllers/Chronicler";
+import Worker from "./Worker";
 
-export class Contractor extends Worker {
+export default class Contractor extends Worker {
     constructor(contractor: Creep) {
         super(contractor);
     }
@@ -28,11 +28,11 @@ export class Contractor extends Worker {
     }
 
     /**
-     * Method to remove rebirth and lower archivist contractor count
+     * Method to remove rebirth and lower Chronicler contractor count
      */
     conclude() {
         //lower count by one
-        Archivist.setNumContractors(this.room, Archivist.getNumContractors(this.room) - 1);
+        Chronicler.setNumContractors(this.room, Chronicler.getNumContractors(this.room) - 1);
         delete this.memory.generation;
     }
 }

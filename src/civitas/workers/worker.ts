@@ -1,12 +1,12 @@
-import { Archivist } from 'administrators/archivist';
-import { Civitas } from '../civitas';
+import Chronicler from 'controllers/Chronicler';
+import Civitas from '../Civitas';
 
 export interface WorkerMemory extends CreepMemory {
     fillTarget?: Id<AnyStoreStructure>;
     pillageTarget?: Id<StructureStorage | StructureTerminal | Ruin>;
     buildTarget?: Id<ConstructionSite>;
 }
-export class Worker extends Civitas {
+export default class Worker extends Civitas {
     memory: WorkerMemory;
 
     extensionsFilled: boolean;      //if the extensions are filled
@@ -144,7 +144,7 @@ export class Worker extends Civitas {
 
             liveObj = this.pos.findClosestByRange(fillables);
             if (liveObj === null) {
-                Archivist.setTowersFilled(this.room, true);
+                Chronicler.setTowersFilled(this.room, true);
                 return false;
             };
             this.memory.fillTarget = liveObj.id;

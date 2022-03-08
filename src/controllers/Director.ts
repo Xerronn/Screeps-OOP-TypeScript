@@ -1,5 +1,5 @@
 //Entity that manages task execution
-export class Director {
+export default class Director {
     /**
      * Function that schedules task on tick referencing objects in objArr if needed
      * @param {Number} tick

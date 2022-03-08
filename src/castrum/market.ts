@@ -1,5 +1,5 @@
-import { Castrum } from './castrum';
+import Castrum from './Castrum';
 
-export class Market extends Castrum {
+export default class Market extends Castrum {
 
 }

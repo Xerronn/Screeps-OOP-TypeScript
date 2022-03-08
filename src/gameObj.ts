@@ -1,7 +1,7 @@
-import { Executive } from "administrators/executive";
-import { Supervisor } from "administrators/supervisor";
+import Executive from "administrators/Executive";
+import Supervisor from "administrators/Supervisor";
 
-export abstract class GameObj {
+export default abstract class GameObj {
     abstract id: Id<any>;
     abstract liveObj: Creep | Structure
     abstract pos: RoomPosition

@@ -1,7 +1,7 @@
-import { Archivist } from 'administrators/archivist';
-import { Castrum } from './castrum';
+import Chronicler from 'controllers/Chronicler';
+import Castrum from './Castrum';
 
-export class Conduit extends Castrum {
+export default class Conduit extends Castrum {
     id: Id<StructureLink>;
     liveObj: StructureLink;
 
@@ -43,7 +43,7 @@ export class Conduit extends Castrum {
             let nearSource = this.pos.findInRange(FIND_SOURCES, 3)[0]
             if (nearSource) {
                 //set the link attribute on the source
-                let allSources = Archivist.getSources(this.room);
+                let allSources = Chronicler.getSources(this.room);
 
                 allSources[nearSource.id].linkId = this.id;
             }

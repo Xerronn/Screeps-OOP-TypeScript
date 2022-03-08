@@ -1,5 +1,5 @@
-import {Informant} from 'administrators/informant';
-import {Worker, WorkerMemory} from './worker';
+import Informant from 'controllers/Informant';
+import Worker, {WorkerMemory} from './Worker';
 
 interface ScholarMemory extends WorkerMemory {
     controllerId: Id<StructureController>;
@@ -7,7 +7,7 @@ interface ScholarMemory extends WorkerMemory {
     linkId: Id<StructureLink>;
 }
 
-export class Scholar extends Worker {
+export default class Scholar extends Worker {
     memory: ScholarMemory;
 
     controller?: StructureController;

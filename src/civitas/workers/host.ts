@@ -1,15 +1,15 @@
-import { Archivist } from 'administrators/archivist';
-import { Informant } from 'administrators/informant';
-import { Nexus } from 'castrum/nexus';
-import { Worker } from './worker';
+import Chronicler from 'controllers/Chronicler';
+import Informant from 'controllers/Informant';
+import Nexus from 'castrum/Nexus';
+import Worker from './Worker';
 
-export class Host extends Worker {
+export default class Host extends Worker {
     idleSpot: {x: number, y: number};
     renewSpawnId?: Id<StructureSpawn>;
 
     constructor(host: Creep) {
         super(host)
-        let anchor = Archivist.getAnchor(this.room);
+        let anchor = Chronicler.getAnchor(this.room);
         this.idleSpot = {
             'x': anchor.x + 9,
             'y': anchor.y + 6
@@ -31,7 +31,7 @@ export class Host extends Worker {
             (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                 this.memory.task = "withdraw";
                 this.withdrawStorage();
-        } else if (Archivist.getTowersFilled(this.room) === false) {
+        } else if (Chronicler.getTowersFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (this.extensionsFilled === false) {

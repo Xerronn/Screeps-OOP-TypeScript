@@ -1,7 +1,7 @@
-import { Archivist } from "./administrators/archivist";
-import { Imperator } from './administrators/imperator';
-import { Director } from "./administrators/director";
-import { Traveler } from "./thirdParty/traveler"; Traveler;
+import Chronicler from "./controllers/Chronicler";
+import Imperator from './controllers/Imperator';
+import Director from "./controllers/Director";
+import Traveler from "./thirdParty/traveler"; Traveler;
 declare global {
     namespace NodeJS {
         interface Global {

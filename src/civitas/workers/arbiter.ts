@@ -1,13 +1,13 @@
-import { Conduit } from 'castrum/conduit';
-import { WorkerMemory } from './worker';
-import { Host } from './host';
+import Conduit from 'castrum/Conduit';
+import { WorkerMemory } from './Worker';
+import Host from './Host';
 
 interface ArbiterMemory extends WorkerMemory {
     linkId?: Id<StructureLink>,
     storageId?: Id<StructureStorage>,
     terminalId?: Id<StructureTerminal>
 }
-export class Arbiter extends Host {
+export default class Arbiter extends Host {
     memory: ArbiterMemory;
 
     conduit?: Conduit;

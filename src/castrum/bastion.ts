@@ -1,7 +1,7 @@
-import { Archivist } from 'administrators/archivist';
-import { Castrum } from './castrum';
+import Chronicler from 'controllers/Chronicler';
+import Castrum from './Castrum';
 
-export class Bastion extends Castrum {
+export default class Bastion extends Castrum {
     id: Id<StructureTower>;
     liveObj: StructureTower;
     store: Store<RESOURCE_ENERGY, false>
@@ -30,7 +30,7 @@ export class Bastion extends Castrum {
     run(): boolean {
         //set tower filled flag
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY) / 4) {
-            Archivist.setTowersFilled(this.room, false);
+            Chronicler.setTowersFilled(this.room, false);
         }
         // find new repair targets every 100 ticks
         if (Game.time % 100) {

@@ -1,9 +1,6 @@
-import { Architect } from "./architect";
+import Architect from "./Architect";
 
-export class Archivist {
-
-    static anchor: object;
-
+export default class Chronicler {
     /**
      * Method that builds the memory object at the beginning and after global resets
      * @param {boolean} reset reset the memory
@@ -25,38 +22,31 @@ export class Archivist {
         if (!Memory.directives || reset) {
             Memory.directives = {};
         }
+    }
 
-        for (var room of global.Imperator.dominion) {
-            if (!Memory.rooms[room]) {
-                Memory.rooms[room] = {
-                    sources: {},
-                    flags: {
-                        gameStage: '0',                             //must be a string to store floats in memory
-                        anchor: Architect.calculateAnchor(room)
-                    },
-                    statistics: {},
-                };
+    static roomActive(room: string): boolean {
+        return Memory.rooms[room] && Memory.rooms[room].active || false;
+    }
 
-                let terrainData = Game.rooms[room].getTerrain();
-                let sources = Game.rooms[room].find(FIND_SOURCES).map(source => source.id);
-                for (let source of sources) {
-                    let liveSource = Game.getObjectById(source);
-                    if (liveSource === null) continue;
-                    let openSpots = 0;
-                    for (let i = 0; i < 3; i++) {   //x values
-                        for (let j = 0; j < 3; j++) {   //y values
-                            if (terrainData.get(liveSource.pos.x-1 + i, liveSource.pos.y-1 + j) == 0) {
-                                openSpots++;
-                            }
-                        }
-                    }
-                    Memory.rooms[room].sources[source] = {
-                        workers: {},
-                        openSpots: openSpots
-                    };
-                }
+    static roomRegistered(room: string): boolean {
+        return Memory.rooms[room] !== undefined;
+    }
+
+    static registerRoom(room: string, schema: RoomSchematic, resources: RoomResources, force=false): boolean {
+        if (!Memory.rooms[room] || force) {
+            Memory.rooms[room] = {
+                'active': true,
+                'flags': {},
+                'schematic': schema,
+                'resources': resources
             }
         }
+        return true;
+    }
+
+    static readSchema(room: string) {
+        if (!Chronicler.roomActive(room)) throw new Error("Room is not active")
+        return Memory.rooms[room].schematic;
     }
 
     /**
@@ -65,7 +55,7 @@ export class Archivist {
      * @param {String} remoteRoom string representing the remote
      * @param {Object} data data to store in the memory
      */
-    static logRemote(ownerRoom: string, remoteRoom: string, data: RemoteRoomMemory): void {
+    static logRemote(ownerRoom: string, remoteRoom: string, data: RemoteMemory): void {
         let liveRoom = Memory.rooms[ownerRoom];
         if (liveRoom === undefined) return;
         if (liveRoom.remotes === undefined) {

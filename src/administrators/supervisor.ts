@@ -1,27 +1,27 @@
 //administrator imports
-import { Informant } from './informant';
-import { Director } from './director';
-import { Executive } from './executive';
+import Informant from '../controllers/Informant';
+import Director from '../controllers/Director';
+import Executive from './Executive';
 
 //creep imports
-import { Civitas } from '../civitas/civitas';                   Civitas;        //needed or rollup removes the unused imports
-import { Miner } from '../civitas/workers/miner';               Miner;
-import { Engineer } from '../civitas/workers/engineer';         Engineer;
-import { Courier } from '../civitas/workers/courier';           Courier;
-import { Scholar } from '../civitas/workers/scholar';           Scholar;
-import { Host } from '../civitas/workers/host';                 Host;
-import { Contractor } from '../civitas/workers/contractor';     Contractor;
-import { Arbiter } from '../civitas/workers/arbiter';           Arbiter;
+import Civitas from '../civitas/Civitas';                   Civitas;        //needed or rollup removes the unused imports
+import Miner from '../civitas/workers/Miner';               Miner;
+import Engineer from '../civitas/workers/Engineer';         Engineer;
+import Courier from '../civitas/workers/Courier';           Courier;
+import Scholar from '../civitas/workers/Scholar';           Scholar;
+import Host from '../civitas/workers/Host';                 Host;
+import Contractor from '../civitas/workers/Contractor';     Contractor;
+import Arbiter from '../civitas/workers/Arbiter';           Arbiter;
 
 //structure imports
-import { Castrum } from '../castrum/castrum';                   Castrum;
-import { Conduit } from '../castrum/conduit';                   Conduit;
-import { Workshop } from '../castrum/workshop';                 Workshop;
-import { Nexus } from '../castrum/nexus';                       Nexus;
-import { Bastion } from '../castrum/bastion';                   Bastion;
-import { Market } from '../castrum/market';                     Market;
+import Castrum from '../castrum/Castrum';                   Castrum;
+import Conduit from '../castrum/Conduit';                   Conduit;
+import Workshop from '../castrum/Workshop';                 Workshop;
+import Nexus from '../castrum/Nexus';                       Nexus;
+import Bastion from '../castrum/Bastion';                   Bastion;
+import Market from '../castrum/Market';                     Market;
 
-export class Supervisor {
+export default class Supervisor {
     room: string;
     civitas: {[civitasType: string]: Array<Civitas>};       //todo: get proper typing on the keys, not sure how atm
     castrum: {[castrumType: string]: Array<Castrum>};

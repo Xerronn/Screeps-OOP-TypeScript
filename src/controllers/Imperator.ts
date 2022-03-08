@@ -1,10 +1,10 @@
-import {Supervisor} from './supervisor';
-import {Executive} from './executive';
-import { Archivist } from './archivist';
-import { Architect } from './architect';
+import Supervisor from '../administrators/Supervisor';
+import Executive from '../administrators/Executive';
+import Chronicler from './Chronicler';
+import Architect from './Architect';
 
 //highest level class overseeing all operations in the game
-export class Imperator {
+export default class Imperator {
     administrators: {[roomName: string]: {supervisor: Supervisor, executive: Executive}};
     dominion: string[];
 
@@ -17,7 +17,7 @@ export class Imperator {
      * Method that runs on every global reset that constructs room admins
      */
     initialize(): void {
-        //make an supervisor for every room that we own
+        //make a supervisor and executive for every room that we own
         for (let room of this.dominion) {
             this.administrators[room] = {
                 supervisor: new Supervisor(room),
@@ -55,7 +55,7 @@ export class Imperator {
      */
     initRoom(room: string, originRoom: string) {
         this.refreshDominion();
-        Archivist.build();
+        Chronicler.build();
         this.administrators[room] = {
             supervisor: new Supervisor(room),
             executive: new Executive(room)
@@ -75,9 +75,9 @@ export class Imperator {
      * @returns If the Dominion has just respawned
      */
     checkRespawn(): boolean {
-        if (this.dominion.length == 1 && Object.keys(Game.structures).length == 2 && Object.keys(Game.creeps).length == 0) {
+        if (this.dominion.length == 1 && Object.keys(Game.structures).length == 2 && Object.keys(Game.creeps).length == 0 && Game.rooms[this.dominion[0]].controller?.level == 1) {
             //fresh respawn detection
-            Archivist.build(true);
+            Chronicler.build(true);
             return true;
         }
         return false;

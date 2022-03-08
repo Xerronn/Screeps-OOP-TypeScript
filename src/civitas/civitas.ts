@@ -1,8 +1,8 @@
-import { Executive } from 'administrators/executive';
-import { Supervisor } from 'administrators/supervisor';
-import { GameObj } from '../gameObj';
+import Executive from 'administrators/Executive';
+import Supervisor from 'administrators/Supervisor';
+import GameObj from '../GameObj';
 
-export abstract class Civitas extends GameObj {
+export default abstract class Civitas extends GameObj {
     //gameObj attributes
     id: Id<Creep>;
     liveObj: Creep;
@@ -82,7 +82,7 @@ export abstract class Civitas extends GameObj {
      */
     boost(boostTypes: string[]) {
         // for (let boost of boostTypes) {
-        //     let workshopId = global.Archivist.getBoostingWorkshops(this.memory.spawnRoom)[boost] || undefined;
+        //     let workshopId = global.Chronicler.getBoostingWorkshops(this.memory.spawnRoom)[boost] || undefined;
         //     let workshop = global.Imperator.getWrapper(workshopId);
         //     if (!workshop) {
         //         continue;
@@ -91,9 +91,9 @@ export abstract class Civitas extends GameObj {
         //     if (this.pos.inRangeTo(workshop.liveObj, 1)) {
         //         workshop.liveObj.boostCreep(this.liveObj);
         //         workshop.boosting = false;
-        //         let old = global.Archivist.getBoostingWorkshops(this.room);
+        //         let old = global.Chronicler.getBoostingWorkshops(this.room);
         //         old[boost] = undefined;
-        //         global.Archivist.setBoostingWorkshops(this.room, old);
+        //         global.Chronicler.setBoostingWorkshops(this.room, old);
         //         continue;
         //     } else {
         //         this.liveObj.travelTo(workshop.liveObj);

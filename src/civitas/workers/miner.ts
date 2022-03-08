@@ -1,5 +1,5 @@
-import { Archivist } from 'administrators/archivist';
-import { Worker, WorkerMemory } from './worker';
+import Chronicler from 'controllers/Chronicler';
+import Worker, {WorkerMemory} from './Worker';
 
 export interface MinerMemory extends WorkerMemory {
     sourceId: Id<Source>;
@@ -8,7 +8,7 @@ export interface MinerMemory extends WorkerMemory {
     courierSpawned: boolean;
 }
 
-export class Miner extends Worker {
+export default class Miner extends Worker {
     memory: MinerMemory;
 
     source: Source;
@@ -59,7 +59,7 @@ export class Miner extends Worker {
     update(): boolean {
         if (!super.update()) {  //creep is dead
             //remove name from the assigned source worker memory
-            let roomSources = Archivist.getSources(this.memory.spawnRoom);
+            let roomSources = Chronicler.getSources(this.memory.spawnRoom);
             let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
             roomSources[this.memory.sourceId].workers[this.constructor.name].splice(index, 1);
             roomSources[this.memory.sourceId].openSpots++;
@@ -176,7 +176,7 @@ export class Miner extends Worker {
      * @returns assigned source ID
      */
     assignToSource(): Id<Source> {
-        let roomSources = Archivist.getSources(this.memory.spawnRoom);
+        let roomSources = Chronicler.getSources(this.memory.spawnRoom);
 
         if (this.memory.sourceId) {
             //for creep rebirth and object init
@@ -234,7 +234,7 @@ export class Miner extends Worker {
      * @returns assigned link ID
      */
     getLink(): Id<StructureLink> | undefined {
-        let roomSources = Archivist.getSources(this.memory.spawnRoom);
+        let roomSources = Chronicler.getSources(this.memory.spawnRoom);
         return roomSources[this.memory.sourceId].linkId;
     }
 

@@ -1,11 +1,11 @@
-import {Archivist} from 'administrators/archivist';
-import {Worker} from './worker';
+import Chronicler from 'controllers/Chronicler';
+import Worker from './worker';
 
 interface ScoutMemory extends CreepMemory {
     targetRooms: string[];
 }
 
-export class Scout extends Worker {
+export default class Scout extends Worker {
     memory: ScoutMemory;
     targetRoom: string;
 
@@ -14,7 +14,7 @@ export class Scout extends Worker {
 
         if (this.memory.targetRooms === undefined) {
             let options = Object.values(Game.map.describeExits(this.room));
-            let currentRemotes = Archivist.getRemotes(this.memory.spawnRoom);
+            let currentRemotes = Chronicler.getRemotes(this.memory.spawnRoom);
             let visited: string[];
             if (currentRemotes === undefined) {
                 visited = [];
@@ -42,7 +42,7 @@ export class Scout extends Worker {
                 let data: RemoteRoomMemory = {
                     status: REMOTE_STATUSES.DANGEROUS
                 }
-                Archivist.logRemote(this.memory.spawnRoom, this.targetRoom, data);
+                Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
             }
             return false;
         }
@@ -63,7 +63,7 @@ export class Scout extends Worker {
         //         this.march();
         //     } else {
         //         //signal that we are ready to start building up to the remotes
-        //         global.Archivist.setDoneScouting(this.room, true);
+        //         global.Chronicler.setDoneScouting(this.room, true);
         //         //scouting is done, no need to have rebirth
         //         delete this.memory.generation;
         //     }
@@ -79,19 +79,19 @@ export class Scout extends Worker {
         //             //todo: use pathfinder to see if a route is possible and get length
         //             data.distances.push(this.pos.findPathTo(source).length);
         //         }
-        //         global.Archivist.logRemote(this.memory.spawnRoom, this.targetRoom, data);
+        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
         //     } else if (!Game.rooms[this.targetRoom].controller) {
         //         //log that the room is a highway
         //         let data = {
         //             status : "highway"
         //         };
-        //         global.Archivist.logRemote(this.memory.spawnRoom, this.targetRoom, data);
+        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
         //     } else if (Game.rooms[this.targetRoom].controller.owner) {
         //         //log that the room is occupied
         //         let data = {
         //             status : "claimed"
         //         };
-        //         global.Archivist.logRemote(this.memory.spawnRoom, this.targetRoom, data);
+        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
         //     }
 
         //     //then move to next room

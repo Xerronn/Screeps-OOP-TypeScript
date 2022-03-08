@@ -1,5 +1,5 @@
-import { Castrum } from './castrum';
+import Castrum from './Castrum';
 
-export class Workshop extends Castrum {
+export default class Workshop extends Castrum {
 
 }

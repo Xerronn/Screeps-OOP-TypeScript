@@ -1,35 +1,40 @@
-import { Architect } from "./architect";
-import { Archivist } from "./archivist";
-import { Director } from "./director";
+import Architect from "../controllers/Architect";
+import Chronicler from "../controllers/Chronicler";
+import Director from "../controllers/Director";
+import Informant from "../controllers/Informant";
 
 //entity that executes room logic
-export class Executive {
+export default class Executive {
     room: string;
+
+    architect: Architect;
+    
     constructor(room: string) {
         this.room = room;
+        if (!Chronicler.roomRegistered(this.room)) {
+            this.setup();
+        }
     }
 
     /**
      * Executive logic to run each tick
      */
     run() {
-        //check gamestage every 10 ticks
-        if (Game.time % 10 == 0) {
-            let calculation = Architect.calculateGameStage(this.room);
-            let current = Archivist.getGameStage(this.room);
-            //if gamestage is valid and different from what we have stored
+        if (Game.time % 30 === 0) {
+            let calculation = Informant.calculateGameStage(this.room);
+            let current = Chronicler.getGameStage(this.room);
             if (calculation != "-1" && current < calculation) {
-                //do some architect stuff
-                Architect.design(this.room, calculation);
-                Archivist.setGameStage(this.room, calculation);
+                Chronicler.setGameStage(this.room, calculation);
             }
+            let buildRoads = parseInt(calculation) > 4.2;
+            Architect.buildExtensions(this.room, buildRoads);
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
-        let gameStage = parseFloat(Archivist.getGameStage(this.room));
+        let gameStage = parseFloat(Chronicler.getGameStage(this.room));
         if (gameStage >= 4.1) {
             if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
-                let contractors = Archivist.getNumContractors(this.room);
+                let contractors = Chronicler.getNumContractors(this.room);
 
                 if (contractors === undefined) {
                     contractors = 0;
@@ -59,10 +64,16 @@ export class Executive {
                         'type': CIVITAS_TYPES.CONTRACTOR,
                         'memory': { "generation": 0 }
                     });
-                    Archivist.setNumContractors(this.room, contractors + 1);
+                    Chronicler.setNumContractors(this.room, contractors + 1);
                 }
             }
         }
+    }
+
+    setup() {
+        let schematic = Architect.plan();
+        let resources = this.accumulator.analyze(schematic);
+        Chronicler.registerRoom(this.room, schematic, resources, force);
     }
 
     /**
@@ -103,7 +114,7 @@ export class Executive {
             { 'body': [CARRY, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.HOST, 'memory': memory }
         ]
 
-        for (let source of Object.keys(Archivist.getSources(this.room))) {
+        for (let source of Object.keys(Chronicler.getSources(this.room))) {
             //one miner per source. they spawn their own courier
             creepsToSpawn.push({ 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.MINER, 'memory': memory });
         }

@@ -1,7 +1,7 @@
-import { Informant } from 'administrators/informant';
-import { GameObj } from '../gameObj';
+import Informant from 'controllers/Informant';
+import GameObj from '../GameObj';
 
-export abstract class Castrum extends GameObj {
+export default abstract class Castrum extends GameObj {
     //default gameObj attributes
     id: Id<Structure>;
     liveObj: Structure;

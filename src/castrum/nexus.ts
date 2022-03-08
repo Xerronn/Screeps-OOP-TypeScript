@@ -1,9 +1,9 @@
-import { Archivist } from 'administrators/archivist';
-import { Informant } from 'administrators/informant';
-import { Castrum } from './castrum';
+import Chronicler from 'controllers/Chronicler';
+import Informant from 'controllers/Informant';
+import Castrum from './Castrum';
 
 //spawn structure definition
-export class Nexus extends Castrum {
+export default class Nexus extends Castrum {
     liveObj: StructureSpawn;
     id: Id<StructureSpawn>;
 
@@ -28,7 +28,7 @@ export class Nexus extends Castrum {
 
         this.reservedTick = Game.time - 1;
         this.prime = false;
-        let anchorPos = Archivist.getAnchor(this.room);
+        let anchorPos = Chronicler.getAnchor(this.room);
         let primeSpawnLoc = Informant.getBunkerSchema().spawn.pos[0];
         if (this.pos.x - anchorPos.x == primeSpawnLoc.x &&
             this.pos.y - anchorPos.y == primeSpawnLoc.y) {
@@ -70,7 +70,7 @@ export class Nexus extends Castrum {
 
         let spawnBody = body;
         //reduce move parts when roads are built
-        if (Archivist.getRoadsBuilt(this.room) && !memory.offRoading) {
+        if (Chronicler.getRoadsBuilt(this.room) && !memory.offRoading) {
             //build a list of all non move body parts
             let noMoves: BodyPartConstant[] = [];
             for (let part of spawnBody) {
@@ -126,7 +126,7 @@ export class Nexus extends Castrum {
     statTracking(body: BodyPartConstant[]) {
         let bodyCost = Informant.calculateBodyCost(body);
 
-        let currentValue = Archivist.getStatistic(this.room, "RemoteEnergySpent");
-        Archivist.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
+        let currentValue = Chronicler.getStatistic(this.room, "RemoteEnergySpent");
+        Chronicler.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
     }
 }

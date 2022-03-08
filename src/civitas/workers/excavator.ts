@@ -1,5 +1,5 @@
-import { Director } from "administrators/director";
-import { Civitas } from "../civitas";
+import Director from "controllers/Director";
+import Civitas from "../Civitas";
 
 interface ExcavatorMemory extends CreepMemory {
     mineralId: Id<Mineral>;
@@ -8,7 +8,7 @@ interface ExcavatorMemory extends CreepMemory {
     courierSpawned: boolean;
 }
 
-export class Excavator extends Civitas {
+export default class Excavator extends Civitas {
     memory: ExcavatorMemory;
 
     mineral?: Mineral;

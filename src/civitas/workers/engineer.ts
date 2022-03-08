@@ -1,7 +1,7 @@
-import { Archivist } from "administrators/archivist";
-import { Miner } from "./miner";
+import Chronicler from "controllers/Chronicler";
+import Miner from "./Miner";
 
-export class Engineer extends Miner {
+export default class Engineer extends Miner {
     constructor(engineer: Creep) {
         super(engineer);
     }
@@ -14,7 +14,7 @@ export class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (Archivist.getTowersFilled(this.room) === false) {
+        else if (Chronicler.getTowersFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (!this.extensionsFilled) {

@@ -1,5 +1,5 @@
-import { Informant } from 'administrators/informant';
-import {Worker, WorkerMemory} from './worker';
+import Informant from 'controllers/Informant';
+import Worker, {WorkerMemory} from './Worker';
 
 interface CourierMemory extends WorkerMemory {
     resource: ResourceConstant;                 //must be provided by whatever is spawning the courier
@@ -8,7 +8,7 @@ interface CourierMemory extends WorkerMemory {
     terminalId?: Id<StructureTerminal>;
 }
 
-export class Courier extends Worker {
+export default class Courier extends Worker {
     memory: CourierMemory
 
     storage?: StructureStorage;

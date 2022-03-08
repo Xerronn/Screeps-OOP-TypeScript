@@ -3,7 +3,7 @@
  * Example: var Traveler = require('Traveler.js');
  */
 
- export class Traveler {
+ export default class Traveler {
 
     private static structureMatrixCache: {[roomName: string]: CostMatrix} = {};
     private static creepMatrixCache: {[roomName: string]: CostMatrix} = {};
