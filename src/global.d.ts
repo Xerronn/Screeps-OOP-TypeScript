@@ -34,19 +34,39 @@ interface CreepMemory {
 
 interface RoomMemory {
     active: boolean;
-    flags: {
-    }
+    flags: RoomFlags;
     schematic: RoomSchematic;
     resources: RoomResources;
-    statistics?: any;   //todo
-    remotes?: {[roomName: string]: RemoteMemory;};
+    statistics: any;   //todo
+    remotes: RoomRemotes;
 }
+
+interface RoomFlags {
+    'gameStage': string,
+    'numContractors': number,
+    'bastionsFilled': boolean,
+    'curatorSpawned': boolean,
+    'doneScouting': boolean,
+    'garrisonSpawned': boolean,
+    'workshopsFilled': boolean,
+    'boostingWorkshops': BoostingMemory,
+}
+
+interface RoomRemotes {[roomName: string]: RemoteMemory;}
+
+type ResourceId = Id<Source> | Id<Deposit>;
 
 interface RoomResources {
-    [resource: ResourceType]: SourceMemory
+    [resource: ResourceId]: ResourceMemory
 }
 
-type ResourceType = Id<Source> | Id<Deposit>;
+interface ResourceMemory {
+    workers: {
+        [creepType: string]: string[]
+    }
+    openSpots: number;
+    linkId?: Id<StructureLink>;
+}
 
 interface Position {
     x: number,
@@ -68,16 +88,6 @@ interface StampPlacement {
     rotations: number
 }
 
-interface SourceMemory {
-    [sourceId: Id<Source>]: {
-        workers: {
-            [creepType: string]: string[]
-        }
-        openSpots: number;
-        linkId?: Id<StructureLink>;
-    }
-}
-
 interface RenewalTemplate {
     body: BodyPartConstant[];
     type: CivitasType | LegionType;
@@ -88,6 +98,10 @@ interface RemoteMemory {
     status: REMOTE_STATUSES;
     distances?: number[];
     selected?: boolean;
+}
+
+interface BoostingMemory {
+    [lab: Id<StructureLab>]: MineralBoostConstant;
 }
 
 //TYPES AND CONSTANTS
