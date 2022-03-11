@@ -42,6 +42,35 @@ export default class Informant {
     }
 
     /**
+     * Get information about sources from a room
+     * @param room 
+     * @returns 
+     */
+    static prospect(room: string): RoomResources {
+        let resources: RoomResources = {};
+        let terrainData = Game.rooms[room].getTerrain();
+        let sources = Game.rooms[room].find(FIND_SOURCES).map(source => source.id);
+        for (let source of sources) {
+            let liveSource = Game.getObjectById(source);
+            if (liveSource === null) continue;
+            let openSpots = 0;
+            for (let i = 0; i < 3; i++) {   //x values
+                for (let j = 0; j < 3; j++) {   //y values
+                    if (terrainData.get(liveSource.pos.x-1 + i, liveSource.pos.y-1 + j) == 0) {
+                        openSpots++;
+                    }
+                }
+            }
+            resources[source] = {
+                type: 'source',
+                workers: {},
+                openSpots: openSpots
+            };
+        }
+        return resources;
+    }
+
+    /**
      * Method to calculate the gamestage, should be run occasionally to check for certain game events
      * @param {String} room String representing the room
      * @returns an integer representing the game stage
