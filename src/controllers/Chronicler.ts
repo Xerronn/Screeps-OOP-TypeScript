@@ -1,5 +1,3 @@
-import Architect from "./Architect";
-
 export default class Chronicler {
     /**
      * Method that builds the memory object at the beginning and after global resets
@@ -49,7 +47,7 @@ export default class Chronicler {
      * @param room 
      * @returns 
      */
-    static readRoomRegistered(room: string): boolean {
+    static roomRegistered(room: string): boolean {
         return Memory.rooms[room] !== undefined;
     }
 
@@ -216,6 +214,16 @@ export default class Chronicler {
     static writeGarrisonSpawned(room: string, value: boolean) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].flags.garrisonSpawned = value;
+    }
+
+    /**
+     * Get the resources of a room
+     * @param room 
+     * @returns 
+     */
+    static readResources(room: string): RoomResources {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].resources;
     }
 
     /**
