@@ -12,7 +12,9 @@ export default class Executive {
     constructor(room: string) {
         this.room = room;
         if (!Chronicler.roomRegistered(this.room)) {
-            this.setup();
+            let schematic = Architect.plan(this.room);
+            let resources = Informant.prospect(this.room);
+            Chronicler.registerRoom(this.room, schematic, resources);
         }
     }
 
@@ -22,19 +24,19 @@ export default class Executive {
     run() {
         if (Game.time % 30 === 0) {
             let calculation = Informant.calculateGameStage(this.room);
-            let current = Chronicler.getGameStage(this.room);
+            let current = Chronicler.readGameStage(this.room);
             if (calculation != "-1" && current < calculation) {
-                Chronicler.setGameStage(this.room, calculation);
+                Chronicler.writeGameStage(this.room, calculation);
             }
             let buildRoads = parseInt(calculation) > 4.2;
             Architect.buildExtensions(this.room, buildRoads);
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
-        let gameStage = parseFloat(Chronicler.getGameStage(this.room));
+        let gameStage = parseFloat(Chronicler.readGameStage(this.room));
         if (gameStage >= 4.1) {
             if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
-                let contractors = Chronicler.getNumContractors(this.room);
+                let contractors = Chronicler.readNumContractors(this.room);
 
                 if (contractors === undefined) {
                     contractors = 0;
@@ -64,16 +66,10 @@ export default class Executive {
                         'type': CIVITAS_TYPES.CONTRACTOR,
                         'memory': { "generation": 0 }
                     });
-                    Chronicler.setNumContractors(this.room, contractors + 1);
+                    Chronicler.writeNumContractors(this.room, contractors + 1);
                 }
             }
         }
-    }
-
-    setup() {
-        let schematic = Architect.plan();
-        let resources = this.accumulator.analyze(schematic);
-        Chronicler.registerRoom(this.room, schematic, resources, force);
     }
 
     /**
@@ -114,9 +110,13 @@ export default class Executive {
             { 'body': [CARRY, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.HOST, 'memory': memory }
         ]
 
-        for (let source of Object.keys(Chronicler.getSources(this.room))) {
+        let resources = Chronicler.readResources(this.room);
+        for (let resource in resources) {
             //one miner per source. they spawn their own courier
-            creepsToSpawn.push({ 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.MINER, 'memory': memory });
+            let liveResource = resources[resource as keyof RoomResources];
+            if (liveResource.type === 'source') {
+                creepsToSpawn.push({ 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.MINER, 'memory': memory });
+            }
         }
 
         for (let creepToSpawn of creepsToSpawn.reverse()) {
