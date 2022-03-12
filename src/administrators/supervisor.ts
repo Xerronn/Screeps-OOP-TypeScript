@@ -174,11 +174,6 @@ export default class Supervisor {
             for (let nexus of this.castrum[CASTRUM_TYPES.NEXUS]) {
                 if (!(nexus instanceof Nexus)) continue;
                 if (!nexus.spawning && !nexus.spawningThisTick) {
-
-                    //arbiters must be spawned from the prime nexus
-                    if (template.type == CIVITAS_TYPES.ARBITER) {
-                        if (!nexus.prime) continue;
-                    }
                     foundNexus = true;
 
                     //use the body stored in memory if it exists, as it can contain evolutions

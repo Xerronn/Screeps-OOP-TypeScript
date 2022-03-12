@@ -8,7 +8,6 @@ export default class Nexus extends Castrum {
     id: Id<StructureSpawn>;
 
     name: string;
-    prime: boolean;                 //if the nexus is located next to manager position
     spawning: Spawning | null;
     wrapped: boolean;               //if the currently spawning creep has been wrapped yet
     spawningThisTick: boolean;      //if the nexus has already return OK to spawn something this tick
@@ -25,15 +24,6 @@ export default class Nexus extends Castrum {
             this.wrapped = false
         } else this.wrapped = true;
         this.spawningThisTick = false;
-
-        this.reservedTick = Game.time - 1;
-        this.prime = false;
-        let anchorPos = Chronicler.getAnchor(this.room);
-        let primeSpawnLoc = Informant.getBunkerSchema().spawn.pos[0];
-        if (this.pos.x - anchorPos.x == primeSpawnLoc.x &&
-            this.pos.y - anchorPos.y == primeSpawnLoc.y) {
-                this.prime = true;
-            }
     }
 
     update(): boolean {
@@ -70,7 +60,7 @@ export default class Nexus extends Castrum {
 
         let spawnBody = body;
         //reduce move parts when roads are built
-        if (Chronicler.getRoadsBuilt(this.room) && !memory.offRoading) {
+        if (Chronicler.readRoadsBuilt(this.room) && !memory.offRoading) {
             //build a list of all non move body parts
             let noMoves: BodyPartConstant[] = [];
             for (let part of spawnBody) {
@@ -126,7 +116,7 @@ export default class Nexus extends Castrum {
     statTracking(body: BodyPartConstant[]) {
         let bodyCost = Informant.calculateBodyCost(body);
 
-        let currentValue = Chronicler.getStatistic(this.room, "RemoteEnergySpent");
-        Chronicler.setStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
+        let currentValue = Chronicler.readStatistic(this.room, "RemoteEnergySpent");
+        Chronicler.writeStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
     }
 }
