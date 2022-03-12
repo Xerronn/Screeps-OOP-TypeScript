@@ -80,7 +80,7 @@ export default class Informant {
         if (liveRoom === undefined || liveRoom.controller === undefined) return '-1';
         let supervisor = global.Imperator.administrators[room].supervisor;
         let rcl = liveRoom.controller.level;
-        let currentStage = Chronicler.getGameStage(room);
+        let currentStage = Chronicler.readGameStage(room);
         let calculation = "-1"; //hopefully never calculation = s this
         let numConstructionSites = liveRoom.find(FIND_MY_CONSTRUCTION_SITES).length;
         if (rcl == 1) {
@@ -139,7 +139,7 @@ export default class Informant {
             //time to start scouting and spawn the excavator
             calculation = "6.3";
         }
-        if (rcl == 6 && currentStage == "6.3" && Chronicler.getDoneScouting(room) == true) {
+        if (rcl == 6 && currentStage == "6.3" && /*Chronicler.getDoneScouting(room) ==**/ true) {
             //time to build road to the remote
             calculation = "6.4";
         }
@@ -251,5 +251,69 @@ export default class Informant {
         }
         //this.matrixCache[roomName] = matrix;
         return matrix;
+    }
+}
+
+declare global {
+    const enum CASTRUM_TYPES {
+        //wrappers
+        BASTION = 'bastion',
+        CONDUIT = 'conduit',
+        MARKET = 'market',
+        NEXUS = 'nexus',
+        WORKSHOP = 'workshop',
+    
+        //primitives
+        CONTAINER = 'container',
+        EXTENSION = 'extension',
+        ROAD = 'road',
+    
+        //everything else
+        UNDEFINED = 'undefined'
+    }
+    
+    type CastrumType =
+        'bastion' | 'conduit' | 'market' | 'nexus' | 'workshop' | 'undefined';
+    
+    const enum CIVITAS_TYPES {
+        ARBITER = 'arbiter',
+        CHEMIST = 'chemist',
+        CONTRACTOR = 'contractor',
+        COURIER = 'courier',
+        CURATOR = 'curator',
+        EMISSARY = 'emissary',
+        EXCAVATOR = 'excavator',
+        HOST = 'host',
+        MINER = 'miner',
+        SCHOLAR = 'scholar',
+        SCOUT = 'scout',
+    }
+    
+    type CivitasType =
+        'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
+        'emissary' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
+    
+    const enum LEGION_TYPES {
+        EXECUTIONER = 'executioner',
+        GARRISON = 'garrison',
+        JESTER = 'jester',
+    }
+    
+    type LegionType =
+        'executioner' | 'garrison' | 'jester';
+    
+    const enum REMOTE_STATUSES {
+        SAFE = 'safe',
+        DANGEROUS = 'dangerous',
+        UNINTERESTING = 'uninteresting'
+    }
+    
+    type LinkType =
+        'storage' | 'controller' | 'container';
+    
+    const enum LINK_TYPES {
+        STORAGE = 'storage',
+        CONTROLLER = 'controller',
+        CONTAINER = 'container'
     }
 }
