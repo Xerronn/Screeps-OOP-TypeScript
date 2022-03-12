@@ -27,10 +27,10 @@ export default class Executive {
             let current = Chronicler.readGameStage(this.room);
             if (calculation != "-1" && current < calculation) {
                 Chronicler.writeGameStage(this.room, calculation);
+                this.execute(calculation);
             }
             let buildRoads = parseInt(calculation) > 4.2;
             Architect.buildExtensions(this.room, buildRoads);
-            this.execute(calculation);
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
