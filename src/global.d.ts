@@ -42,14 +42,15 @@ interface RoomMemory {
 }
 
 interface RoomFlags {
-    'gameStage': string,
-    'numContractors': number,
-    'bastionsFilled': boolean,
-    'curatorSpawned': boolean,
-    'doneScouting': boolean,
-    'garrisonSpawned': boolean,
-    'workshopsFilled': boolean,
-    'boostingWorkshops': BoostingMemory,
+    gameStage: string,
+    roadsBuilt: boolean,
+    numContractors: number,
+    bastionsFilled: boolean,
+    curatorSpawned: boolean,
+    doneScouting: boolean,
+    garrisonSpawned: boolean,
+    workshopsFilled: boolean,
+    boostingWorkshops: BoostingMemory,
 }
 
 interface RoomRemotes {[roomName: string]: RemoteMemory;}

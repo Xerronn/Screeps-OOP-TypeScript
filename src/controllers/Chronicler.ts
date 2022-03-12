@@ -65,6 +65,7 @@ export default class Chronicler {
                 'active': true,
                 'flags': {
                     'gameStage': '0',
+                    'roadsBuilt': false,
                     'bastionsFilled': false,
                     'numContractors': 0,
                     'curatorSpawned': false,
@@ -224,6 +225,21 @@ export default class Chronicler {
     static readResources(room: string): RoomResources {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         return Memory.rooms[room].resources;
+    }
+
+    /**
+     * Get the roads built flag for a given room
+     * @param room 
+     * @returns 
+     */
+    static readRoadsBuilt(room: string): boolean {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].flags.roadsBuilt;
+    }
+
+    static writeRoadsBuilt(room: string, value: boolean) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].flags.roadsBuilt = value;
     }
 
     /**
