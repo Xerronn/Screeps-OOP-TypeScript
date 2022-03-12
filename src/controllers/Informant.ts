@@ -253,8 +253,8 @@ export default class Informant {
         return matrix;
     }
 }
-
 declare global {
+    //TYPES AND CONSTANTS
     const enum CASTRUM_TYPES {
         //wrappers
         BASTION = 'bastion',
@@ -262,19 +262,19 @@ declare global {
         MARKET = 'market',
         NEXUS = 'nexus',
         WORKSHOP = 'workshop',
-    
+
         //primitives
         CONTAINER = 'container',
         EXTENSION = 'extension',
         ROAD = 'road',
-    
+
         //everything else
         UNDEFINED = 'undefined'
     }
-    
+
     type CastrumType =
         'bastion' | 'conduit' | 'market' | 'nexus' | 'workshop' | 'undefined';
-    
+
     const enum CIVITAS_TYPES {
         ARBITER = 'arbiter',
         CHEMIST = 'chemist',
@@ -288,29 +288,29 @@ declare global {
         SCHOLAR = 'scholar',
         SCOUT = 'scout',
     }
-    
+
     type CivitasType =
         'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
         'emissary' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
-    
+
     const enum LEGION_TYPES {
         EXECUTIONER = 'executioner',
         GARRISON = 'garrison',
         JESTER = 'jester',
     }
-    
+
     type LegionType =
         'executioner' | 'garrison' | 'jester';
-    
+
     const enum REMOTE_STATUSES {
         SAFE = 'safe',
         DANGEROUS = 'dangerous',
         UNINTERESTING = 'uninteresting'
     }
-    
+
     type LinkType =
         'storage' | 'controller' | 'container';
-    
+
     const enum LINK_TYPES {
         STORAGE = 'storage',
         CONTROLLER = 'controller',
