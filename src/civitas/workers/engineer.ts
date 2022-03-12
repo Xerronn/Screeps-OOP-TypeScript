@@ -7,6 +7,7 @@ export default class Engineer extends Miner {
     }
 
     run(): boolean {
+        let gameStage = parseFloat(Chronicler.readGameStage(this.room));
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "harvest" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
             this.memory.task = "harvest";
             if (!this.noPillage) {
@@ -14,7 +15,7 @@ export default class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (Chronicler.readBastionsFilled(this.room) === false) {
+        else if (Chronicler.readBastionsFilled(this.room) === false && gameStage >= 3.1) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (!this.extensionsFilled) {
