@@ -30,6 +30,7 @@ export default class Executive {
             }
             let buildRoads = parseInt(calculation) > 4.2;
             Architect.buildExtensions(this.room, buildRoads);
+            this.execute(calculation);
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
@@ -69,6 +70,115 @@ export default class Executive {
                     Chronicler.writeNumContractors(this.room, contractors + 1);
                 }
             }
+        }
+    }
+
+    /**
+     * Function to do room planning whenever gamestage changes
+     * @param {String} room string representation of a room
+     */
+    execute(gameStage: string) {
+        switch (gameStage) {
+            case "1":
+                //calculate anchor and build spawn
+                // // Architect.buildBunker(room);
+                if (Game.rooms[this.room].find(FIND_MY_SPAWNS).length > 0) {
+                    //start the room off with the five basic engineers
+                    this.phaseOne();
+                }
+                break;
+            case "2":
+                //turning rcl 2
+                // // Architect.buildBunker(room);
+
+                break;
+            case "3":
+                //turning rcl 3
+                //build the first few extensions
+                // // Architect.buildBunker(room);
+                break;
+            case "3.1":
+                //towers are built
+                //activate phaseOne at gamestage 3.1 if this isn't the first room
+                if (global.Imperator.dominion.length > 1) {
+                    this.phaseOne();
+                }
+                break;
+            case "4":
+                // Architect.buildSourceContainers(room);
+                //just turned rcl 4
+                // Architect.buildBunker(room);
+                break;
+            case "4.1":
+                //storage is built, time to switch to phase two
+                this.phaseTwo();
+                break;
+            case "4.2":
+                //storage has 100k energy, build bunker roads
+                // Architect.buildBunkerRoads(room);
+                break;
+            case "4.3":
+                //bunker roads are done, build roads to sources
+                // Architect.buildUtilityRoads(room);
+                Chronicler.writeRoadsBuilt(this.room, true);
+                break;
+            case "5":
+                //just turned rcl 5
+                //build upgrader link
+                // Architect.buildBunker(room);
+                // Architect.buildControllerLink(room);
+                break;
+            case "5.1":
+                //links are built
+                this.spawnArbiter();
+                break;
+            case "6":
+                //just turned rcl 6
+                //build lots of expensive stuff
+                // Architect.buildBunker(room);
+                break;
+            case "6.1":
+                //build first source link
+                // Architect.buildSourceLinks(room);
+                break;
+            case "6.2":
+                //build extractor and road to mineral
+                // Architect.buildExtractor(room);
+                break;
+            case "6.3":
+                //start scouting for remotes
+                this.spawnExcavator();
+                this.spawnScout();
+                break;
+            case "6.4":
+                //start reserving and build roads to remote exit
+                // Architect.prepareForRemote(room);
+                break;
+            case "6.5":
+                //send remote builders
+                let remotes = Chronicler.readRemotes(this.room);
+                for (let r in remotes) {
+                    if (remotes[r].selected) {
+                        this.spawnProspectors(r);
+                        break;
+                    }
+                }
+                break;
+            case "7":
+                //just turned rcl 7
+                //build second source link and get rid of one professor
+                // Architect.buildBunker(room);
+                // Architect.buildSourceLinks(room);
+                this.downscale();
+                break;
+            case "7.1":
+                //everything is done building and storage has > 100,000 energy
+                this.spawnChemist();
+                break;
+            case "8":
+                //TODO: lots and lots
+                // Architect.buildBunker(room);
+                break;
         }
     }
 
