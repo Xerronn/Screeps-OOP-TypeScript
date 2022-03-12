@@ -32,7 +32,7 @@ export default class Contractor extends Worker {
      */
     conclude() {
         //lower count by one
-        Chronicler.setNumContractors(this.room, Chronicler.getNumContractors(this.room) - 1);
+        Chronicler.writeNumContractors(this.room, Chronicler.readNumContractors(this.room) - 1);
         delete this.memory.generation;
     }
 }

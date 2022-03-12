@@ -30,7 +30,7 @@ export default class Bastion extends Castrum {
     run(): boolean {
         //set tower filled flag
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY) / 4) {
-            Chronicler.setTowersFilled(this.room, false);
+            Chronicler.writeBastionsFilled(this.room, false);
         }
         // find new repair targets every 100 ticks
         if (Game.time % 100) {

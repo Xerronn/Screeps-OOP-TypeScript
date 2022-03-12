@@ -9,10 +9,10 @@ export default class Host extends Worker {
 
     constructor(host: Creep) {
         super(host)
-        let anchor = Chronicler.getAnchor(this.room);
+        let anchor = Chronicler.readSchema(this.room).main.anchor;
         this.idleSpot = {
-            'x': anchor.x + 9,
-            'y': anchor.y + 6
+            'x': anchor.x + 1,
+            'y': anchor.y + 1
         }
     }
 
@@ -31,7 +31,7 @@ export default class Host extends Worker {
             (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                 this.memory.task = "withdraw";
                 this.withdrawStorage();
-        } else if (Chronicler.getTowersFilled(this.room) === false) {
+        } else if (Chronicler.readBastionsFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (this.extensionsFilled === false) {

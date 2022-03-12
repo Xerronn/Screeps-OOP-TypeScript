@@ -14,7 +14,7 @@ export default class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (Chronicler.getTowersFilled(this.room) === false) {
+        else if (Chronicler.readBastionsFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (!this.extensionsFilled) {

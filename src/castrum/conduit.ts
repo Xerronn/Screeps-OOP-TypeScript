@@ -43,7 +43,7 @@ export default class Conduit extends Castrum {
             let nearSource = this.pos.findInRange(FIND_SOURCES, 3)[0]
             if (nearSource) {
                 //set the link attribute on the source
-                let allSources = Chronicler.getSources(this.room);
+                let allSources = Chronicler.readResources(this.room);
 
                 allSources[nearSource.id].linkId = this.id;
             }

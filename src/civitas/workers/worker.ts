@@ -144,7 +144,7 @@ export default class Worker extends Civitas {
 
             liveObj = this.pos.findClosestByRange(fillables);
             if (liveObj === null) {
-                Chronicler.setTowersFilled(this.room, true);
+                Chronicler.writeBastionsFilled(this.room, true);
                 return false;
             };
             this.memory.fillTarget = liveObj.id;

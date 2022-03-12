@@ -14,7 +14,7 @@ export default class Scout extends Worker {
 
         if (this.memory.targetRooms === undefined) {
             let options = Object.values(Game.map.describeExits(this.room));
-            let currentRemotes = Chronicler.getRemotes(this.memory.spawnRoom);
+            let currentRemotes = Chronicler.readRemotes(this.memory.spawnRoom);
             let visited: string[];
             if (currentRemotes === undefined) {
                 visited = [];
@@ -39,10 +39,10 @@ export default class Scout extends Worker {
             //creep was killed
             if (this.ticksToLive > 2 && this.room === this.targetRoom) {
                 //log that room is dangerous
-                let data: RemoteRoomMemory = {
+                let data: RemoteMemory = {
                     status: REMOTE_STATUSES.DANGEROUS
                 }
-                Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
+                Chronicler.writeRemote(this.memory.spawnRoom, this.targetRoom, data);
             }
             return false;
         }

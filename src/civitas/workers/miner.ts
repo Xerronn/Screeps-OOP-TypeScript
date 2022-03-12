@@ -59,7 +59,7 @@ export default class Miner extends Worker {
     update(): boolean {
         if (!super.update()) {  //creep is dead
             //remove name from the assigned source worker memory
-            let roomSources = Chronicler.getSources(this.memory.spawnRoom);
+            let roomSources = Chronicler.readResources(this.memory.spawnRoom);
             let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
             roomSources[this.memory.sourceId].workers[this.constructor.name].splice(index, 1);
             roomSources[this.memory.sourceId].openSpots++;
@@ -176,7 +176,7 @@ export default class Miner extends Worker {
      * @returns assigned source ID
      */
     assignToSource(): Id<Source> {
-        let roomSources = Chronicler.getSources(this.memory.spawnRoom);
+        let roomSources = Chronicler.readResources(this.memory.spawnRoom);
 
         if (this.memory.sourceId) {
             //for creep rebirth and object init
@@ -193,7 +193,7 @@ export default class Miner extends Worker {
             return this.memory.sourceId;
         } else {
             //for first time an ancestry has spawned
-            let sortedSources: Id<Source>[] = _.sortBy(
+            let sortedSources: any[] = _.sortBy(
                 Object.keys(roomSources) as Array<keyof typeof roomSources>,
                 s => this.pos.findPathTo(Game.getObjectById(s as Id<any>)).length
             );
@@ -234,7 +234,7 @@ export default class Miner extends Worker {
      * @returns assigned link ID
      */
     getLink(): Id<StructureLink> | undefined {
-        let roomSources = Chronicler.getSources(this.memory.spawnRoom);
+        let roomSources = Chronicler.readResources(this.memory.spawnRoom);
         return roomSources[this.memory.sourceId].linkId;
     }
 
