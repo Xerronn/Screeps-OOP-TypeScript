@@ -28,7 +28,7 @@ export default class Chronicler {
      * @returns 
      */
     static readRoomActive(room: string): boolean {
-        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not registered");
+        if (!Chronicler.roomRegistered(room)) throw new Error("Room is not registered");
         return Memory.rooms[room] && Memory.rooms[room].active || false;
     }
 
