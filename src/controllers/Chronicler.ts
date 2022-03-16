@@ -182,9 +182,9 @@ export default class Chronicler {
      * @param {String} room string representing the room
      * @returns value of the gameStage flag
      */
-    static readGameStage(room: string): string {
+    static readGameStage(room: string): number {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        return Memory.rooms[room].flags.gameStage;
+        return parseFloat(Memory.rooms[room].flags.gameStage);
     }
 
     /**
