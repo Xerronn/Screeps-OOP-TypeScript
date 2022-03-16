@@ -67,11 +67,9 @@ export default class Supervisor {
     wrap(onlyStructures = false): void {
         let thisRoom = Game.rooms[this.room];
         //initialize all structures in the room to their respective classes
-        this.castrum = {};
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (!['undefined', 'container', 'extension', 'road'].includes(castrumType)) {
-                if (!this.castrum[castrumType]) this.castrum[castrumType] = [];
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
