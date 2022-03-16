@@ -65,10 +65,17 @@ export default class Architect {
     }
 
     static buildRoom(room: string, buildRoads: boolean, gameStage: number) {
-        
+        this.buildExtensions(room, buildRoads);
+        this.buildBastions(room, buildRoads);
     }
 
-    static buildExtensions(room: string, buildRoads:boolean) {
+    /**
+     * Function to build extensions based on the stamp locations
+     * @param room 
+     * @param buildRoads 
+     * @returns 
+     */
+    static buildExtensions(room: string, buildRoads: boolean) {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
@@ -88,6 +95,35 @@ export default class Architect {
                     pos.createConstructionSite(building);
                     if (numExtensions <= 0) return;
                 }
+            }
+        }
+    }
+
+    /**
+     * Method to build bastions based on the stamp locations
+     * @param room 
+     * @param buildRoads 
+     * @returns 
+     */
+    static buildBastions(room: string, buildRoads: boolean) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let numBastions = CONTROLLER_STRUCTURES[STRUCTURE_TOWER][controller.level];
+        if (numBastions == 0) return;
+        let stamp = schema.towers;
+        let rotated = rotateStamp(STAMP_TOWER, stamp.rotations);
+        let dimensions = rotated.length;
+        for (let x = 0; x < dimensions; x++) {
+            for (let y = 0; y < dimensions; y++) {
+                let building = rotated[x][y];
+                if (building === STRUCTURE_ROAD && !buildRoads) continue;
+                if (building === STRUCTURE_TOWER) {
+                    numBastions--;
+                }
+                let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
+                pos.createConstructionSite(building);
+                if (numBastions <= 0) return;
             }
         }
     }
@@ -204,9 +240,9 @@ export default class Architect {
                 let schematic: RoomSchematic = {
                     'main': mainStamp,
                     'extensions': extensionStamps,
-                    'tower': towerStamp,
-                    'lab': labStamp,
-                    'spawn': spawnPositions,
+                    'towers': towerStamp,
+                    'labs': labStamp,
+                    'spawns': spawnPositions,
                     'paths': paths
                 }
                 return schematic;
