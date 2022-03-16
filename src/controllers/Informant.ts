@@ -75,9 +75,9 @@ export default class Informant {
      * @param {String} room String representing the room
      * @returns an integer representing the game stage
      */
-     static calculateGameStage(room: string): string {
+     static calculateGameStage(room: string): number {
         let liveRoom = Game.rooms[room];
-        if (liveRoom === undefined || liveRoom.controller === undefined) return '-1';
+        if (liveRoom === undefined || liveRoom.controller === undefined) return -1;
         let supervisor = global.Imperator.administrators[room].supervisor;
         let rcl = liveRoom.controller.level;
         let currentStage = Chronicler.readGameStage(room);
@@ -161,7 +161,7 @@ export default class Informant {
             calculation = "8";
         }
 
-        return calculation;
+        return parseFloat(calculation);
     }
 
     /**
