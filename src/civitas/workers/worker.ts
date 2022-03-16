@@ -136,7 +136,7 @@ export default class Worker extends Civitas {
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj as StructureSpawn);
+            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj as StructureTower);
 
             let fillables = bastions.filter(
                 obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0

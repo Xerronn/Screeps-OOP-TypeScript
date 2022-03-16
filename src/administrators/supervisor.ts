@@ -43,7 +43,13 @@ export default class Supervisor {
     constructor(room: string) {
         this.room = room;
 
-        this.castrum = {};
+        this.castrum = {
+            [CASTRUM_TYPES.BASTION]: [],
+            [CASTRUM_TYPES.CONDUIT]: [],
+            [CASTRUM_TYPES.MARKET]: [],
+            [CASTRUM_TYPES.NEXUS]: [],
+            [CASTRUM_TYPES.WORKSHOP]: []
+        };
         this.civitas = {};
         this.primitives = {};
         this._primitives = {};
