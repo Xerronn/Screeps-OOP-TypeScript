@@ -192,9 +192,9 @@ export default class Chronicler {
      * @param room 
      * @param value 
      */
-    static writeGameStage(room: string, value: string) {
+    static writeGameStage(room: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].flags.gameStage = value;
+        Memory.rooms[room].flags.gameStage = String(value);
     }
 
     /**

@@ -64,6 +64,10 @@ export default class Architect {
         room = room;
     }
 
+    static buildRoom(room: string, buildRoads: boolean, gameStage: number) {
+        
+    }
+
     static buildExtensions(room: string, buildRoads:boolean) {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;

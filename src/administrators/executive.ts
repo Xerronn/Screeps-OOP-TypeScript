@@ -25,16 +25,16 @@ export default class Executive {
         if (Game.time % 30 === 0) {
             let calculation = Informant.calculateGameStage(this.room);
             let current = Chronicler.readGameStage(this.room);
-            if (calculation != "-1" && current < calculation) {
+            if (calculation !== -1 && current < calculation) {
                 Chronicler.writeGameStage(this.room, calculation);
                 this.execute(calculation);
             }
-            let buildRoads = parseInt(calculation) > 4.2;
-            Architect.buildExtensions(this.room, buildRoads);
+            let buildRoads = calculation > 4.2;
+            Architect.buildRoom(this.room, buildRoads, calculation)
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
-        let gameStage = parseFloat(Chronicler.readGameStage(this.room));
+        let gameStage = Chronicler.readGameStage(this.room);
         if (gameStage >= 4.1) {
             if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
                 let contractors = Chronicler.readNumContractors(this.room);
@@ -77,9 +77,9 @@ export default class Executive {
      * Function to do room planning whenever gamestage changes
      * @param {String} room string representation of a room
      */
-    execute(gameStage: string) {
+    execute(gameStage: number) {
         switch (gameStage) {
-            case "1":
+            case 1:
                 //calculate anchor and build spawn
                 // // Architect.buildBunker(room);
                 if (Game.rooms[this.room].find(FIND_MY_SPAWNS).length > 0) {
@@ -87,74 +87,74 @@ export default class Executive {
                     this.phaseOne();
                 }
                 break;
-            case "2":
+            case 2:
                 //turning rcl 2
                 // // Architect.buildBunker(room);
 
                 break;
-            case "3":
+            case 3:
                 //turning rcl 3
                 //build the first few extensions
                 // // Architect.buildBunker(room);
                 break;
-            case "3.1":
+            case 3.1:
                 //towers are built
                 //activate phaseOne at gamestage 3.1 if this isn't the first room
                 if (global.Imperator.dominion.length > 1) {
                     this.phaseOne();
                 }
                 break;
-            case "4":
+            case 4:
                 // Architect.buildSourceContainers(room);
                 //just turned rcl 4
                 // Architect.buildBunker(room);
                 break;
-            case "4.1":
+            case 4.1:
                 //storage is built, time to switch to phase two
                 this.phaseTwo();
                 break;
-            case "4.2":
+            case 4.2:
                 //storage has 100k energy, build bunker roads
                 // Architect.buildBunkerRoads(room);
                 break;
-            case "4.3":
+            case 4.3:
                 //bunker roads are done, build roads to sources
                 // Architect.buildUtilityRoads(room);
                 Chronicler.writeRoadsBuilt(this.room, true);
                 break;
-            case "5":
+            case 5:
                 //just turned rcl 5
                 //build upgrader link
                 // Architect.buildBunker(room);
                 // Architect.buildControllerLink(room);
                 break;
-            case "5.1":
+            case 5.1:
                 //links are built
                 this.spawnArbiter();
                 break;
-            case "6":
+            case 6:
                 //just turned rcl 6
                 //build lots of expensive stuff
                 // Architect.buildBunker(room);
                 break;
-            case "6.1":
+            case 6.1:
                 //build first source link
                 // Architect.buildSourceLinks(room);
                 break;
-            case "6.2":
+            case 6.2:
                 //build extractor and road to mineral
                 // Architect.buildExtractor(room);
                 break;
-            case "6.3":
+            case 6.3:
                 //start scouting for remotes
                 this.spawnExcavator();
                 this.spawnScout();
                 break;
-            case "6.4":
+            case 6.4:
                 //start reserving and build roads to remote exit
                 // Architect.prepareForRemote(room);
                 break;
-            case "6.5":
+            case 6.5:
                 //send remote builders
                 let remotes = Chronicler.readRemotes(this.room);
                 for (let r in remotes) {
@@ -164,18 +164,18 @@ export default class Executive {
                     }
                 }
                 break;
-            case "7":
+            case 7:
                 //just turned rcl 7
                 //build second source link and get rid of one professor
                 // Architect.buildBunker(room);
                 // Architect.buildSourceLinks(room);
                 this.downscale();
                 break;
-            case "7.1":
+            case 7.1:
                 //everything is done building and storage has > 100,000 energy
                 this.spawnChemist();
                 break;
-            case "8":
+            case 8:
                 //TODO: lots and lots
                 // Architect.buildBunker(room);
                 break;
