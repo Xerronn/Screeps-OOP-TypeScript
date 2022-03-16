@@ -79,9 +79,9 @@ interface RoomSchematic {
     paths: Position[][],
     main: StampPlacement,
     extensions: StampPlacement[],
-    tower: StampPlacement,
-    spawn: Position[],
-    lab: StampPlacement
+    towers: StampPlacement,
+    spawns: Position[],
+    labs: StampPlacement
 }
 
 interface Stamp extends Array<BuildableStructureConstant[]> {}
