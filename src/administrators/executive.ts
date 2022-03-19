@@ -30,7 +30,7 @@ export default class Executive {
                 this.execute(calculation);
             }
             let buildRoads = calculation > 4.2;
-            Architect.buildRoom(this.room, buildRoads, calculation)
+            Architect.buildRoom(this.room, buildRoads)
         }
 
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
@@ -89,8 +89,7 @@ export default class Executive {
                 break;
             case 2:
                 //turning rcl 2
-                // // Architect.buildBunker(room);
-
+                //Architect.buildRoom(room, true);
                 break;
             case 3:
                 //turning rcl 3
@@ -105,7 +104,7 @@ export default class Executive {
                 }
                 break;
             case 4:
-                // Architect.buildSourceContainers(room);
+                Architect.buildSourceContainers(this.room);
                 //just turned rcl 4
                 // Architect.buildBunker(room);
                 break;

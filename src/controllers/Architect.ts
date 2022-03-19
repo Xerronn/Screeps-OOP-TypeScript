@@ -64,9 +64,10 @@ export default class Architect {
         room = room;
     }
 
-    static buildRoom(room: string, buildRoads: boolean, gameStage: number) {
+    static buildRoom(room: string, buildRoads: boolean) {
         this.buildExtensions(room, buildRoads);
         this.buildBastions(room, buildRoads);
+        this.buildMain(room, buildRoads);
     }
 
     /**
@@ -125,6 +126,50 @@ export default class Architect {
                 pos.createConstructionSite(building);
                 if (numBastions <= 0) return;
             }
+        }
+    }
+
+    /**
+     * Method to build and repair main stamp
+     * @param room 
+     * @param buildRoads 
+     */
+    static buildMain(room: string, buildRoads: boolean) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let stamp = schema.main;
+        let rotated = rotateStamp(STAMP_MAIN, stamp.rotations);
+        let dimensions = rotated.length;
+        for (let x = 0; x < dimensions; x++) {
+            for (let y = 0; y < dimensions; y++) {
+                let building = rotated[x][y];
+                if (building === STRUCTURE_ROAD && !buildRoads) continue;
+                let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
+                pos.createConstructionSite(building);
+            }
+        }
+    }
+
+    /**
+     * Method to build source containers
+     * @param {String} room string representing the room
+     */
+    static buildSourceContainers(room: string): void {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let anchor = schema.main.anchor;
+        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room)
+        //build paths from the roomAchor to the sources then build containers at the final step in that path
+        let closest = []
+        for (let source of Game.rooms[room].find(FIND_SOURCES)) {
+            let pathToSource = roomAnchor.findPathTo(source.pos, {range: 1, ignoreCreeps: true})
+            let closestPosition = new RoomPosition(pathToSource[pathToSource.length - 1]["x"], pathToSource[pathToSource.length - 1]["y"], room);
+            closest.push(closestPosition);
+        }
+        for (let close of closest) {
+            close.createConstructionSite(STRUCTURE_CONTAINER);
         }
     }
 
