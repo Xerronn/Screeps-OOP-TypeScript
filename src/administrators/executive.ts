@@ -39,10 +39,6 @@ export default class Executive {
             if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
                 let contractors = Chronicler.readNumContractors(this.room);
 
-                if (contractors === undefined) {
-                    contractors = 0;
-                }
-
                 let numToSpawn = 2;
                 let spawnBody = [
                     WORK, WORK, WORK, WORK,
