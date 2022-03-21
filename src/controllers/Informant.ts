@@ -103,7 +103,7 @@ export default class Informant {
             //nothing special
             calculation = 4;
         }
-        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my) {
+        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 10000) {
             //storage is built, time to switch to phase 2
             calculation = 4.1;
         }
