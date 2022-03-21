@@ -103,7 +103,7 @@ export default class Informant {
             //nothing special
             calculation = 4;
         }
-        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 10000) {
+        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 10000 && numConstructionSites === 0) {
             //storage is built, time to switch to phase 2
             calculation = 4.1;
         }
@@ -111,7 +111,7 @@ export default class Informant {
             //storage is built, has 100,000 energy. time to build bunker roads
             calculation = 4.2;
         }
-        if (rcl == 4 && currentStage == 4.2 && numConstructionSites == 0) {
+        if (rcl == 4 && currentStage == 4.2 && numConstructionSites === 0) {
             //bunker roads are built, build roads to sources
             calculation = 4.3;
         }
@@ -119,7 +119,7 @@ export default class Informant {
             //links are available, time to build controller link and storage link
             calculation = 5;
         }
-        if (rcl == 5 && currentStage == 5 && numConstructionSites == 0) {
+        if (rcl == 5 && currentStage == 5 && numConstructionSites === 0) {
             //links are built, spawn arbiter
             calculation = 5.1;
         }
@@ -127,15 +127,15 @@ export default class Informant {
             //rcl 6 has lots of expensive stuff to build
             calculation = 6;
         }
-        if (rcl == 6 && currentStage == 6 && numConstructionSites == 0) {
+        if (rcl == 6 && currentStage == 6 && numConstructionSites === 0) {
             //lots of expensive stuff is done building, time to build one source link
             calculation = 6.1;
         }
-        if (rcl == 6 && currentStage == 6.1 && numConstructionSites == 0) {
+        if (rcl == 6 && currentStage == 6.1 && numConstructionSites === 0) {
             //build excavator and roads to it
             calculation = 6.2;
         }
-        if (rcl == 6 && currentStage == 6.2 && numConstructionSites == 0) {
+        if (rcl == 6 && currentStage == 6.2 && numConstructionSites === 0) {
             //time to start scouting and spawn the excavator
             calculation = 6.3;
         }
@@ -143,7 +143,7 @@ export default class Informant {
             //time to build road to the remote
             calculation = 6.4;
         }
-        if (rcl == 6 && currentStage == 6.4 && numConstructionSites == 0) {
+        if (rcl == 6 && currentStage == 6.4 && numConstructionSites === 0) {
             //time to build the insides of the remote and miners
             calculation = 6.5;
         }
@@ -151,7 +151,7 @@ export default class Informant {
             //build second source link
             calculation = 7;
         }
-        if (rcl == 7 && currentStage == 7 && numConstructionSites == 0
+        if (rcl == 7 && currentStage == 7 && numConstructionSites === 0
             && liveRoom.storage && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
                 //start chemical productions
                 calculation = 7.1;
