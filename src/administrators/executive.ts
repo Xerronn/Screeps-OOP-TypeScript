@@ -29,7 +29,7 @@ export default class Executive {
                 Chronicler.writeGameStage(this.room, calculation);
                 this.execute(calculation);
             }
-            let buildRoads = calculation > 4.2;
+            let buildRoads = current > 4.1;
             Architect.buildRoom(this.room, buildRoads)
         }
 
@@ -106,12 +106,11 @@ export default class Executive {
                 this.phaseTwo();
                 break;
             case 4.2:
-                //storage has 100k energy, build bunker roads
-                // Architect.buildBunkerRoads(room);
+                //storage has 100k energy, enable stamp roads building
                 break;
             case 4.3:
                 //bunker roads are done, build roads to sources
-                // Architect.buildUtilityRoads(room);
+                Architect.buildPaths(this.room);
                 Chronicler.writeRoadsBuilt(this.room, true);
                 break;
             case 5:
@@ -285,7 +284,7 @@ export default class Executive {
      * Method that spawns the two miners that will build the roads and containers in the remote
      * @param {String} targetRoom string representing the room they should move to first
      */
-     spawnCurator(targetRoom: string) {
+    spawnCurator(targetRoom: string) {
         this.getSupervisor().initiate({
             'body': [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.CURATOR,
@@ -298,7 +297,7 @@ export default class Executive {
      * Method to spawn 4 remote engineers to bootstrap a new room
      * @param {String} targetRoom String representing the room
      */
-     spawnDevelopers(targetRoom: string) {
+    spawnDevelopers(targetRoom: string) {
         for (let i = 0; i < 4; i++) {
             this.getSupervisor().initiate({
                 'body': [
@@ -364,7 +363,7 @@ export default class Executive {
     /**
      * Method that spawns a simple harass creep for an enemy's remote mine
      */
-     spawnJester(targetRoom: string) {
+    spawnJester(targetRoom: string) {
         this.getSupervisor().initiate({
             'body': [
                 ATTACK, MOVE, MOVE
@@ -378,7 +377,7 @@ export default class Executive {
      * Method that spawns defenders for remote rooms
      * @param {String} targetRoom string representing the room
      */
-     spawnGarrison(targetRoom: string) {
+    spawnGarrison(targetRoom: string) {
         this.getSupervisor().initiate({
             'body': [
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
