@@ -2,7 +2,7 @@
  * INTERFACES
  */
  interface Memory {
-    creeps: {[creepName: string]: CreepMemory}
+    creeps: {[creepName: string]: CreepMemory};
     gFlags: {[flagName: string]: string | boolean};
     rooms: {[roomName: string]: RoomMemory};
     directives: {
@@ -71,17 +71,24 @@ interface ResourceMemory {
 }
 
 interface Position {
-    x: number,
-    y: number
+    x: number;
+    y: number;
 }
 
 interface RoomSchematic {
-    paths: Position[][],
-    main: StampPlacement,
-    extensions: StampPlacement[],
-    towers: StampPlacement,
-    spawns: Position[],
-    labs: StampPlacement
+    paths: RoomPaths;
+    main: StampPlacement;
+    extensions: StampPlacement[];
+    towers: StampPlacement;
+    spawns: Position[];
+    labs: StampPlacement;
+}
+
+interface RoomPaths {
+    sources: {[id: Id<Source>]: Position[]};
+    controller: Position[];
+    exits: {[room: string]: Position[]};
+    mineral: Position[];
 }
 
 interface Stamp extends Array<BuildableStructureConstant[]> {}

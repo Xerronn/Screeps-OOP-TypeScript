@@ -160,9 +160,9 @@ export default class Architect {
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
         let anchor = schema.main.anchor;
-        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room)
+        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room);
         //build paths from the roomAchor to the sources then build containers at the final step in that path
-        let closest = []
+        let closest = [];
         for (let source of Game.rooms[room].find(FIND_SOURCES)) {
             let pathToSource = roomAnchor.findPathTo(source.pos, {range: 1, ignoreCreeps: true})
             let closestPosition = new RoomPosition(pathToSource[pathToSource.length - 1]["x"], pathToSource[pathToSource.length - 1]["y"], room);
@@ -170,6 +170,28 @@ export default class Architect {
         }
         for (let close of closest) {
             close.createConstructionSite(STRUCTURE_CONTAINER);
+        }
+    }
+
+    /**
+     * Method to build roads to sources and controller
+     * @param {String} room string representing the room
+     */
+     static buildPaths(room: string): void {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let liveRoom = Game.rooms[room];
+        let pathSchema = schema.paths;
+        let paths = [pathSchema.controller]
+        for (let source in pathSchema.sources) {
+            paths.push(pathSchema.sources[source as Id<Source>]);
+        }
+        //build all roads of all paths
+        for (let path of paths) {
+            for (let pos of path) {
+                liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+            }
         }
     }
 
@@ -194,8 +216,9 @@ export default class Architect {
         for (let p = 0; p < 7; p++) {
             let mainStamp = Architect.placeMain(centroid, distanceMatrix);
             try {
-                let paths = Architect.path(roomObj, controller, mainStamp.anchor);
-                let flatPaths = paths.reduce((a, b) => a.concat(b));
+                let bothPaths = Architect.path(roomObj, controller, mainStamp.anchor);
+                let paths = bothPaths[0];
+                let flatPaths = bothPaths[1];
                 let sources = roomObj.find(FIND_SOURCES);
                 let mineral = roomObj.find(FIND_MINERALS)[0];
                 // Create a cost matrix to hold the locations of things we don't want to build over
@@ -375,8 +398,14 @@ export default class Architect {
      * Function to path to important positions in the room to ensure that no key element is blocked off
      * @param mainStampLocation
      */
-    static path(roomObj: Room, controller: StructureController, mainStampLocation: Position): Position[][] {
-        let pathPositions = [];
+    static path(roomObj: Room, controller: StructureController, mainStampLocation: Position): [RoomPaths, Position[]] {
+        let pathPositions: RoomPaths = {
+            'sources': {},
+            'controller': [],
+            'exits': {},
+            'mineral': []
+        }
+        let flatPaths = []
         let mainRP = new RoomPosition(mainStampLocation.x, mainStampLocation.y, roomObj.name);
 
         let sources = roomObj.find(FIND_SOURCES);
@@ -386,7 +415,8 @@ export default class Architect {
             for (let p of sPath) {
                 sArray.push({'x': p.x, 'y': p.y});
             }
-            pathPositions.push(sArray);
+            flatPaths.push(...sArray);
+            pathPositions['sources'][s.id] = sArray;
         }
 
         let cPath = roomObj.findPath(mainRP, controller.pos, {'range': 1});
@@ -394,7 +424,8 @@ export default class Architect {
         for (let p of cPath) {
             cArray.push({'x': p.x, 'y': p.y});
         }
-        pathPositions.push(cArray);
+        flatPaths.push(...cArray);
+        pathPositions['controller'] = cArray;
 
         let exits = [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP]
 
@@ -407,7 +438,9 @@ export default class Architect {
             for (let p of ePath) {
                 eArray.push({'x': p.x, 'y': p.y});
             }
-            pathPositions.push(eArray);
+            pathPositions['exits'][exit] = eArray;
+            flatPaths.push(...eArray);
+
         }
 
         let mineralPos = roomObj.find(FIND_MINERALS);
@@ -416,9 +449,10 @@ export default class Architect {
         for (let p of mPath) {
             mArray.push({'x': p.x, 'y': p.y});
         }
-        pathPositions.push(mArray);
+        pathPositions['mineral'] = mArray;
+        flatPaths.push(...mArray);
 
-        return pathPositions;
+        return [pathPositions, flatPaths];
 
     }
 
