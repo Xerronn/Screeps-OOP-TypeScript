@@ -107,8 +107,8 @@ export default class Informant {
             //storage is built, time to switch to phase 2
             calculation = 4.1;
         }
-        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
-            //storage is built, has 100,000 energy. time to build bunker roads
+        if (rcl == 4 && liveRoom.storage && liveRoom.storage.my && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 25000) {
+            //storage is built, has 25,000 energy. time to build bunker roads
             calculation = 4.2;
         }
         if (rcl == 4 && currentStage == 4.2 && numConstructionSites === 0) {
