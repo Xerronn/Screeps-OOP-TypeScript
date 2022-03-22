@@ -221,7 +221,7 @@ export default class Informant {
         //if (this.matrixCache[roomName]) return this.matrixCache[roomName];
         let room = Game.rooms[roomName];
         let matrix = new PathFinder.CostMatrix();
-
+        if (room === undefined) return false;
         let impassibleStructures = [];
         for (let structure of room.find(FIND_STRUCTURES)) {
             if (structure instanceof StructureRampart) {
