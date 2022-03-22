@@ -263,6 +263,15 @@ export default class Architect {
                     }
                 }
                 let center = new RoomPosition(mainStamp.anchor.x + 1, mainStamp.anchor.y + 1, room);
+                
+                let towerStamp = Architect.placeTowers(center, costMatrix);
+                //add lab stamp onto cost matrix
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        costMatrix.set(towerStamp.anchor.x + i, towerStamp.anchor.y + j, 255);
+                    }
+                }
+
                 let extensionStamps = Architect.placeExtensions(center, costMatrix);
                 //add extensions onto cost matrix
                 for (let stamp of extensionStamps) {
@@ -278,14 +287,6 @@ export default class Architect {
                 for (let i = 0; i < 4; i++) {
                     for (let j = 0; j < 4; j++) {
                         costMatrix.set(labStamp.anchor.x + i, labStamp.anchor.y + j, 255);
-                    }
-                }
-
-                let towerStamp = Architect.placeTowers(center, costMatrix);
-                //add lab stamp onto cost matrix
-                for (let i = 0; i < 4; i++) {
-                    for (let j = 0; j < 4; j++) {
-                        costMatrix.set(towerStamp.anchor.x + i, towerStamp.anchor.y + j, 255);
                     }
                 }
 
