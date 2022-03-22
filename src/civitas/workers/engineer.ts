@@ -23,9 +23,11 @@ export default class Engineer extends Miner {
         } else if (this.memory.buildTarget !== undefined || Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
-        } else {
+        } else if (!Game.rooms[this.room].storage) {
             this.memory.task = "upgradeController";
             this.upgradeController();
+        } else {
+            this.depositStorage();
         }
 
         //evolve the creep to meet expanding energy availability

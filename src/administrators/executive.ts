@@ -85,12 +85,10 @@ export default class Executive {
                 break;
             case 2:
                 //turning rcl 2
-                //Architect.buildRoom(room, true);
                 break;
             case 3:
                 //turning rcl 3
                 //build the first few extensions
-                // // Architect.buildBunker(room);
                 break;
             case 3.1:
                 //towers are built
@@ -102,7 +100,6 @@ export default class Executive {
             case 4:
                 Architect.buildSourceContainers(this.room);
                 //just turned rcl 4
-                // Architect.buildBunker(room);
                 break;
             case 4.1:
                 //storage is built, time to switch to phase two
@@ -120,7 +117,6 @@ export default class Executive {
             case 5:
                 //just turned rcl 5
                 //build upgrader link
-                // Architect.buildBunker(room);
                 // Architect.buildControllerLink(room);
                 break;
             case 5.1:
@@ -130,7 +126,6 @@ export default class Executive {
             case 6:
                 //just turned rcl 6
                 //build lots of expensive stuff
-                // Architect.buildBunker(room);
                 break;
             case 6.1:
                 //build first source link
@@ -162,7 +157,6 @@ export default class Executive {
             case 7:
                 //just turned rcl 7
                 //build second source link and get rid of one professor
-                // Architect.buildBunker(room);
                 // Architect.buildSourceLinks(room);
                 this.downscale();
                 break;
@@ -172,7 +166,6 @@ export default class Executive {
                 break;
             case 8:
                 //TODO: lots and lots
-                // Architect.buildBunker(room);
                 break;
         }
     }

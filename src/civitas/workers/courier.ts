@@ -173,19 +173,6 @@ export default class Courier extends Worker {
     }
 
     /**
-     * Move to storage and deposit all stored energy
-     */
-    depositStorage(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
-        if (this.storage === undefined) return false;
-        if (this.pos.inRangeTo(this.storage, 1)) {
-            this.liveObj.transfer(this.storage, resourceType);
-        } else if (!this.pathing) {
-            this.liveObj.travelTo(this.storage);
-        }
-        return true;
-    }
-
-    /**
      * Method to deposit minerals to the terminal
      * @param {STRING} resourceType
      */

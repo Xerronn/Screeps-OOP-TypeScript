@@ -159,6 +159,20 @@ export default class Worker extends Civitas {
     }
 
     /**
+     * Move to storage and deposit all stored energy
+     */
+    depositStorage(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
+        let storage = Game.rooms[this.room].storage;
+        if (storage === undefined) return false;
+        if (this.pos.inRangeTo(storage, 1)) {
+            this.liveObj.transfer(storage, resourceType);
+        } else {
+            this.liveObj.travelTo(storage);
+        }
+        return true;
+    }
+
+    /**
      * Method to steal energy from leftover enemy storage and terminals
      * @returns If pillage does anything
      */
