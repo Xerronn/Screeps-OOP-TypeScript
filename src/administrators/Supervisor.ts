@@ -283,7 +283,7 @@ export default class Supervisor {
     }
 
     /**
-     * function to return the room's executive
+     * Getter to return the paired executive
      * @returns Executive
      */
     get executive(): Executive {
