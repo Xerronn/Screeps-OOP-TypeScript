@@ -114,7 +114,7 @@ export default class Scholar extends Worker {
         }
         //disable automatic move adding
         this.memory.offRoading = true;
-        if (this.storage.store.getUsedCapacity(RESOURCE_ENERGY) > this.storage.store.getCapacity(RESOURCE_ENERGY) / 3) {
+        if (this.storage.store.getUsedCapacity(RESOURCE_ENERGY) > this.storage.store.getCapacity(RESOURCE_ENERGY) / 4) {
             let currentBodyCost = Informant.calculateBodyCost(newBody);
             let totalEnergy = Game.rooms[this.room].energyCapacityAvailable - currentBodyCost;
             let targetWorks = 30;
