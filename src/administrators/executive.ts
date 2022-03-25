@@ -116,11 +116,11 @@ export default class Executive {
             case 5:
                 //just turned rcl 5
                 //build upgrader link
-                // Architect.buildControllerLink(room);
+                Architect.buildControllerLink(this.room);
                 break;
             case 5.1:
                 //links are built
-                this.spawnArbiter();
+                // this.spawnArbiter();
                 break;
             case 6:
                 //just turned rcl 6

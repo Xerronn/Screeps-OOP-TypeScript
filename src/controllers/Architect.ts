@@ -196,6 +196,24 @@ export default class Architect {
     }
 
     /**
+     * Method to build the controller link
+     * @param {String} room string representing the room
+     */
+     static buildControllerLink(room: string): void {
+        //get anchor
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let anchor = schema.main.anchor;
+        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room);
+
+        //build link
+        let pathToController = roomAnchor.findPathTo(controller.pos, {range: 2, ignoreCreeps: true})
+        let closestPosition = new RoomPosition(pathToController[pathToController.length - 1]["x"], pathToController[pathToController.length - 1]["y"], room);
+        closestPosition.createConstructionSite(STRUCTURE_LINK);
+    }
+
+    /**
      * One time room setup
      */
     static plan(room: string): RoomSchematic {
