@@ -1,6 +1,7 @@
 import Conduit from 'castrum/Conduit';
 import { WorkerMemory } from './Worker';
 import Host from './Host';
+import Chronicler from 'controllers/Chronicler';
 
 interface ArbiterMemory extends WorkerMemory {
     linkId?: Id<StructureLink>,
@@ -10,6 +11,7 @@ interface ArbiterMemory extends WorkerMemory {
 export default class Arbiter extends Host {
     memory: ArbiterMemory;
 
+    station: Position;
     conduit?: Conduit;
     link?: StructureLink;
     storage?: StructureStorage;
@@ -18,6 +20,8 @@ export default class Arbiter extends Host {
     constructor(arbiter: Creep) {
         super(arbiter);
 
+        let mainAnchor = Chronicler.readSchema(this.room).main.anchor;
+        this.station = {x: mainAnchor.x + 1, y: mainAnchor.y + 1};
         this.conduit = this.supervisor.controllerLink;
         this.storage = Game.rooms[this.room].storage;
         this.terminal = Game.rooms[this.room].terminal;
@@ -40,17 +44,19 @@ export default class Arbiter extends Host {
     }
 
     run(): boolean {
-        if (this.ticksToLive < 300 || this.memory.task == "renew" || this.memory.task == "renewFill") {
-            //start the loop by setting task to renewFill
-            //this task will block spawning, but keep filling
-            //until reaching the required energy for a full renew
-            if (this.memory.task != "renew") {
-                this.memory.task = "renewFill";
-            }
-            //renew with usePrime
-            this.renew(true);
-            return true;
-        }
+        // if (this.ticksToLive < 300 || this.memory.task == "renew" || this.memory.task == "renewFill") {
+        //     //start the loop by setting task to renewFill
+        //     //this task will block spawning, but keep filling
+        //     //until reaching the required energy for a full renew
+        //     if (this.memory.task != "renew") {
+        //         this.memory.task = "renewFill";
+        //     }
+        //     //renew with usePrime
+        //     this.renew(true);
+        //     return true;
+        // }
+
+        if (!this.position()) return true;
 
         // /**
         //  * Empty stores of minerals before dealing with minerals
@@ -142,6 +148,19 @@ export default class Arbiter extends Host {
         //     }
         // }
         return false;
+    }
+
+    /**
+     * Move arbiter to its position in the main stamp
+     */
+    position(): boolean {
+        if (this.pos.x !== this.station.x || this.pos.y !== this.station.y) {
+            let position = new RoomPosition(this.station.x, this.station.y, this.room);
+            this.liveObj.travelTo(position);
+            return false
+        }
+
+        return true
     }
 
     /**
