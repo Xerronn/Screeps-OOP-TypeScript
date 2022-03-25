@@ -159,17 +159,13 @@ export default class Architect {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
-        let anchor = schema.main.anchor;
-        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room);
-        //build paths from the roomAchor to the sources then build containers at the final step in that path
-        let closest = [];
-        for (let source of Game.rooms[room].find(FIND_SOURCES)) {
-            let pathToSource = roomAnchor.findPathTo(source.pos, {range: 1, ignoreCreeps: true})
-            let closestPosition = new RoomPosition(pathToSource[pathToSource.length - 1]["x"], pathToSource[pathToSource.length - 1]["y"], room);
-            closest.push(closestPosition);
-        }
-        for (let close of closest) {
-            close.createConstructionSite(STRUCTURE_CONTAINER);
+        let sourcePaths = schema.paths.sources;
+
+        for (let source in sourcePaths) {
+            let path = sourcePaths[source as Id<Source>];
+            let lastPos = path[path.length - 1];
+            let lastRoomPos = new RoomPosition(lastPos.x, lastPos.y, room);
+            lastRoomPos.createConstructionSite(STRUCTURE_CONTAINER);
         }
     }
 
