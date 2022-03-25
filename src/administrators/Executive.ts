@@ -120,7 +120,7 @@ export default class Executive {
                 break;
             case 5.1:
                 //links are built
-                // this.spawnArbiter();
+                this.spawnArbiter();
                 break;
             case 6:
                 //just turned rcl 6
