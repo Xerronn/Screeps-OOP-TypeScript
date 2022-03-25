@@ -1,5 +1,5 @@
 import Chronicler from "./controllers/Chronicler";
-import Imperator from './controllers/Imperator';
+import Imperator from './Imperator';
 import Director from "./controllers/Director";
 import Traveler from "./thirdParty/traveler"; Traveler;
 declare global {
