@@ -149,6 +149,22 @@ export default class Architect {
                 pos.createConstructionSite(building);
             }
         }
+
+        //build roads surrounding the main stamp
+        let nearY = stamp.anchor.y - 1;
+        let nearX = stamp.anchor.x - 1;
+        let farX = stamp.anchor.x + 3;
+        let farY = stamp.anchor.y + 3;
+        for (let x = -1; x < 4; x++) {
+            for (let y = -1; y < 4; y++) {
+                let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
+                console.log(pos.y)
+                console.log(farY)
+                if (pos.x === nearX || pos.x === farX || pos.y === nearY || pos.y === farY) {
+                    pos.createConstructionSite(STRUCTURE_ROAD);
+                }
+            }
+        }
     }
 
     /**
