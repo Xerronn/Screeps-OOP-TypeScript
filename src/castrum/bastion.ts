@@ -15,6 +15,7 @@ export default class Bastion extends Castrum {
         this.store = this.liveObj.store;
 
         this.repairTargets = [];
+        this.findRepairTargets();
     }
 
     update(): boolean {
@@ -33,7 +34,7 @@ export default class Bastion extends Castrum {
             Chronicler.writeBastionsFilled(this.room, false);
         }
         // find new repair targets every 100 ticks
-        if (Game.time % 100) {
+        if (Game.time % 100 === 0) {
             this.findRepairTargets();
         }
         if (!this.simpleAttack()) {     //todo: better attack implementation
