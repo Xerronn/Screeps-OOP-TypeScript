@@ -204,13 +204,10 @@ export default class Architect {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
-        let anchor = schema.main.anchor;
-        let roomAnchor = new RoomPosition(anchor.x, anchor.y, room);
-
-        //build link
-        let pathToController = roomAnchor.findPathTo(controller.pos, {range: 2, ignoreCreeps: true})
-        let closestPosition = new RoomPosition(pathToController[pathToController.length - 1]["x"], pathToController[pathToController.length - 1]["y"], room);
-        closestPosition.createConstructionSite(STRUCTURE_LINK);
+        let path = schema.paths.controller;
+        let lastPos = path[path.length - 1];
+        let linkRoomPos = new RoomPosition(lastPos.x, lastPos.y, room);
+        linkRoomPos.createConstructionSite(STRUCTURE_LINK);
     }
 
     /**
