@@ -1,36 +1,36 @@
 //administrator imports
-import Informant from 'controllers/Informant';
-import Director from 'controllers/Director';
-import Executive from './Executive';
+import Informant from 'controllers/Informant';          Informant;
+import Director from 'controllers/Director';            Director;
+import Executive from './Executive';                    Executive;
 
 //worker imports
-import Civitas from 'civitas/Civitas';
-import Miner from 'civitas/workers/Miner';
-import Engineer from 'civitas/workers/Engineer';
-import Courier from 'civitas/workers/Courier';
-import Scholar from 'civitas/workers/Scholar';
-import Host from 'civitas/workers/Host';
-import Contractor from 'civitas/workers/Contractor';
-import Arbiter from 'civitas/workers/Arbiter';
-import Excavator from 'civitas/workers/excavator';
-import Scout from 'civitas/workers/scout';
-import Chemist from 'civitas/workers/Chemist';
-import Curator from 'civitas/workers/Curator';
-import Emissary from 'civitas/workers/Emissary';
+import Civitas from 'civitas/Civitas';                  Civitas;
+import Miner from 'civitas/workers/Miner';              Miner;
+import Engineer from 'civitas/workers/Engineer';        Engineer;
+import Courier from 'civitas/workers/Courier';          Courier;
+import Scholar from 'civitas/workers/Scholar';          Scholar;
+import Host from 'civitas/workers/Host';                Host;
+import Contractor from 'civitas/workers/Contractor';    Contractor;
+import Arbiter from 'civitas/workers/Arbiter';          Arbiter;
+import Excavator from 'civitas/workers/excavator';      Excavator;
+import Scout from 'civitas/workers/scout';              Scout;
+import Chemist from 'civitas/workers/Chemist';          Chemist;
+import Curator from 'civitas/workers/Curator';          Curator;
+import Emissary from 'civitas/workers/Emissary';        Emissary;
 
 //legion imports
-import Executioner from 'civitas/Legion/Executioner';
-import Garrison from 'civitas/Legion/Garrison';
-import Jester from 'civitas/Legion/Jester';
+import Executioner from 'civitas/Legion/Executioner';   Executioner;
+import Garrison from 'civitas/Legion/Garrison';         Garrison;
+import Jester from 'civitas/Legion/Jester';             Jester;
 
 
 //structure imports
-import Castrum from 'castrum/Castrum';
-import Conduit from 'castrum/Conduit';
-import Workshop from 'castrum/Workshop';
-import Nexus from 'castrum/Nexus';
-import Bastion from 'castrum/Bastion';
-import Market from 'castrum/Market';
+import Castrum from 'castrum/Castrum';                  Castrum;
+import Conduit from 'castrum/Conduit';                  Conduit;
+import Workshop from 'castrum/Workshop';                Workshop;
+import Nexus from 'castrum/Nexus';                      Nexus;
+import Bastion from 'castrum/Bastion';                  Bastion;
+import Market from 'castrum/Market';                    Market;
 
 export default class Supervisor {
     room: string;
