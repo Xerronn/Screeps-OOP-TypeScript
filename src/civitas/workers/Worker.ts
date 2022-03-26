@@ -9,20 +9,15 @@ export interface WorkerMemory extends CreepMemory {
 export default class Worker extends Civitas {
     memory: WorkerMemory;
 
-    extensionsFilled: boolean;      //if the extensions are filled
     noPillage: boolean;             //if there is nothing to pillage
     constructor(creep: Creep) {
         super(creep);
-
-        this.extensionsFilled = false;
     }
 
     update(): boolean {
         if (!super.update()) {
             return false;
         }
-
-        this.extensionsFilled = Game.rooms[this.room].energyCapacityAvailable === Game.rooms[this.room].energyAvailable;
 
         return true;
     }
@@ -36,7 +31,8 @@ export default class Worker extends Civitas {
      */
     upgradeController(): boolean {
         let controller = Game.rooms[this.room].controller;
-        if (controller === undefined) return false;
+        if (controller === undefined) throw Error('Room has no controller');
+        
         if (this.pos.inRangeTo(controller, 3)) {
             this.liveObj.upgradeController(controller);
         } else {
@@ -49,7 +45,7 @@ export default class Worker extends Civitas {
      * build construction sites closest to current position
      */
     build(): boolean {
-        let liveSite;
+        let liveSite: ConstructionSite | undefined;
         if (this.memory.buildTarget !== undefined) {
             let tmpObj = Game.getObjectById(this.memory.buildTarget);
             if (tmpObj !== null) {
@@ -62,19 +58,15 @@ export default class Worker extends Civitas {
         }
         if (liveSite === undefined) {
             let sites = Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES);
-
-            liveSite = this.pos.findClosestByRange(sites);
-
-        }
-        if (liveSite !== null) {
+            liveSite = this.pos.findClosestByRange(sites) || undefined;
+            if (liveSite === undefined) return false;
             this.memory.buildTarget = liveSite.id;
-        } else return false;
+        }
 
         if (this.pos.inRangeTo(liveSite, 3)) {
             this.liveObj.build(liveSite);
-        } else {
-            this.liveObj.travelTo(liveSite);
-        }
+        } else this.liveObj.travelTo(liveSite);
+
         return true;
     }
 
@@ -88,9 +80,8 @@ export default class Worker extends Civitas {
 
         if (this.pos.inRangeTo(storage, 1)) {
             this.liveObj.withdraw(storage, RESOURCE_ENERGY);
-        } else {
-            this.liveObj.travelTo(storage);
-        }
+        } else this.liveObj.travelTo(storage);
+
         return true;
     }
 
@@ -98,30 +89,29 @@ export default class Worker extends Civitas {
      * Function to fill spawn and extensions
      */
     fillExtensions(): boolean {
-        let liveObj;
+        let liveObj: StructureSpawn | StructureExtension | undefined;
         if (this.memory.fillTarget !== undefined) {
-            let tmpObj = Game.getObjectById(this.memory.fillTarget);
-            if (tmpObj !== null && (tmpObj.structureType === STRUCTURE_EXTENSION || tmpObj.structureType === STRUCTURE_SPAWN)) liveObj = tmpObj;
+            let tmpObj = Game.getObjectById(this.memory.fillTarget) || undefined;
+            if (tmpObj !== undefined && (tmpObj.structureType === STRUCTURE_EXTENSION || tmpObj.structureType === STRUCTURE_SPAWN)) liveObj = tmpObj;
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
             let ext = this.supervisor.extensions;
-            let spawns = this.supervisor.castrum.nexus.map(s => s.liveObj as StructureSpawn);
+            let spawns = this.supervisor.castrum.nexus.map(s => s.liveObj);
 
             let fillables = spawns.concat(ext as any[]).filter(
                 obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
 
-            liveObj = this.pos.findClosestByRange(fillables);
-            if (liveObj === null) return false;
+            liveObj = this.pos.findClosestByRange(fillables) || undefined;
+            if (liveObj === undefined) return false;
             this.memory.fillTarget = liveObj.id;
         }
 
         if (this.pos.inRangeTo(liveObj, 1)) {
             this.liveObj.transfer(liveObj, RESOURCE_ENERGY);
-        } else {
-            this.liveObj.travelTo(liveObj);
-        }
+        } else this.liveObj.travelTo(liveObj);
+
         return true;
     }
 
@@ -129,21 +119,21 @@ export default class Worker extends Civitas {
      * Function to fill spawn and extensions
      */
     fillTowers(): boolean {
-        let liveObj;
+        let liveObj: StructureTower | undefined;
         if (this.memory.fillTarget !== undefined) {
-            let tmpObj = Game.getObjectById(this.memory.fillTarget);
-            if (tmpObj !== null && tmpObj.structureType === STRUCTURE_TOWER) liveObj = tmpObj;
+            let tmpObj = Game.getObjectById(this.memory.fillTarget) || undefined;
+            if (tmpObj !== undefined && tmpObj.structureType === STRUCTURE_TOWER) liveObj = tmpObj;
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj as StructureTower);
+            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj);
 
             let fillables = bastions.filter(
                 obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             );
 
-            liveObj = this.pos.findClosestByRange(fillables);
-            if (liveObj === null) {
+            liveObj = this.pos.findClosestByRange(fillables) || undefined;
+            if (liveObj === undefined) {
                 Chronicler.writeBastionsFilled(this.room, true);
                 return false;
             };
@@ -166,9 +156,8 @@ export default class Worker extends Civitas {
         if (storage === undefined) return false;
         if (this.pos.inRangeTo(storage, 1)) {
             this.liveObj.transfer(storage, resourceType);
-        } else {
-            this.liveObj.travelTo(storage);
-        }
+        } else this.liveObj.travelTo(storage);
+
         return true;
     }
 
@@ -177,7 +166,7 @@ export default class Worker extends Civitas {
      * @returns If pillage does anything
      */
     pillage(): boolean {
-        let liveObj;
+        let liveObj: StructureStorage | StructureTerminal | Ruin | undefined;
         if (this.memory.pillageTarget !== undefined) {
             let tmpObj = Game.getObjectById(this.memory.pillageTarget);
             if (tmpObj !== null && tmpObj.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
@@ -211,9 +200,8 @@ export default class Worker extends Civitas {
 
         if (this.pos.inRangeTo(liveObj, 1)) {
             this.liveObj.withdraw(liveObj, RESOURCE_ENERGY);
-        } else {
-            this.liveObj.travelTo(liveObj);
-        }
+        } else this.liveObj.travelTo(liveObj);
+        
         return true;
     }
 }
