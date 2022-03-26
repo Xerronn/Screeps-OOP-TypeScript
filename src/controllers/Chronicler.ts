@@ -177,6 +177,10 @@ export default class Chronicler {
         Memory.rooms[room].flags.doneScouting = value;
     }
 
+    static readExtensionsFilled(room: string): boolean {
+        return Game.rooms[room].energyCapacityAvailable === Game.rooms[room].energyAvailable;
+    }
+
     /**
      * Get gameStage flag for a given room
      * @param {String} room string representing the room

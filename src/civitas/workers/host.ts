@@ -34,7 +34,7 @@ export default class Host extends Worker {
         } else if (Chronicler.readBastionsFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
-        } else if (this.extensionsFilled === false) {
+        } else if (Chronicler.readExtensionsFilled(this.room) === false) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
         } else { //move to idle spot
