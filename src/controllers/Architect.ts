@@ -119,6 +119,9 @@ export default class Architect {
             for (let y = 0; y < dimensions; y++) {
                 let building = rotated[x][y];
                 if (building === STRUCTURE_ROAD && !buildRoads) continue;
+                if (building === STRUCTURE_LINK && Chronicler.readGameStage(room) >= 8) {
+
+                }
                 if (building === STRUCTURE_TOWER) {
                     numBastions--;
                 }
