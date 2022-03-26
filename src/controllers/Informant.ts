@@ -21,6 +21,9 @@ export default class Informant {
             let supervisor = global.Imperator.administrators[room.name].supervisor;
             let castrumType = Informant.mapGameToClass(liveObj.structureType);
             if (castrumType === undefined) return undefined;
+            if (castrumType === CASTRUM_TYPES.CONTAINER || castrumType === CASTRUM_TYPES.EXTENSION || castrumType === CASTRUM_TYPES.ROAD || castrumType === CASTRUM_TYPES.UNDEFINED) {
+                throw Error('Primitive types do not have wrappers')
+            }
             let structures = supervisor.castrum[castrumType];
             for (let struc of structures) {
                 if (struc.id == id) {
@@ -30,8 +33,9 @@ export default class Informant {
             return undefined;
         } else {
             //is a creep
-            let supervisor = global.Imperator.administrators[liveObj.memory.spawnRoom].supervisor;
-            let creeps = supervisor.civitas[liveObj.memory.type]
+            let creep = liveObj as Creep;
+            let supervisor = global.Imperator.administrators[creep.memory.spawnRoom].supervisor;
+            let creeps = supervisor.civitas[creep.memory.type]
             for (let creep of creeps) {
                 if (creep.id === id) {
                     return creep;
@@ -282,6 +286,7 @@ declare global {
         COURIER = 'courier',
         CURATOR = 'curator',
         EMISSARY = 'emissary',
+        ENGINEER = 'engineer',
         EXCAVATOR = 'excavator',
         HOST = 'host',
         MINER = 'miner',
@@ -291,7 +296,7 @@ declare global {
 
     type CivitasType =
         'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
-        'emissary' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
+        'emissary' | 'engineer' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
 
     const enum LEGION_TYPES {
         EXECUTIONER = 'executioner',

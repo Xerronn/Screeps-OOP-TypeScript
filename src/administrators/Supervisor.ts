@@ -1,36 +1,75 @@
 //administrator imports
-import Informant from '../controllers/Informant';
-import Director from '../controllers/Director';
+import Informant from 'controllers/Informant';
+import Director from 'controllers/Director';
 import Executive from './Executive';
 
-//creep imports
-import Civitas from '../civitas/Civitas';                   Civitas;        //needed or rollup removes the unused imports
-import Miner from '../civitas/workers/Miner';               Miner;
-import Engineer from '../civitas/workers/Engineer';         Engineer;
-import Courier from '../civitas/workers/Courier';           Courier;
-import Scholar from '../civitas/workers/Scholar';           Scholar;
-import Host from '../civitas/workers/Host';                 Host;
-import Contractor from '../civitas/workers/Contractor';     Contractor;
-import Arbiter from '../civitas/workers/Arbiter';           Arbiter;
+//worker imports
+import Civitas from 'civitas/Civitas';
+import Miner from 'civitas/workers/Miner';
+import Engineer from 'civitas/workers/Engineer';
+import Courier from 'civitas/workers/Courier';
+import Scholar from 'civitas/workers/Scholar';
+import Host from 'civitas/workers/Host';
+import Contractor from 'civitas/workers/Contractor';
+import Arbiter from 'civitas/workers/Arbiter';
+import Excavator from 'civitas/workers/excavator';
+import Scout from 'civitas/workers/scout';
+import Chemist from 'civitas/workers/Chemist';
+import Curator from 'civitas/workers/Curator';
+import Emissary from 'civitas/workers/Emissary';
+
+//legion imports
+import Executioner from 'civitas/Legion/Executioner';
+import Garrison from 'civitas/Legion/Garrison';
+import Jester from 'civitas/Legion/Jester';
+
 
 //structure imports
-import Castrum from '../castrum/Castrum';                   Castrum;
-import Conduit from '../castrum/Conduit';                   Conduit;
-import Workshop from '../castrum/Workshop';                 Workshop;
-import Nexus from '../castrum/Nexus';                       Nexus;
-import Bastion from '../castrum/Bastion';                   Bastion;
-import Market from '../castrum/Market';                     Market;
+import Castrum from 'castrum/Castrum';
+import Conduit from 'castrum/Conduit';
+import Workshop from 'castrum/Workshop';
+import Nexus from 'castrum/Nexus';
+import Bastion from 'castrum/Bastion';
+import Market from 'castrum/Market';
 
 export default class Supervisor {
     room: string;
-    civitas: {[civitasType: string]: Array<Civitas>};       //todo: get proper typing on the keys, not sure how atm
-    castrum: {[castrumType: string]: Array<Castrum>};
+    civitas: {
+        [CIVITAS_TYPES.ARBITER]: Arbiter[],
+        [CIVITAS_TYPES.CHEMIST]: Chemist[],
+        [CIVITAS_TYPES.CONTRACTOR]: Contractor[],
+        [CIVITAS_TYPES.COURIER]: Courier[],
+        [CIVITAS_TYPES.CURATOR]: Curator[],
+        [CIVITAS_TYPES.EMISSARY]: Emissary[],
+        [CIVITAS_TYPES.ENGINEER]: Engineer[],
+        [CIVITAS_TYPES.EXCAVATOR]: Excavator[],
+        [CIVITAS_TYPES.HOST]: Host[],
+        [CIVITAS_TYPES.MINER]: Miner[],
+        [CIVITAS_TYPES.SCHOLAR]: Scholar[],
+        [CIVITAS_TYPES.SCOUT]: Scout[],
+        
+        [LEGION_TYPES.EXECUTIONER]: Executioner[],
+        [LEGION_TYPES.GARRISON]: Garrison[],
+        [LEGION_TYPES.JESTER]: Jester[]
+
+    };
+    castrum: {
+        [CASTRUM_TYPES.BASTION]: Bastion[],
+        [CASTRUM_TYPES.CONDUIT]: Conduit[],
+        [CASTRUM_TYPES.MARKET]: Market[],
+        [CASTRUM_TYPES.NEXUS]: Nexus[],
+        [CASTRUM_TYPES.WORKSHOP]: Workshop[],
+    };
     primitives: {                                           //castrum that I don't need full logic wrappers for
-        [castrumType: string]: Id<any>[]
+        [CASTRUM_TYPES.CONTAINER]: Id<StructureContainer>[],
+        [CASTRUM_TYPES.EXTENSION]: Id<StructureExtension>[],
+        [CASTRUM_TYPES.ROAD]: Id<StructureRoad>[]
     };
-    _primitives: {                                          //cached version of primitives for each tick
-        [castrumType: string]: Structure[]
-    };
+    _primitives: {                                          //the current tick live game objects
+        [CASTRUM_TYPES.CONTAINER]: StructureContainer[],
+        [CASTRUM_TYPES.EXTENSION]: StructureExtension[],
+        [CASTRUM_TYPES.ROAD]: StructureRoad[]
+    }
 
     nexusReservation: number;
     workshopReservation: number;
@@ -43,16 +82,10 @@ export default class Supervisor {
     constructor(room: string) {
         this.room = room;
 
-        this.castrum = {
-            [CASTRUM_TYPES.BASTION]: [],
-            [CASTRUM_TYPES.CONDUIT]: [],
-            [CASTRUM_TYPES.MARKET]: [],
-            [CASTRUM_TYPES.NEXUS]: [],
-            [CASTRUM_TYPES.WORKSHOP]: []
-        };
-        this.civitas = {};
-        this.primitives = {};
-        this._primitives = {};
+        this.castrum = this.emptyCastrum;
+        this.civitas = this.emptyCivitas;
+        this.primitives = this.emptyPrimitives;
+        this._primitives = this.emptyPrimitives;
 
         this.nexusReservation = 0;
         this.workshopReservation = 0;
@@ -66,27 +99,27 @@ export default class Supervisor {
      */
     wrap(onlyStructures = false): void {
         let thisRoom = Game.rooms[this.room];
-        //initialize all structures in the room to their respective classes
+        //initialize all structures in the room with their respective wrappers
+        this.castrum = this.emptyCastrum;
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (!['undefined', 'container', 'extension', 'road'].includes(castrumType)) {
+            if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.EXTENSION && castrumType !== CASTRUM_TYPES.ROAD) {
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
-            } else if (['container', 'extension', 'road'].includes(castrumType)) {
+            } else if (castrumType !== CASTRUM_TYPES.UNDEFINED) {
                 //cache for basic structures like roads and containers
-                if (!this.primitives[castrumType]) this.primitives[castrumType] = [];
-                this.primitives[castrumType].push(structure.id);
+                this.primitives[castrumType].push(structure.id as any);
             }
         }
 
         if (onlyStructures) return;
 
+        this.civitas = this.emptyCivitas;
+
         //initialize all creeps in the room to their respective classes
-        this.civitas = {};
         for (let creepMem of _.filter(Memory.creeps, c => c.spawnRoom == this.room)) {
             if (Game.creeps[creepMem.name]) {
-                if (!this.civitas[creepMem.type]) this.civitas[creepMem.type] = [];
                 let createObjStr = "this.civitas[\"" + creepMem.type + "\"].push(new " + creepMem.type.charAt(0).toUpperCase() +
                     creepMem.type.slice(1) + "(Game.creeps[\"" + creepMem.name + "\"]));";
 
@@ -112,10 +145,12 @@ export default class Supervisor {
      */
     run() {
         //first delete last tick's cache of primitives
-        this._primitives = {};
+        this._primitives = this.emptyPrimitives;
         try {
             //first all creeps
-            for (var type in this.civitas) {
+            let civitas = this.civitas;
+            let type: keyof typeof civitas
+            for (type in this.civitas) {
                 for (var civ of this.civitas[type]) {
                     if (civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
@@ -130,10 +165,12 @@ export default class Supervisor {
             }
 
             //then all structures
-            for (var type of Object.keys(this.castrum)) {
-                for (var struc of this.castrum[type]) {
+            let castrum = this.castrum;
+            let cType: keyof typeof castrum;
+            for (cType in castrum) {
+                for (let struc of this.castrum[cType]) {
                     //block workshops from running when they are reserved
-                    if (type !== "workshop" || this.workshopReservation < Game.time) {
+                    if (cType !== CASTRUM_TYPES.WORKSHOP || this.workshopReservation < Game.time) {
                         struc.run();
                     }
                 }
@@ -151,15 +188,19 @@ export default class Supervisor {
      * Method that refreshes the live references every tick
      */
     refresh() {
-        for (let type in this.civitas) {
+        let civitas = this.civitas;
+        let type: keyof typeof civitas
+        for (type in this.civitas) {
             for (let civ of this.civitas[type]) {
                 civ.update();
             }
         }
 
         //refresh the live game object reference for every structure
-        for (let type in this.castrum) {
-            for (let struc of this.castrum[type]) {
+        let castrum = this.castrum;
+        let cType: keyof typeof castrum;
+        for (cType in this.castrum) {
+            for (let struc of castrum[cType]) {
                 struc.update();
             }
         }
@@ -233,9 +274,6 @@ export default class Supervisor {
      */
     wrapCreep(creepName: string): boolean {
         let creep = Game.creeps[creepName];
-        if (!this.civitas[creep.memory.type]) {
-            this.civitas[creep.memory.type] = [];
-        }
         //check if the creep has already been wrapped
         if (!Informant.getWrapper(creep.id)) {
             let createObjStr = "this.civitas[\"" + creep.memory.type + "\"].push(new " + creep.memory.type.charAt(0).toUpperCase() +
@@ -253,18 +291,22 @@ export default class Supervisor {
      */
     dismiss(civitasType: Civitas): void {
         let origArr = this.civitas[civitasType.type];
-        let index = origArr.indexOf(civitasType);
+        let index = origArr.indexOf(civitasType as any);
         if (index >= 0) origArr.splice(index, 1);
         delete Memory.creeps[civitasType.memory.name];
     }
 
     /**
-     * Delete the class holding the dead tower
+     * Delete the wrapper for a destroyed building
      * @param {Castrum} castrumType
      */
     decommission(castrumType: Castrum): void {
-        let origArr = this.castrum[castrumType.type];
-        let index = origArr.indexOf(castrumType);
+        let type = castrumType.type;
+        if (type === CASTRUM_TYPES.CONTAINER || type === CASTRUM_TYPES.EXTENSION || type === CASTRUM_TYPES.ROAD || type === CASTRUM_TYPES.UNDEFINED) {
+            throw Error('Primitive types cannot be decommissioned')
+        }
+        let origArr = this.castrum[type];
+        let index = origArr.indexOf(castrumType as any);
         if (index >= 0) origArr.splice(index, 1);
     }
 
@@ -282,6 +324,45 @@ export default class Supervisor {
         this.workshopReservation = Game.time + numTicks;
     }
 
+    get emptyCivitas() {
+        return {
+            [CIVITAS_TYPES.ARBITER]: [],
+            [CIVITAS_TYPES.CHEMIST]: [],
+            [CIVITAS_TYPES.CONTRACTOR]: [],
+            [CIVITAS_TYPES.COURIER]: [],
+            [CIVITAS_TYPES.CURATOR]: [],
+            [CIVITAS_TYPES.EMISSARY]: [],
+            [CIVITAS_TYPES.ENGINEER]: [],
+            [CIVITAS_TYPES.EXCAVATOR]: [],
+            [CIVITAS_TYPES.HOST]: [],
+            [CIVITAS_TYPES.MINER]: [],
+            [CIVITAS_TYPES.SCHOLAR]: [],
+            [CIVITAS_TYPES.SCOUT]: [],
+
+            [LEGION_TYPES.EXECUTIONER]: [],
+            [LEGION_TYPES.GARRISON]: [],
+            [LEGION_TYPES.JESTER]: []
+        }   
+    }
+
+    get emptyCastrum() {
+        return {
+            [CASTRUM_TYPES.BASTION]: [],
+            [CASTRUM_TYPES.CONDUIT]: [],
+            [CASTRUM_TYPES.MARKET]: [],
+            [CASTRUM_TYPES.NEXUS]: [],
+            [CASTRUM_TYPES.WORKSHOP]: [],
+        }
+    }
+
+    get emptyPrimitives() {
+        return {
+            [CASTRUM_TYPES.CONTAINER]: [],
+            [CASTRUM_TYPES.EXTENSION]: [],
+            [CASTRUM_TYPES.ROAD]: []
+        }
+    }
+
     /**
      * Getter to return the paired executive
      * @returns Executive
@@ -292,24 +373,36 @@ export default class Supervisor {
 
     get containers(): StructureContainer[] {
         if (this._primitives[CASTRUM_TYPES.CONTAINER] === undefined) {
-            if (!this.primitives[CASTRUM_TYPES.CONTAINER]) this.primitives[CASTRUM_TYPES.CONTAINER] = [];
-            this._primitives[CASTRUM_TYPES.CONTAINER] = this.primitives[CASTRUM_TYPES.CONTAINER].map((s) => Game.getObjectById(s));
+            let containers: StructureContainer[] = [];
+            this.primitives[CASTRUM_TYPES.CONTAINER].forEach(function(s) {
+                let liveObj = Game.getObjectById(s) || undefined;
+                if (liveObj !== undefined) containers.push(liveObj);
+            })
+            this._primitives[CASTRUM_TYPES.CONTAINER] = containers;
         }
         return this._primitives[CASTRUM_TYPES.CONTAINER] as StructureContainer[];
     }
 
     get extensions(): StructureExtension[] {
         if (this._primitives[CASTRUM_TYPES.EXTENSION] === undefined) {
-            if (!this.primitives[CASTRUM_TYPES.EXTENSION]) this.primitives[CASTRUM_TYPES.EXTENSION] = [];
-            this._primitives[CASTRUM_TYPES.EXTENSION] = this.primitives[CASTRUM_TYPES.EXTENSION].map((s) => Game.getObjectById(s));
+            let extensions: StructureExtension[] = [];
+            this.primitives[CASTRUM_TYPES.EXTENSION].forEach(function(s) {
+                let liveObj = Game.getObjectById(s) || undefined;
+                if (liveObj !== undefined) extensions.push(liveObj);
+            })
+            this._primitives[CASTRUM_TYPES.EXTENSION] = extensions;
         }
         return this._primitives[CASTRUM_TYPES.EXTENSION] as StructureExtension[];
     }
 
     get roads(): StructureRoad[] {
         if (this._primitives[CASTRUM_TYPES.ROAD] === undefined) {
-            if (!this.primitives[CASTRUM_TYPES.ROAD]) this.primitives[CASTRUM_TYPES.ROAD] = [];
-            this._primitives[CASTRUM_TYPES.ROAD] = this.primitives[CASTRUM_TYPES.ROAD].map((s) => Game.getObjectById(s));
+            let roads: StructureRoad[] = [];
+            this.primitives[CASTRUM_TYPES.ROAD].forEach(function(s) {
+                let liveObj = Game.getObjectById(s) || undefined;
+                if (liveObj !== undefined) roads.push(liveObj);
+            })
+            this._primitives[CASTRUM_TYPES.ROAD] = roads;
         }
         return this._primitives[CASTRUM_TYPES.ROAD] as StructureRoad[];
     }
