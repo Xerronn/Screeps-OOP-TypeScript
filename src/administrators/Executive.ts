@@ -11,7 +11,7 @@ export default class Executive {
     
     constructor(room: string) {
         this.room = room;
-        if (!Chronicler.roomRegistered(this.room)) {
+        if (!Chronicler.readRoomRegistered(this.room)) {
             let schematic = Architect.plan(this.room);
             let resources = Informant.prospect(this.room);
             Chronicler.registerRoom(this.room, schematic, resources);
