@@ -372,7 +372,7 @@ export default class Supervisor {
     }
 
     get containers(): StructureContainer[] {
-        if (this._primitives[CASTRUM_TYPES.ROAD].length === 0) {
+        if (this._primitives[CASTRUM_TYPES.CONTAINER].length === 0) {
             let containers: StructureContainer[] = [];
             this.primitives[CASTRUM_TYPES.CONTAINER].forEach(function(s) {
                 let liveObj = Game.getObjectById(s) || undefined;
@@ -380,11 +380,11 @@ export default class Supervisor {
             })
             this._primitives[CASTRUM_TYPES.CONTAINER] = containers;
         }
-        return this._primitives[CASTRUM_TYPES.CONTAINER] as StructureContainer[];
+        return this._primitives[CASTRUM_TYPES.CONTAINER];
     }
 
     get extensions(): StructureExtension[] {
-        if (this._primitives[CASTRUM_TYPES.ROAD].length === 0) {
+        if (this._primitives[CASTRUM_TYPES.EXTENSION].length === 0) {
             let extensions: StructureExtension[] = [];
             this.primitives[CASTRUM_TYPES.EXTENSION].forEach(function(s) {
                 let liveObj = Game.getObjectById(s) || undefined;
@@ -392,7 +392,7 @@ export default class Supervisor {
             })
             this._primitives[CASTRUM_TYPES.EXTENSION] = extensions;
         }
-        return this._primitives[CASTRUM_TYPES.EXTENSION] as StructureExtension[];
+        return this._primitives[CASTRUM_TYPES.EXTENSION];
     }
 
     get roads(): StructureRoad[] {
@@ -404,6 +404,6 @@ export default class Supervisor {
             })
             this._primitives[CASTRUM_TYPES.ROAD] = roads;
         }
-        return this._primitives[CASTRUM_TYPES.ROAD] as StructureRoad[];
+        return this._primitives[CASTRUM_TYPES.ROAD];
     }
 }
