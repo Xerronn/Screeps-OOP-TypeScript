@@ -128,11 +128,11 @@ export default class Executive {
                 break;
             case 6.1:
                 //build first source link
-                // Architect.buildSourceLinks(room);
+                Architect.buildSourceLink(this.room);
                 break;
             case 6.2:
                 //build extractor and road to mineral
-                // Architect.buildExtractor(room);
+                Architect.buildExtractor(this.room);
                 break;
             case 6.3:
                 //start scouting for remotes

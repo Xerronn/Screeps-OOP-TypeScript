@@ -190,7 +190,7 @@ export default class Architect {
      * Method to build roads to sources and controller
      * @param {String} room string representing the room
      */
-     static buildPaths(room: string): void {
+    static buildPaths(room: string): void {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
@@ -212,7 +212,7 @@ export default class Architect {
      * Method to build the controller link
      * @param {String} room string representing the room
      */
-     static buildControllerLink(room: string): void {
+    static buildControllerLink(room: string): void {
         //get anchor
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
@@ -221,6 +221,65 @@ export default class Architect {
         let lastPos = path[path.length - 1];
         let linkRoomPos = new RoomPosition(lastPos.x, lastPos.y, room);
         linkRoomPos.createConstructionSite(STRUCTURE_LINK);
+    }
+
+    /**
+     * Method to build a link for sources
+     * @param room 
+     */
+    static buildSourceLink(room: string) {
+        //get anchor
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let main = schema.main.anchor;
+        let mainPos = new RoomPosition(main.x, main.y, room);
+
+        //find the sources and sort by distance
+        let sources = Game.rooms[room].find(FIND_SOURCES);
+        sources = _.sortBy(sources, source => mainPos.getRangeTo(source)).reverse();
+
+        //loop through sources
+        for (let source of sources) {
+            //find nearby container
+            let sourceContainer = source.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (structure) => { return structure.structureType == STRUCTURE_CONTAINER
+                    && source.pos.inRangeTo(structure, 2)
+                }
+            });
+
+            //if there is no container, there is already a link so move to next source
+            if (!sourceContainer) continue;
+
+            //once a source not in the memory is found, route to it and build a link on the last step of the route
+            let path = schema.paths.sources[source.id];
+            let linkPos = path[path.length - 2];
+            let roomLinkPos = new RoomPosition(linkPos.x, linkPos.y, room);
+
+            if (roomLinkPos.createConstructionSite(STRUCTURE_LINK) == 0) {
+                //remove sourceContainer if a link is successfully built
+                sourceContainer.destroy();
+                return; //end the function once we have built a link
+            }
+        }
+    }
+
+    /**
+     * Method to build the extractor and path back to main
+     * @param room 
+     */
+    static buildExtractor(room: string) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let liveRoom = Game.rooms[room];
+        let path = schema.paths.mineral;
+        for (let pos of path) {
+            liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+        }
+        let mineralPos = liveRoom.find(FIND_MINERALS)[0].pos;
+        liveRoom.createConstructionSite(mineralPos.x, mineralPos.y, STRUCTURE_EXTRACTOR);
+        
     }
 
     /**
