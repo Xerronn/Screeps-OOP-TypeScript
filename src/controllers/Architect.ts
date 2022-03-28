@@ -232,6 +232,8 @@ export default class Architect {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
+        let liveRoom = Game.rooms[room];
+        let roomTerrain = Game.map.getRoomTerrain(room);
         let main = schema.main.anchor;
         let mainPos = new RoomPosition(main.x, main.y, room);
 
@@ -251,15 +253,28 @@ export default class Architect {
             //if there is no container, there is already a link so move to next source
             if (!sourceContainer) continue;
 
-            //once a source not in the memory is found, route to it and build a link on the last step of the route
-            let path = schema.paths.sources[source.id];
-            let linkPos = path[path.length - 2];
-            let roomLinkPos = new RoomPosition(linkPos.x, linkPos.y, room);
+            //first try to find a position adjacent to the container that is not the path, so the creep doesn't have to offroad to get around it
+            let linkPos: RoomPosition | undefined;
+            for (let i = -1; i < 2; i++) {   //x values
+                for (let j = -1; j < 2; j++) {   //y values
+                    if (roomTerrain.get(sourceContainer.pos.x + i, sourceContainer.pos.y + j) !== TERRAIN_MASK_WALL && 
+                    liveRoom.lookForAt(LOOK_STRUCTURES, sourceContainer.pos.x + i, sourceContainer.pos.y + j).length === 0) {
+                        linkPos = new RoomPosition(sourceContainer.pos.x + i, sourceContainer.pos.y + j, room);
+                    }
+                }
+            }
 
-            if (roomLinkPos.createConstructionSite(STRUCTURE_LINK) == 0) {
+            if (linkPos === undefined) {
+                //if a position satisfying the above requirements is not found, build it on the path
+                let path = schema.paths.sources[source.id];
+                let lastPos = path[path.length - 2];
+                linkPos = new RoomPosition(lastPos.x, lastPos.y, room);
+            }
+            
+            if (linkPos.createConstructionSite(STRUCTURE_LINK) === 0) {
                 //remove sourceContainer if a link is successfully built
                 sourceContainer.destroy();
-                return; //end the function once we have built a link
+                return; //only build one
             }
         }
     }
