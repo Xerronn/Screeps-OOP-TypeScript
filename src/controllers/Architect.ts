@@ -153,6 +153,8 @@ export default class Architect {
             }
         }
 
+        if (!buildRoads) return;
+
         //build roads surrounding the main stamp
         let nearY = stamp.anchor.y - 1;
         let nearX = stamp.anchor.x - 1;
