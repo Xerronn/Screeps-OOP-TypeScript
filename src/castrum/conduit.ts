@@ -19,7 +19,7 @@ export default class Conduit extends Castrum {
         let nearestBuilding = this.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return structure.structureType != STRUCTURE_LINK
-                    && structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_CONTROLLER
+                    && (structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_CONTROLLER)
                     && this.pos.inRangeTo(structure, 2)
             }
         }) || undefined;
