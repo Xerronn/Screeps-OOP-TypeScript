@@ -127,7 +127,11 @@ export default class Miner extends Worker {
             }
 
         } else {
-            this.depositLink(this.link);
+            if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                this.harvest();
+            } else {
+                this.depositLink(this.link);
+            }
         }
 
         //evolve the creep if it has a link
