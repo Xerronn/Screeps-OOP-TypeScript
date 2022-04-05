@@ -291,6 +291,9 @@ export default class Architect {
         if (controller === undefined) throw Error("Room has no controller!");
         let liveRoom = Game.rooms[room];
         let path = schema.paths.mineral;
+        let lastPos = path.pop();
+        if (lastPos === undefined) throw Error("No path to mineral");
+        liveRoom.createConstructionSite(lastPos.x, lastPos.y, STRUCTURE_CONTAINER);
         for (let pos of path) {
             liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
         }
