@@ -130,6 +130,10 @@ export default abstract class Civitas extends GameObj {
         return this.liveObj.getActiveBodyparts(bodyPart)
     }
 
+    get arrived(): boolean {
+        return this.room === this.assignedRoom && this.pos.x !== 50 && this.pos.x !== 0 && this.pos.y !== 0 && this.pos.y !== 50
+    }
+
     get supervisor(): Supervisor {
         return global.Imperator.administrators[this.memory.spawnRoom].supervisor;
     }

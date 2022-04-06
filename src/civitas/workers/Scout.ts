@@ -58,7 +58,7 @@ export default class Scout extends Worker {
 
     run() {
         //move to current targetRoom
-        if (this.room !== this.assignedRoom) {
+        if (!this.arrived) {
             return this.march(this.assignedRoom);
         } else if (this.room === this.memory.spawnRoom) {
             this.assignedRoom = this.memory.targetRooms[0];
