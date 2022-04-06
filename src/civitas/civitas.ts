@@ -19,7 +19,7 @@ export default abstract class Civitas extends GameObj {
     body: BodyPartConstant[];
     spawning: boolean;
     ticksToLive: number;
-    remote?: boolean;
+    assignedRoom: string;
 
     constructor(civitas: Creep) {
         super();
@@ -30,7 +30,7 @@ export default abstract class Civitas extends GameObj {
         this.type = civitas.memory.type;
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
-        this.remote = civitas.memory.remote;
+        this.assignedRoom = civitas.memory.assignedRoom;
 
         //attributes that change every tick
         this.memory = civitas.memory;
@@ -73,6 +73,21 @@ export default abstract class Civitas extends GameObj {
      * @returns {false}
      */
     run(): boolean {
+        return false;
+    }
+
+    /**
+     * Method to march to a specific room
+     * @param room 
+     * @returns 
+     */
+    march(room: string): boolean {
+        let pos = new RoomPosition(25, 25, room);
+        
+        if (this.room !== room) {
+            this.liveObj.travelTo(pos);
+            return true;
+        }
         return false;
     }
 

@@ -26,16 +26,6 @@ export default class Worker extends Civitas {
         return true;
     }
 
-    march(room: string): boolean {
-        let pos = new RoomPosition(25, 25, room);
-        
-        if (this.room !== room) {
-            this.liveObj.travelTo(pos);
-            return true;
-        }
-        return false;
-    }
-
     /**
      * upgrade the controller
      */
