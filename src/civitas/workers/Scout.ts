@@ -7,10 +7,11 @@ interface ScoutMemory extends CreepMemory {
 
 export default class Scout extends Worker {
     memory: ScoutMemory;
-    targetRoom: string;
+    assignedRoom: string;
 
     constructor(scout: Creep) {
         super(scout);
+        
 
         if (this.memory.targetRooms === undefined) {
             let options = Object.values(Game.map.describeExits(this.room));
@@ -30,75 +31,71 @@ export default class Scout extends Worker {
             }
             this.memory.targetRooms = targets;
         }
-
-        this.targetRoom = this.memory.targetRooms[0];
+        this.assignedRoom = this.memory.targetRooms[0];
     }
 
     update(): boolean {
         if (!super.update()) {
             //creep was killed
-            if (this.ticksToLive > 2 && this.room === this.targetRoom) {
+            if (this.ticksToLive > 2 && this.room === this.assignedRoom) {
                 //log that room is dangerous
                 let data: RemoteMemory = {
-                    status: REMOTE_STATUSES.DANGEROUS
+                    status: REMOTE_STATUSES.DANGEROUS,
+                    distances: []
                 }
-                Chronicler.writeRemote(this.memory.spawnRoom, this.targetRoom, data);
+                Chronicler.writeRemote(this.memory.spawnRoom, this.assignedRoom, data);
             }
             return false;
         }
         //attributes that will change tick to tick
+        if (this.memory.targetRooms.length === 0) {
+            Chronicler.writeDoneScouting(this.memory.spawnRoom, true);
+            delete this.memory.generation;
+            this.liveObj.suicide(); //rip
+        }
         return true;
     }
 
     run(): boolean {
         //move to current targetRoom
-        return true;
-        // if (!this.arrived) {
-        //     this.march();
-        // } else if (this.room == this.memory.spawnRoom) {
-        //     //ensures that it travels back through the home room, just to be safe
-        //     if (this.memory.targets.length > 0) {
-        //         this.targetRoom = this.memory.targets[0];
-        //         this.arrived = false;
-        //         this.march();
-        //     } else {
-        //         //signal that we are ready to start building up to the remotes
-        //         global.Chronicler.setDoneScouting(this.room, true);
-        //         //scouting is done, no need to have rebirth
-        //         delete this.memory.generation;
-        //     }
-        // } else {
-        //     //once we are there, we can do some logging
-        //     let sources = Game.rooms[this.targetRoom].find(FIND_SOURCES);
-        //     if (sources.length == 2 && Game.rooms[this.targetRoom].controller && !Game.rooms[this.targetRoom].controller.owner) {
-        //         let data = {
-        //             status : "safe",
-        //             distances : []
-        //         };
-        //         for (let source of sources) {
-        //             //todo: use pathfinder to see if a route is possible and get length
-        //             data.distances.push(this.pos.findPathTo(source).length);
-        //         }
-        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
-        //     } else if (!Game.rooms[this.targetRoom].controller) {
-        //         //log that the room is a highway
-        //         let data = {
-        //             status : "highway"
-        //         };
-        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
-        //     } else if (Game.rooms[this.targetRoom].controller.owner) {
-        //         //log that the room is occupied
-        //         let data = {
-        //             status : "claimed"
-        //         };
-        //         global.Chronicler.logRemote(this.memory.spawnRoom, this.targetRoom, data);
-        //     }
+        if (this.room !== this.assignedRoom) {
+            return this.march(this.assignedRoom);
+        } else if (this.room === this.memory.spawnRoom) {
+            this.assignedRoom = this.memory.targetRooms[0];
+            return this.march(this.assignedRoom);
+        } else {
+            //once we are there, we can do some logging
+            let sources = Game.rooms[this.assignedRoom].find(FIND_SOURCES);
+            if (sources.length == 2 && Game.rooms[this.assignedRoom].controller?.owner === undefined) {
+                let data: RemoteMemory = {
+                    status: REMOTE_STATUSES.SAFE,
+                    distances: []
+                };
+                for (let source of sources) {
+                    //todo: use pathfinder to see if a route is possible and get length
+                    data.distances.push(this.pos.findPathTo(source).length);
+                }
+                Chronicler.writeRemote(this.memory.spawnRoom, this.assignedRoom, data);
+            } else if (!Game.rooms[this.assignedRoom].controller) {
+                //log that the room is a highway
+                let data = {
+                    status: REMOTE_STATUSES.UNINTERESTING,
+                    distances: []
+                };
+                Chronicler.writeRemote(this.memory.spawnRoom, this.assignedRoom, data);
+            } else if (Game.rooms[this.assignedRoom].controller?.owner !== undefined) {
+                //log that the room is occupied
+                let data = {
+                    status: REMOTE_STATUSES.CLAIMED,
+                    distances: []
+                };
+                Chronicler.writeRemote(this.memory.spawnRoom, this.assignedRoom, data);
+            }
 
-        //     //then move to next room
-        //     this.memory.targets.shift();
-        //     this.arrived = false;
-        //     this.targetRoom = this.memory.spawnRoom;
-        //     this.march();
-        // }
+            //then move to next room
+            this.memory.targetRooms.shift();
+            this.assignedRoom = this.memory.spawnRoom;
+            return this.march(this.assignedRoom);
+        }
     }
 }
