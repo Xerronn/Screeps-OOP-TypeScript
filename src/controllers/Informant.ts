@@ -310,7 +310,8 @@ declare global {
     const enum REMOTE_STATUSES {
         SAFE = 'safe',
         DANGEROUS = 'dangerous',
-        UNINTERESTING = 'uninteresting'
+        UNINTERESTING = 'uninteresting',
+        CLAIMED = 'claimed'
     }
 
     type LinkType =
