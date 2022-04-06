@@ -72,8 +72,8 @@ export default abstract class Civitas extends GameObj {
      * Empty run method because this class is not meant to be instantiated
      * @returns {false}
      */
-    run(): boolean {
-        return false;
+    run() {
+        return;
     }
 
     /**

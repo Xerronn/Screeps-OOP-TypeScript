@@ -10,7 +10,7 @@ export default abstract class GameObj {
     abstract hitsMax: number
 
     abstract update(): boolean;
-    abstract run(): boolean;
+    abstract run(): void;
 
     info() {
         return `${this.constructor.name} with ID ${this.id}`;

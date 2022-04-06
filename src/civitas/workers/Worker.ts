@@ -22,8 +22,8 @@ export default class Worker extends Civitas {
         return true;
     }
 
-    run(): boolean {
-        return true;
+    run() {
+        return;
     }
 
     /**
