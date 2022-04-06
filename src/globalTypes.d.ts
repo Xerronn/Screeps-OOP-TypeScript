@@ -104,7 +104,7 @@ interface RenewalTemplate {
 
 interface RemoteMemory {
     status: REMOTE_STATUSES;
-    distances?: number[];
+    distances: number[];
     selected?: boolean;
 }
 
