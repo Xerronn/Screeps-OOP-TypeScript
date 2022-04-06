@@ -44,10 +44,12 @@ export default class Excavator extends Civitas {
         if (this.memory.extractorId) {
             this.extractor = Game.getObjectById(this.memory.extractorId) || undefined;
         }
-
-        if (!this.memory.containerId && this.mineral) {
+        if (this.memory.containerId) {
+            this.container = Game.getObjectById(this.memory.containerId) || undefined;
+        } else if (!this.memory.containerId && this.mineral) {
             let allContainers = this.supervisor.containers;
             this.container = this.mineral.pos.findInRange(allContainers, 1)[0] || undefined;
+            this.memory.containerId = this.container.id;
         }
 
         return true;
@@ -112,7 +114,7 @@ export default class Excavator extends Civitas {
             'body': [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.COURIER,
             'memory': {
-                'container': this.memory.containerId,
+                'containerId': this.memory.containerId,
                 'resource': this.mineral.mineralType
             }
         });
