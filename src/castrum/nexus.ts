@@ -86,6 +86,10 @@ export default class Nexus extends Castrum {
         memory.type = type;
         memory.spawnRoom = this.room;
         memory.body = spawnBody;
+        
+        if (memory.assignedRoom === undefined) {
+            memory.assignedRoom == this.room;
+        }
 
         let options: any = {
             'memory': memory

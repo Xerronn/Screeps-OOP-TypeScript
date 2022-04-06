@@ -29,7 +29,6 @@ interface CreepMemory {
     boost?: Array<MineralBoostConstant>;
     offRoading?: boolean;
     task?: string;
-    targetRoom?: string;
 }
 
 interface RoomMemory {
