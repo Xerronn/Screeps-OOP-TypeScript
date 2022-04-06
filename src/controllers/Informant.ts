@@ -311,7 +311,8 @@ declare global {
         SAFE = 'safe',
         DANGEROUS = 'dangerous',
         UNINTERESTING = 'uninteresting',
-        CLAIMED = 'claimed'
+        CLAIMED = 'claimed',
+        INVADED = 'invaded'
     }
 
     type LinkType =
