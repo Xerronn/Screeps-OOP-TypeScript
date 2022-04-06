@@ -103,6 +103,12 @@ export default class Chronicler {
         return Memory.rooms[room].remotes;
     }
 
+    /**
+     * Get all data on a single remote for a room
+     * @param room 
+     * @param remote 
+     * @returns 
+     */
     static readRemote(room: string, remote: string): RemoteMemory {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         if (Memory.rooms[room].remotes[remote] === undefined) throw new Error('Remote does not exist');
