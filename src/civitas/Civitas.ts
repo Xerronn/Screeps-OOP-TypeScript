@@ -84,7 +84,7 @@ export default abstract class Civitas extends GameObj {
     march(room: string): boolean {
         let pos = new RoomPosition(25, 25, room);
         
-        if (this.room !== room) {
+        if (this.room !== room || this.room === room && this.pos.x === 50 || this.pos.x === 0 || this.pos.y === 0 || this.pos.y === 50) {
             this.liveObj.travelTo(pos);
             return true;
         }
