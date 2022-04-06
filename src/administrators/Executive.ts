@@ -252,7 +252,7 @@ export default class Executive {
      * Method that spawns an emissary to either claim a new room or reserve a remote room
      * @param {String} task either 'reserve' or 'claim'
      */
-    spawnEmissary(targetRoom: string, task='reserve') {
+    spawnEmissary(assignedRoom: string, task='reserve') {
         let body;
         if (task == 'reserve') {
             body = [CLAIM, CLAIM, CLAIM, MOVE, MOVE, MOVE];
@@ -262,42 +262,42 @@ export default class Executive {
         this.getSupervisor().initiate({
             'body': body,
             'type': CIVITAS_TYPES.EMISSARY,
-            'memory': {'generation' : 0, 'task': task, 'targetRoom': targetRoom, 'offRoading': true}
+            'memory': {'generation' : 0, 'task': task, 'assignedRoom': assignedRoom, 'offRoading': true}
         });
     }
 
     /**
      * Method that spawns the two miners that will build the roads and containers in the remote
-     * @param {String} targetRoom string representing the room they should move to first
+     * @param {String} assignedRoom string representing the room they should move to first
      */
-    spawnProspectors(targetRoom: string) {
+    spawnProspectors(assignedRoom: string) {
         for (let i = 0; i < 2; i++) {
             this.getSupervisor().initiate({
                 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
                 'type': CIVITAS_TYPES.MINER,
-                'memory': {'generation' : 0, 'targetRoom': targetRoom, 'offRoading': true}
+                'memory': {'generation' : 0, 'assignedRoom': assignedRoom, 'offRoading': true}
             });
         }
     }
 
     /**
      * Method that spawns the two miners that will build the roads and containers in the remote
-     * @param {String} targetRoom string representing the room they should move to first
+     * @param {String} assignedRoom string representing the room they should move to first
      */
-    spawnCurator(targetRoom: string) {
+    spawnCurator(assignedRoom: string) {
         this.getSupervisor().initiate({
             'body': [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.CURATOR,
-            'memory': {'generation' : 0, 'targetRoom': targetRoom}
+            'memory': {'generation' : 0, 'assignedRoom': assignedRoom}
         });
     }
 
 
     /**
      * Method to spawn 4 remote engineers to bootstrap a new room
-     * @param {String} targetRoom String representing the room
+     * @param {String} assignedRoom String representing the room
      */
-    spawnDevelopers(targetRoom: string) {
+    spawnDevelopers(assignedRoom: string) {
         for (let i = 0; i < 4; i++) {
             this.getSupervisor().initiate({
                 'body': [
@@ -307,7 +307,7 @@ export default class Executive {
                     MOVE, MOVE, MOVE, MOVE, MOVE
                 ],
                 'type': CIVITAS_TYPES.CONTRACTOR,
-                'memory': {'generation':0, 'targetRoom': targetRoom, 'offRoading': true}
+                'memory': {'generation':0, 'assignedRoom': assignedRoom, 'offRoading': true}
             });
         }
     }
@@ -345,7 +345,7 @@ export default class Executive {
     /**
      * Method that spawns an executioner to destroy a low level room <7 rcl
      */
-    spawnExecutioner(targetRoom: string, boost=true) {
+    spawnExecutioner(assignedRoom: string, boost=true) {
         this.getSupervisor().initiate({
             'body': [
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
@@ -356,28 +356,28 @@ export default class Executive {
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ],
             'type': LEGION_TYPES.EXECUTIONER,
-            'memory': {'targetRoom': targetRoom, 'offRoading': true}
+            'memory': {'assignedRoom': assignedRoom, 'offRoading': true}
         }, boost);
     }
 
     /**
      * Method that spawns a simple harass creep for an enemy's remote mine
      */
-    spawnJester(targetRoom: string) {
+    spawnJester(assignedRoom: string) {
         this.getSupervisor().initiate({
             'body': [
                 ATTACK, MOVE, MOVE
             ],
             'type': LEGION_TYPES.JESTER,
-            'memory': {'targetRoom': targetRoom, 'offRoading': true, 'generation': 0}
+            'memory': {'assignedRoom': assignedRoom, 'offRoading': true, 'generation': 0}
         });
     }
 
     /**
      * Method that spawns defenders for remote rooms
-     * @param {String} targetRoom string representing the room
+     * @param {String} assignedRoom string representing the room
      */
-    spawnGarrison(targetRoom: string) {
+    spawnGarrison(assignedRoom: string) {
         this.getSupervisor().initiate({
             'body': [
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
@@ -386,7 +386,7 @@ export default class Executive {
                 HEAL, HEAL, HEAL
             ],
             'type': LEGION_TYPES.GARRISON,
-            'memory': {'targetRoom': targetRoom}
+            'memory': {'assignedRoom': assignedRoom}
         });
     }
 
