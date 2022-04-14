@@ -143,7 +143,7 @@ export default class Informant {
             //time to start scouting and spawn the excavator
             calculation = 6.3;
         }
-        if (rcl == 6 && currentStage == 6.3 && /*Chronicler.getDoneScouting(room) ==**/ true) {
+        if (rcl == 6 && currentStage == 6.3 && Chronicler.readDoneScouting(room) == true) {
             //time to build road to the remote
             calculation = 6.4;
         }
