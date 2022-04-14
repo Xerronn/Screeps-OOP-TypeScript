@@ -303,6 +303,23 @@ export default class Architect {
     }
 
     /**
+     * Method to select remotes and then build roads from the main stamp to the sources
+     * @param room
+     */
+    static buildRemotePaths(room: string, exit: ExitConstant) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let liveRoom = Game.rooms[room];
+        let path = schema.paths.exits[exit];
+
+        //build all roads of all paths
+        for (let pos of path) {
+            liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+        }
+    }
+
+    /**
      * One time room setup
      */
     static plan(room: string): RoomSchematic {
