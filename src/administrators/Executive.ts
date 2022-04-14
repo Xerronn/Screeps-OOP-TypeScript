@@ -141,17 +141,17 @@ export default class Executive {
                 break;
             case 6.4:
                 //start reserving and build roads to remote exit
-                // Architect.prepareForRemote(room);
+                this.remote();
                 break;
             case 6.5:
                 //send remote builders
-                let remotes = Chronicler.readRemotes(this.room);
-                for (let r in remotes) {
-                    if (remotes[r].selected) {
-                        this.spawnProspectors(r);
-                        break;
-                    }
-                }
+                // let remotes = Chronicler.readRemotes(this.room);
+                // for (let r in remotes) {
+                //     if (remotes[r].selected) {
+                //         this.spawnProspectors(r);
+                //         break;
+                //     }
+                // }
                 break;
             case 7:
                 //just turned rcl 7
@@ -388,6 +388,23 @@ export default class Executive {
             'type': LEGION_TYPES.GARRISON,
             'memory': {'assignedRoom': assignedRoom}
         });
+    }
+
+    /**
+     * Select remotes, then build roads
+     */
+    remote() {
+        let remotes = Chronicler.readRemotes(this.room);
+        for (let remote in remotes) {
+            let remoteData = remotes[remote];
+            if (remoteData.status == REMOTE_STATUSES.SAFE && remoteData.distances.length === 2) {
+                let exit = Game.rooms[this.room].findExitTo(remote);
+                if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
+                Architect.buildRemotePaths(this.room, exit);
+                this.spawnEmissary(remote, 'reserve');
+                break;
+            }
+        }
     }
 
     /**
