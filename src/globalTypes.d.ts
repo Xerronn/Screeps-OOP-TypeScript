@@ -105,7 +105,6 @@ interface RenewalTemplate {
 interface RemoteMemory {
     status: REMOTE_STATUSES;
     distances: number[];
-    selected?: boolean;
 }
 
 interface BoostingMemory {
