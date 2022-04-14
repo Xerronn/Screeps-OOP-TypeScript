@@ -11,8 +11,8 @@ export default class Host extends Worker {
         super(host)
         let anchor = Chronicler.readSchema(this.room).main.anchor;
         this.idleSpot = {
-            'x': anchor.x + 1,
-            'y': anchor.y + 1
+            'x': anchor.x - 1,
+            'y': anchor.y - 1
         }
     }
 
