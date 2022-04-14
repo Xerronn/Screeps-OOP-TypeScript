@@ -66,7 +66,7 @@ export default class Scout extends Worker {
         } else {
             //once we are there, we can do some logging
             let sources = Game.rooms[this.assignedRoom].find(FIND_SOURCES);
-            if (sources.length == 2 && Game.rooms[this.assignedRoom].controller?.owner === undefined) {
+            if (Game.rooms[this.assignedRoom].controller?.owner === undefined) {
                 let data: RemoteMemory = {
                     status: REMOTE_STATUSES.SAFE,
                     distances: []
