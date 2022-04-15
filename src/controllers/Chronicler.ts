@@ -140,6 +140,18 @@ export default class Chronicler {
         if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
         Memory.rooms[room].remotes[remote].status = status;
     }
+
+    /**
+     * Method that changes the roads built flags of a remote room
+     * @param room 
+     * @param remote 
+     * @param roadsBuilt 
+     */
+    static writeRemoteRoadsBuilt(room: string, remote: string, roadsBuilt: boolean) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
+        Memory.rooms[room].remotes[remote].roadsBuilt = roadsBuilt;
+    }
     
     /**
      * Gets the labs that are boosting and what chemicals they have
