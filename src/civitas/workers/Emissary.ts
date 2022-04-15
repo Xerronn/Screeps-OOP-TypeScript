@@ -10,26 +10,11 @@ export default class Emissary extends Worker {
     memory: EmissaryMemory;
 
     spawnTime: number;
-    fleeing: boolean;
 
     constructor(emissary: Creep) {
         super(emissary);
 
         this.spawnTime = Game.time - (600 - this.ticksToLive);
-        this.fleeing = false;
-    }
-
-    update(): boolean {
-        if (!super.update()) {
-            //creep is dead
-            return false;
-        }
-        //attributes that will change tick to tick
-        if (this.memory.task === 'reserve') {
-            this.fleeing = Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom).status === REMOTE_STATUSES.INVADED;
-        } else this.fleeing = false;
-
-        return true;
     }
 
     run() {

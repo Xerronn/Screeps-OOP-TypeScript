@@ -1,5 +1,6 @@
 import Executive from 'administrators/Executive';
 import Supervisor from 'administrators/Supervisor';
+import Chronicler from 'controllers/Chronicler';
 import GameObj from '../GameObj';
 
 export default abstract class Civitas extends GameObj {
@@ -132,6 +133,10 @@ export default abstract class Civitas extends GameObj {
 
     get arrived(): boolean {
         return this.room === this.assignedRoom && this.pos.x !== 50 && this.pos.x !== 0 && this.pos.y !== 0 && this.pos.y !== 50
+    }
+
+    get fleeing(): boolean {
+        return Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom).status === REMOTE_STATUSES.INVADED
     }
 
     get supervisor(): Supervisor {
