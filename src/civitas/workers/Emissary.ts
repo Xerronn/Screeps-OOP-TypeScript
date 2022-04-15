@@ -9,12 +9,8 @@ interface EmissaryMemory extends WorkerMemory {
 export default class Emissary extends Worker {
     memory: EmissaryMemory;
 
-    spawnTime: number;
-
     constructor(emissary: Creep) {
         super(emissary);
-
-        this.spawnTime = Game.time - (600 - this.ticksToLive);
     }
 
     run() {
