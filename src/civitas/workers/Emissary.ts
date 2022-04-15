@@ -4,7 +4,6 @@ import Worker, {WorkerMemory} from './Worker';
 
 interface EmissaryMemory extends WorkerMemory {
     task: 'reserve' | 'claim' | 'done';
-    travelTime?: number;
 }
 
 export default class Emissary extends Worker {

@@ -26,6 +26,7 @@ interface CreepMemory {
     _trav: {};
     spawnDirection?: DirectionConstant;
     assignedRoom: string;
+    travelTime?: number;
     boost?: Array<MineralBoostConstant>;
     offRoading?: boolean;
     task?: string;
