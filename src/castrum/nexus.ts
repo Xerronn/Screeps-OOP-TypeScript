@@ -88,7 +88,7 @@ export default class Nexus extends Castrum {
         memory.body = spawnBody;
         
         if (memory.assignedRoom === undefined) {
-            memory.assignedRoom == this.room;
+            memory.assignedRoom = this.room;
         }
 
         let options: any = {
