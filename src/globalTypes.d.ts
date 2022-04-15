@@ -103,7 +103,7 @@ interface RenewalTemplate {
 interface RemoteMemory {
     status: REMOTE_STATUSES;
     distances: number[];
-    roadsBuilt: boolean;
+    roadsBuilt?: boolean;
 }
 
 interface BoostingMemory {
