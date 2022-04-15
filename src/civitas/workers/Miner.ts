@@ -11,112 +11,50 @@ export interface MinerMemory extends WorkerMemory {
 export default class Miner extends Worker {
     memory: MinerMemory;
 
-    source: Source;
+    source?: Source;
     container?: StructureContainer;
     link?: StructureLink;
-
-    replacementTime: number;                //When the creep should spawn its replacement
 
     constructor(miner: Creep) {
         super(miner);
 
-        if (this.memory.sourceId === undefined) {
-            this.memory.sourceId = this.assignToSource();
-        }
-        if (this.memory.courierSpawned === undefined) {
-            this.memory.courierSpawned = false;
-        }
-
-        let unkSource = Game.getObjectById(this.memory.sourceId);      //in some cases we might not have vision of the source
-        if (unkSource !== null) {
-            this.source = unkSource;
-            this.replacementTime = Game.rooms[this.memory.spawnRoom].find(FIND_MY_SPAWNS)[0].pos.findPathTo(this.source).length + (this.body.length * 2);
-
-            //container assignment
-            if (this.memory.containerId !== undefined && this.memory.linkId === undefined) {
-                let unkContainer = Game.getObjectById(this.memory.containerId);
-
-                if (unkContainer !== null) {
-                    this.container = unkContainer;
-                } else {
-                    this.memory.containerId = undefined;
-                }
-            } else this.memory.containerId = this.getContainer();
-
-            //link assignment
-            if (this.memory.linkId !== undefined) {
-                let unkLink = Game.getObjectById(this.memory.linkId);
-
-                if (unkLink !== null) {
-                    this.link = unkLink;
-                } else {
-                    this.memory.linkId = undefined;
-                }
-            } else this.memory.linkId = this.getLink();
-        }
     }
 
     update(): boolean {
-        if (!super.update()) {  //creep is dead
-            //remove name from the assigned source worker memory
-            let roomSources = Chronicler.readResources(this.memory.spawnRoom);
-            let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
-            roomSources[this.memory.sourceId].workers[this.constructor.name].splice(index, 1);
-            roomSources[this.memory.sourceId].openSpots++;
+        if (!super.update()) {  
+            //creep is dead
             return false;
         }
 
-        let unkSource = Game.getObjectById(this.memory.sourceId);      //in some cases we might not have vision of the source
-        if (unkSource) {
-            this.source = unkSource;
-
-            if (this.memory.containerId !== undefined) {
-                let unkContainer = Game.getObjectById(this.memory.containerId);
-
-                if (unkContainer !== null) {
-                    this.container = unkContainer;
-                } else {
-                    this.memory.containerId = undefined;
-                }
-            } else if (Game.time % 25 === 0 && this.memory.linkId === undefined) {      //check every 25 ticks for a newly built link
-                this.memory.containerId = this.getContainer();
-            }
-
-            if (this.memory.linkId !== undefined) {
-                let unkLink = Game.getObjectById(this.memory.linkId);
-
-                if (unkLink !== null) {
-                    this.link = unkLink;
-                } else {
-                    this.memory.linkId = undefined;
-                }
-            } else if (Game.time % 25 === 0) {      //check every 25 ticks for a newly built link
-                this.memory.linkId = this.getLink();
-            }
+        let liveSource = Game.getObjectById(this.memory.sourceId) || undefined;      //in some cases we might not have vision of the source
+        if (liveSource !== undefined) {
+            this.source = liveSource;
+            //check every tick for a new container/link to use
+            this.assignStore();
         }
-
 
         return true;
     }
 
-    run(): boolean {
+    run() {
         //make sure to spawn new miner before the current one dies, to maintain 100% uptime
-        if (this.memory.generation !== undefined && this.ticksToLive <= this.replacementTime) {
-            //basically rebirth but without the dying first
-            this.evolve();
-            this.supervisor.initiate({
-                'body': [...this.body],
-                'type': this.memory.type,
-                'memory': {...this.memory}
-            });
+        let replacementTime = (this.memory.travelTime || 0) + CREEP_SPAWN_TIME * this.body.length;
+        if (this.memory.generation !== undefined && this.ticksToLive <= replacementTime) {
+            this.replace();
+        }
 
-            //no more rebirth for you
-            delete this.memory.generation;
+        //march to room and flee if enemies
+        if (this.fleeing === true) {
+            return this.march(this.memory.spawnRoom);
+        }
+
+        if (this.arrived === false) {
+            return this.march(this.assignedRoom);
         }
 
         //spawn courier
-        if (this.memory.courierSpawned === false) {
-            this.spawnCourier();
+        if (this.memory.courierSpawned === false && this.memory.travelTime !== undefined) {
+            this.spawnCourier(this.memory.travelTime - (CREEP_SPAWN_TIME * this.body.length));
         }
 
         if (this.link === undefined) {
@@ -134,11 +72,7 @@ export default class Miner extends Worker {
             }
         }
 
-        //evolve the creep if it has a link
-        if (this.ticksToLive < 2 && this.link !== undefined) {
-            this.evolve();
-        }
-        return true;
+        return;
     }
 
     /**
@@ -157,6 +91,9 @@ export default class Miner extends Worker {
         }
         if (target === undefined || this.source === undefined) return false;
         if (this.pos.inRangeTo(target, targetRange)) {
+            if (this.memory.travelTime === undefined && this.ticksToLive > 1400) {
+                this.memory.travelTime = Game.time - this.spawnTime;
+            }
             this.liveObj.harvest(this.source);
         } else {
             this.liveObj.travelTo(target, {allowSwap: true});
@@ -174,56 +111,39 @@ export default class Miner extends Worker {
             this.liveObj.travelTo(link);
         }
     }
-
+    
     /**
-     * Method that assigns the creep to an available source
-     * @returns assigned source ID
+     * Method to assign a container or link to the miner
      */
-    assignToSource(): Id<Source> {
-        let roomSources = Chronicler.readResources(this.memory.spawnRoom);
+    assignStore() {
+        //container assignment
+        if (this.memory.containerId !== undefined && this.memory.linkId === undefined) {
+            let unkContainer = Game.getObjectById(this.memory.containerId);
 
-        if (this.memory.sourceId) {
-            //for creep rebirth and object init
-            if (roomSources[this.memory.sourceId].workers[this.constructor.name] === undefined) {
-                roomSources[this.memory.sourceId].workers[this.constructor.name] = [];
+            if (unkContainer !== null) {
+                this.container = unkContainer;
+            } else {
+                this.memory.containerId = undefined;
             }
+        } else this.memory.containerId = this.getContainer();
 
-            let index = roomSources[this.memory.sourceId].workers[this.constructor.name].indexOf(this.name);
-            if (index < 0) {
-                roomSources[this.memory.sourceId].workers[this.constructor.name].push(this.name);
-                roomSources[this.memory.sourceId].openSpots--;
+        //link assignment
+        if (this.memory.linkId !== undefined) {
+            let unkLink = Game.getObjectById(this.memory.linkId);
+
+            if (unkLink !== null) {
+                this.link = unkLink;
+            } else {
+                this.memory.linkId = undefined;
             }
-
-            return this.memory.sourceId;
-        } else {
-            //for first time an ancestry has spawned
-            let sortedSources: any[] = _.sortBy(
-                Object.keys(roomSources) as Array<keyof typeof roomSources>,
-                s => this.pos.findPathTo(Game.getObjectById(s as Id<any>)).length
-            );
-            let currentBest = "" as Id<Source>;
-            for (let source of sortedSources) {
-                if (roomSources[source].workers[this.constructor.name] === undefined) {
-                    roomSources[source].workers[this.constructor.name] = [];
-                }
-
-                //find the source with the least workers assigned
-                if (currentBest == "" || roomSources[source].workers[this.constructor.name].length < roomSources[currentBest].workers[this.constructor.name].length) {
-                    currentBest = source;
-                }
-            }
-
-            roomSources[currentBest].workers[this.constructor.name].push(this.name);
-            roomSources[currentBest].openSpots--;
-            return currentBest;
-        }
+        } else this.memory.linkId = this.getLink();
     }
 
     /**
      * Method that checks the source to see if there is a container and then returns the ID
      * @returns assigned container ID
      */
-    getContainer(): Id<StructureContainer> | undefined {
+     getContainer(): Id<StructureContainer> | undefined {
         let roomContainers = this.supervisor.containers;
         if (this.source === undefined) return undefined;
         let container = this.source.pos.findInRange(roomContainers, 1)[0];
@@ -242,6 +162,67 @@ export default class Miner extends Worker {
         return roomSources[this.memory.sourceId].linkId;
     }
 
+    spawnCourier(travelTime: number) {
+        //miners harvest 12 energy per tick and the courier has to travel both ways
+        let travelLength = travelTime * 12 * 2;
+        let carryCount = Math.ceil(travelLength / 50);
+        let numCouriers = Math.ceil(carryCount / 30);    //30 is the max carry parts we want on a single creep
+
+        let body: BodyPartConstant[] = [];
+        for (let i = 0; i < Math.ceil(carryCount / numCouriers); i++) {
+            body.push(MOVE);
+            body.unshift(CARRY);
+        }
+
+        for (let i = 0; i < numCouriers; i++) {
+            // this.supervisor.initiate({
+            //     'body': body,
+            //     'type': CIVITAS_TYPES.COURIER,
+            //     'memory': {
+            //         'generation' : 0, 
+            //         'targetRoom': this.assignedRoom, 
+            //         'offRoading': false,
+            //         'containerId': this.memory.containerId,
+            //         'resource': RESOURCE_ENERGY
+            //     }
+            // });
+            console.log(JSON.stringify({
+                'body': body,
+                'type': CIVITAS_TYPES.COURIER,
+                'memory': {
+                    'generation' : 0, 
+                    'targetRoom': this.assignedRoom, 
+                    'offRoading': false,
+                    'containerId': this.memory.containerId,
+                    'resource': RESOURCE_ENERGY
+                }
+            }));
+        }
+
+        this.memory.courierSpawned = true;
+    }
+
+    /**
+     * Method to replace the miner 
+     */
+     replace() {
+        //evolve the creep if it has a link
+        if (this.link !== undefined) {
+            this.evolve();
+        }
+
+        //basically rebirth but without the dying first
+        this.evolve();
+        this.supervisor.initiate({
+            'body': [...this.body],
+            'type': this.memory.type,
+            'memory': {...this.memory}
+        });
+
+        //no more rebirth for you
+        delete this.memory.generation;
+    }
+
     /**
      * Method to evolve the body after getting a link
      */
@@ -253,19 +234,5 @@ export default class Miner extends Worker {
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ]
         }
-    }
-
-    spawnCourier() {
-        this.supervisor.initiate({
-            'body': [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE],
-            'type': CIVITAS_TYPES.COURIER,
-            'memory': {
-                'generation' : 0,
-                'containerId': this.memory.containerId,
-                'resource': RESOURCE_ENERGY
-            }
-        });
-
-        this.memory.courierSpawned = true;
     }
 }
