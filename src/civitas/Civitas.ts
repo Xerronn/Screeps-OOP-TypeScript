@@ -33,9 +33,10 @@ export default abstract class Civitas extends GameObj {
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
         this.assignedRoom = civitas.memory.assignedRoom;
-        if (this.getActiveBodyParts(CLAIM) > 0) {
-            this.spawnTime = Game.time - (600 - this.ticksToLive);
-        } else this.spawnTime = Game.time - (1500 - this.ticksToLive);
+
+        //Parse spawn time from name
+        let regex = this.name.match('(?<=\<)(.*?)(?=\>)') || [''];
+        this.spawnTime = parseInt(regex[0]);
 
         //attributes that change every tick
         this.memory = civitas.memory;
