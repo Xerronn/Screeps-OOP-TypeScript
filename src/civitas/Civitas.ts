@@ -136,7 +136,12 @@ export default abstract class Civitas extends GameObj {
     }
 
     get fleeing(): boolean {
-        return Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom).status === REMOTE_STATUSES.INVADED
+        try {
+            return Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom).status === REMOTE_STATUSES.INVADED;
+        } catch (err) {
+            console.log(this.info() + " is trying to flee from a nonexistent remote");
+            return false;
+        }
     }
 
     get supervisor(): Supervisor {
