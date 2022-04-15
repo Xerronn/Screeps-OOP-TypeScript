@@ -34,7 +34,9 @@ export default class Emissary extends Worker {
 
     run() {
         //march to room and flee if enemies
-        if (this.fleeing) return this.flee();
+        if (this.fleeing) {
+            return this.march(this.memory.spawnRoom);
+        }
 
         if (!this.arrived) {
             return this.march(this.assignedRoom);
@@ -75,13 +77,7 @@ export default class Emissary extends Worker {
             //no more rebirth for you
             delete this.memory.generation;
         }
-    }
-
-    /**
-     * Method to flee to home room when there is an invader or enemy
-     */
-    flee() {
-        this.march(this.memory.spawnRoom);
+        return;
     }
 
     /**
