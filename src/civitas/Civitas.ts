@@ -144,6 +144,10 @@ export default abstract class Civitas extends GameObj {
         return Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom)?.status === REMOTE_STATUSES.INVADED;
     }
 
+    get remote(): boolean {
+        return this.memory.assignedRoom !== this.memory.spawnRoom;
+    }
+
     get supervisor(): Supervisor {
         return global.Imperator.administrators[this.memory.spawnRoom].supervisor;
     }
