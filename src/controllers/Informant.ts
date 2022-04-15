@@ -67,7 +67,6 @@ export default class Informant {
             }
             resources[source] = {
                 type: 'source',
-                workers: {},
                 openSpots: openSpots
             };
         }
