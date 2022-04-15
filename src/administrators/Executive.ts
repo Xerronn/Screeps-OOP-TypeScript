@@ -182,12 +182,21 @@ export default class Executive {
      * Phase one is defined as RCL 1-4
      */
     phaseOne(numToSpawn=12) {
-        //I think 12 engineers is a good starting point
-        for (var i = 0; i < numToSpawn; i++) {
-            let memory = { "generation": 0 };
-            let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
-            Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
+        let resources = Chronicler.readResources(this.room);
+        for (let resource in resources) {
+            //one miner per source. they spawn their own courier
+            let liveResource = resources[resource as keyof RoomResources];
+            if (liveResource.type === 'source') {
+                //Spawn either the number of open spots times 2 or half of numToSpawn, whichever is lower
+                for (var i = 0; i < Math.min(numToSpawn / 2, liveResource.openSpots * 2); i++) {
+                    let memory = { "generation": 0, "sourceId": resource, "courierSpawned": false};
+                    let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
+                    Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
+                }
+            }
         }
+
+        
     }
 
     /**
@@ -212,7 +221,8 @@ export default class Executive {
             //one miner per source. they spawn their own courier
             let liveResource = resources[resource as keyof RoomResources];
             if (liveResource.type === 'source') {
-                creepsToSpawn.push({ 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.MINER, 'memory': memory });
+                let minerMemory = { "generation": 0, "sourceId": resource, "courierSpawned": false};
+                creepsToSpawn.push({ 'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 'type': CIVITAS_TYPES.MINER, 'memory': minerMemory });
             }
         }
 

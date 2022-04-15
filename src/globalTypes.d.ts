@@ -63,9 +63,6 @@ interface RoomResources {
 
 interface ResourceMemory {
     type: 'source' | DepositConstant
-    workers: {
-        [creepType: string]: string[]
-    }
     openSpots: number;
     linkId?: Id<StructureLink>;
 }
