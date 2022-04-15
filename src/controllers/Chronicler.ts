@@ -109,9 +109,8 @@ export default class Chronicler {
      * @param remote 
      * @returns 
      */
-    static readRemote(room: string, remote: string): RemoteMemory {
+    static readRemote(room: string, remote: string): RemoteMemory | undefined {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        if (Memory.rooms[room].remotes[remote] === undefined) throw new Error('Remote does not exist');
         return Memory.rooms[room].remotes[remote];
     }
 
