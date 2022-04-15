@@ -303,10 +303,10 @@ export default class Architect {
     }
 
     /**
-     * Method to select remotes and then build roads from the main stamp to the sources
+     * Method to build path from main stamp to and exit
      * @param room
      */
-    static buildRemotePaths(room: string, exit: ExitConstant) {
+    static buildExitPaths(room: string, exit: ExitConstant) {
         let schema = Chronicler.readSchema(room);
         let controller = Game.rooms[room].controller;
         if (controller === undefined) throw Error("Room has no controller!");
@@ -316,6 +316,61 @@ export default class Architect {
         //build all roads of all paths
         for (let pos of path) {
             liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+        }
+    }
+
+    /**
+     * Method to build roads in remote room from entrance to sources. Also builds the container
+     * @param room
+     */
+    static buildRemotePaths(room:string, remote: string, exit: ExitConstant) {
+        let remotePath = Chronicler.readSchema(room).paths.exits[exit];
+        let lastPath = remotePath[remotePath.length - 1];
+        let startCoords: Position
+
+        switch (exit) {
+            case TOP:
+                startCoords = {
+                    x: lastPath.x,
+                    y: 48
+                }
+                break;
+            case BOTTOM:
+                startCoords = {
+                    x: lastPath.x,
+                    y: 1
+                }
+                break;
+            case LEFT:
+                startCoords = {
+                    x: 48,
+                    y: lastPath.y
+                }
+                break;
+            case RIGHT:
+                startCoords = {
+                    x: 1,
+                    y: lastPath.y
+                }
+                break;
+        }
+        let liveStart = new RoomPosition(startCoords.x, startCoords.y, remote);
+        let liveRemote = Game.rooms[remote];
+        let paths = []
+
+        let sources = liveRemote.find(FIND_SOURCES);
+        for (let source of sources) {
+            paths.push(liveRemote.findPath(liveStart, source.pos, {'range': 1}))
+        }
+        liveStart.createConstructionSite(STRUCTURE_ROAD)
+        for (let path of paths) {
+            for (let i in path) {
+                if (parseInt(i) === path.length - 1) {
+                    liveRemote.createConstructionSite(path[i].x, path[i].y, STRUCTURE_CONTAINER);
+                    continue;
+                }
+                liveRemote.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD);
+            }
         }
     }
 
