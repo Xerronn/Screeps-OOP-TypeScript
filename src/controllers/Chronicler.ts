@@ -116,17 +116,29 @@ export default class Chronicler {
 
     /**
      * Method that logs some information about a scouted remote to memory
-     * @param {String} ownerRoom string representing the room that owns the remote
+     * @param {String} room string representing the room that owns the remote
      * @param {String} remoteRoom string representing the remote
      * @param {Object} data data to store in the memory
      */
-    static writeRemote(ownerRoom: string, remoteRoom: string, data: RemoteMemory) {
-        if (!Chronicler.readRoomActive(ownerRoom)) throw new Error("Room is not active or not registered");
-        let roomMemory = Memory.rooms[ownerRoom];
+    static writeRemote(room: string, remote: string, data: RemoteMemory) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        let roomMemory = Memory.rooms[room];
         if (roomMemory.remotes === undefined) {
             roomMemory.remotes = {};
         }
-        roomMemory.remotes[remoteRoom] = data;
+        roomMemory.remotes[remote] = data;
+    }
+    
+    /**
+     * Method that changes the status of a remote room
+     * @param room 
+     * @param remote 
+     * @param status 
+     */
+    static writeRemoteStatus(room: string, remote: string, status: REMOTE_STATUSES) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
+        Memory.rooms[room].remotes[remote].status = status;
     }
     
     /**

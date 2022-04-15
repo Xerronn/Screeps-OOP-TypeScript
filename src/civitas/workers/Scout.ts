@@ -86,7 +86,7 @@ export default class Scout extends Worker {
             } else if (Game.rooms[this.assignedRoom].controller?.owner !== undefined) {
                 //log that the room is occupied
                 let data = {
-                    status: REMOTE_STATUSES.CLAIMED,
+                    status: REMOTE_STATUSES.DANGEROUS,
                     distances: []
                 };
                 Chronicler.writeRemote(this.memory.spawnRoom, this.assignedRoom, data);
