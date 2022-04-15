@@ -67,6 +67,40 @@ export default class Executive {
                 }
             }
         }
+
+        //Once gamestage is higher than 6.4, we start doing some remote logic
+        if (gameStage >= 6.4) {
+            let remotes = Chronicler.readRemotes(this.room);
+            for (let remote in remotes) {
+                let remoteData = remotes[remote];
+                
+                if (remoteData.status === REMOTE_STATUSES.CLAIMED || remoteData.status === REMOTE_STATUSES.INVADED) {
+                    //we own this remote room, so do some logic
+                    let liveRemote = Game.rooms[remote];
+
+                    //check that we have vision
+                    if (liveRemote !== undefined) {
+
+                        //make creeps flee when invaders are present
+                        let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
+                        if (numEnemies > 0) {
+                            Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
+                        } else {
+                            Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
+                        }
+
+                        //plan roads
+                        if (remoteData.roadsBuilt === undefined || remoteData.roadsBuilt === false) {
+                            //get last road tile leading into the remote room
+                            let exit = Game.rooms[this.room].findExitTo(remote);
+                            if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
+                            Architect.buildRemotePaths(this.room, remote, exit);
+                            Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -410,8 +444,9 @@ export default class Executive {
             if (remoteData.status == REMOTE_STATUSES.SAFE && remoteData.distances.length === 2) {
                 let exit = Game.rooms[this.room].findExitTo(remote);
                 if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
-                Architect.buildRemotePaths(this.room, exit);
+                Architect.buildExitPaths(this.room, exit);
                 this.spawnEmissary(remote, 'reserve');
+                Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                 break;
             }
         }
