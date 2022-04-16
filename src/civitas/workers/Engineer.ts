@@ -18,10 +18,10 @@ export default class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (Chronicler.readBastionsFilled(this.room) === false) {
+        else if (!this.remote && Chronicler.readBastionsFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
-        } else if (Chronicler.readExtensionsFilled(this.room) === false) {
+        } else if (!this.remote && Chronicler.readExtensionsFilled(this.room) === false) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
         } else if (this.memory.buildTarget !== undefined || Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
