@@ -38,7 +38,7 @@ export default class Miner extends Worker {
 
     run() {
         //make sure to spawn new miner before the current one dies, to maintain 100% uptime
-        let replacementTime = (this.memory.travelTime || 0) + CREEP_SPAWN_TIME * this.body.length;
+        let replacementTime = (this.memory.travelTime || 0);
         if (this.memory.generation !== undefined && this.ticksToLive <= replacementTime) {
             this.replace();
         }
@@ -58,10 +58,13 @@ export default class Miner extends Worker {
         }
 
         if (this.link === undefined) {
-            if (this.container !== undefined || this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+            if (this.container !== undefined && this.container.hits === this.container.hitsMax || this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 this.harvest();
+            } else if (this.container !== undefined && this.container.hits < this.container.hitsMax) {
+                this.repairContainer(this.container);
             } else {
                 this.build();   //build either new container or new link
+
             }
 
         } else {
@@ -78,7 +81,6 @@ export default class Miner extends Worker {
     /**
      * Overridden harvest method that moves to container instead of to source
      */
-    //TODO: add automatic container repairing too
     harvest(): boolean {
         let target: RoomObject | undefined;
         let targetRange: number;
@@ -99,6 +101,14 @@ export default class Miner extends Worker {
             this.liveObj.travelTo(target, {allowSwap: true});
         }
         return true;
+    }
+
+    repairContainer(container: StructureContainer) {
+        if (this.pos.inRangeTo(container, 1)) {
+            this.liveObj.repair(container);
+        } else {
+            this.liveObj.travelTo(container);
+        }
     }
 
     /**
@@ -127,30 +137,34 @@ export default class Miner extends Worker {
             }
         } else this.memory.containerId = this.getContainer();
 
-        //link assignment
-        if (this.memory.linkId !== undefined) {
-            let unkLink = Game.getObjectById(this.memory.linkId);
+        if (!this.remote) {
+            //link assignment
+            if (this.memory.linkId !== undefined) {
+                let unkLink = Game.getObjectById(this.memory.linkId);
 
-            if (unkLink !== null) {
-                this.link = unkLink;
-            } else {
-                this.memory.linkId = undefined;
-            }
-        } else this.memory.linkId = this.getLink();
+                if (unkLink !== null) {
+                    this.link = unkLink;
+                } else {
+                    this.memory.linkId = undefined;
+                }
+            } else this.memory.linkId = this.getLink();
+        }
     }
 
     /**
      * Method that checks the source to see if there is a container and then returns the ID
      * @returns assigned container ID
      */
-     getContainer(): Id<StructureContainer> | undefined {
-        let roomContainers = this.supervisor.containers;
+    getContainer(): Id<StructureContainer> | undefined {
         if (this.source === undefined) return undefined;
-        let container = this.source.pos.findInRange(roomContainers, 1)[0];
-        if (container !== undefined) {
+        let containers: StructureContainer[];
+        if (this.remote) {
+            containers = Game.rooms[this.assignedRoom].find(FIND_STRUCTURES, {'filter': {structureType: STRUCTURE_CONTAINER}});
+        } else containers = this.supervisor.containers;
+        let container = this.source.pos.findInRange(containers, 1)[0];
+        if (container !== undefined && container.structureType === STRUCTURE_CONTAINER) {
             return container.id;
         } else return undefined;
-
     }
 
     /**
@@ -175,28 +189,18 @@ export default class Miner extends Worker {
         }
 
         for (let i = 0; i < numCouriers; i++) {
-            // this.supervisor.initiate({
-            //     'body': body,
-            //     'type': CIVITAS_TYPES.COURIER,
-            //     'memory': {
-            //         'generation' : 0, 
-            //         'targetRoom': this.assignedRoom, 
-            //         'offRoading': false,
-            //         'containerId': this.memory.containerId,
-            //         'resource': RESOURCE_ENERGY
-            //     }
-            // });
-            console.log(JSON.stringify({
+            this.supervisor.initiate({
                 'body': body,
                 'type': CIVITAS_TYPES.COURIER,
                 'memory': {
-                    'generation' : 0, 
+                    'generation' : 0,
+                    'assignedRoom': this.assignedRoom,
                     'targetRoom': this.assignedRoom, 
                     'offRoading': false,
                     'containerId': this.memory.containerId,
                     'resource': RESOURCE_ENERGY
                 }
-            }));
+            });
         }
 
         this.memory.courierSpawned = true;
