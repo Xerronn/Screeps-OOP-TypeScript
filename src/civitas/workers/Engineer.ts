@@ -6,7 +6,7 @@ export default class Engineer extends Miner {
         super(engineer);
     }
 
-    run(): boolean {
+    run() {
         if (this.arrived === false) {
             return this.march(this.assignedRoom);
         }
@@ -14,7 +14,7 @@ export default class Engineer extends Miner {
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "harvest" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
             this.memory.task = "harvest";
             if (!this.noPillage) {
-                if (this.pillage()) return true;
+                if (this.pillage()) return;
             }
             this.harvest();
         }
@@ -42,7 +42,7 @@ export default class Engineer extends Miner {
             this.evolve();
         }
 
-        return true;
+        return;
     }
 
     harvest(): boolean {
