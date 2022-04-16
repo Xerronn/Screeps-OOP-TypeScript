@@ -32,7 +32,7 @@ export default abstract class Civitas extends GameObj {
         this.type = civitas.memory.type;
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
-        this.assignedRoom = civitas.memory.assignedRoom;
+        this.assignedRoom = civitas.memory.assignedRoom || civitas.memory.spawnRoom;
 
         //Parse spawn time from name
         let regex = this.name.match('(?<=\<)(.*?)(?=\>)') || [''];
