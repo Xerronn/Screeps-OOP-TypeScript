@@ -38,7 +38,7 @@ export default class Engineer extends Miner {
         }
         
         //evolve the creep to meet expanding energy availability
-        if (this.ticksToLive < 2) {
+        if (this.ticksToLive < 2 && !this.remote) {
             this.evolve();
         }
 
