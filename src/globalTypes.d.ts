@@ -46,7 +46,6 @@ interface RoomFlags {
     roadsBuilt: boolean,
     numContractors: number,
     bastionsFilled: boolean,
-    curatorSpawned: boolean,
     doneScouting: boolean,
     workshopsFilled: boolean,
     boostingWorkshops: BoostingMemory,
@@ -104,6 +103,7 @@ interface RemoteMemory {
     distances: number[];
     garrisoned?: boolean;
     roadsBuilt?: boolean;
+    curated?: boolean;
 }
 
 interface BoostingMemory {

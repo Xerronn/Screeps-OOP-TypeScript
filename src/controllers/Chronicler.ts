@@ -67,7 +67,6 @@ export default class Chronicler {
                     'roadsBuilt': false,
                     'bastionsFilled': false,
                     'numContractors': 0,
-                    'curatorSpawned': false,
                     'doneScouting': false,
                     'workshopsFilled': false,
                     'boostingWorkshops': {}
@@ -170,6 +169,26 @@ export default class Chronicler {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].remotes[remote].garrisoned = value;
     }
+
+    /**
+     * Get the curator spawned flag for a given room
+     * @param {String} room string representation of a room
+     * @returns the curator spawned flag
+     */
+     static readRemoteCurated(room: string, remote: string): boolean {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].remotes[remote].curated || false;
+    }
+
+    /**
+     * Set the curator spawned flag for a given room
+     * @param room 
+     * @param value 
+     */
+    static writeRemoteCurated(room: string, remote: string, value: boolean) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].remotes[remote].curated = value;
+    }
     
     /**
      * Gets the labs that are boosting and what chemicals they have
@@ -188,26 +207,6 @@ export default class Chronicler {
      static writeBoostingWorkshops(room: string, value: BoostingMemory) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].flags.boostingWorkshops = value;
-    }
-
-    /**
-     * Get the curator spawned flag for a given room
-     * @param {String} room string representation of a room
-     * @returns the curator spawned flag
-     */
-    static readCuratorSpawned(room: string): boolean {
-        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        return Memory.rooms[room].flags.curatorSpawned;
-    }
-
-    /**
-     * Set the curator spawned flag for a given room
-     * @param room 
-     * @param value 
-     */
-    static writeCuratorSpawned(room: string, value: boolean) {
-        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].flags.curatorSpawned = value;
     }
 
     /**
