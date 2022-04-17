@@ -204,4 +204,18 @@ export default class Worker extends Civitas {
         
         return true;
     }
+
+    /**
+     * Method to replace the creep early
+     */
+    replace() {
+        this.supervisor.initiate({
+            'body': [...this.body],
+            'type': this.memory.type,
+            'memory': {...this.memory}
+        });
+
+        //no more rebirth for you
+        delete this.memory.generation;
+    }
 }
