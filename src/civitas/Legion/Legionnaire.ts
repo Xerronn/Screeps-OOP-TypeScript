@@ -1,8 +1,14 @@
 import Civitas from '../civitas'
 
+interface LegionMemory extends CreepMemory {
+    healTarget?: Id<Creep>;
+}
+
 export default class Legionnaire extends Civitas {
-    constructor(emissary: Creep) {
-        super(emissary);
+    memory: LegionMemory;
+
+    constructor(legionnaire: Creep) {
+        super(legionnaire);
     }
 
     run() {
@@ -16,20 +22,55 @@ export default class Legionnaire extends Civitas {
     }
 
     /**
-     * Method to flee to home room when there is an invader or enemy
+     * Method that melee attacks something
      */
-    flee() {
-        this.march(this.memory.spawnRoom);
+    kill(target: AnyCreep | Structure) {
+        if (this.pos.inRangeTo(target, 1)) {
+            this.liveObj.attack(target);
+        } else {
+            this.liveObj.travelTo(target);
+        }
     }
 
     /**
-     * Method that travels to the room controller and reserves it
+     * Method to ranged attack a target
      */
-    kill(spawn: StructureSpawn) {
-        if (this.pos.inRangeTo(spawn, 1)) {
-            this.liveObj.attack(spawn);
+    killRanged(target: AnyCreep | Structure) {
+        if (this.pos.inRangeTo(target, 3)) {
+            if (this.pos.inRangeTo(target, 1)) {
+                this.liveObj.rangedMassAttack();
+            } else {
+                this.liveObj.rangedAttack(target);
+                this.liveObj.moveTo(target);
+            }
         } else {
-            this.liveObj.travelTo(spawn);
+            this.liveObj.moveTo(target);
         }
+    }
+
+    /**
+     * Method for a creep to heal others
+     */
+     medic() {
+        let targetCreep = Game.getObjectById(this.memory.healTarget || '' as Id<Creep>) || undefined;
+
+        if (targetCreep === undefined || targetCreep.hits == targetCreep.hitsMax) {
+            let myCreeps = Game.rooms[this.assignedRoom].find(FIND_MY_CREEPS, {
+                filter : (creep) => creep.hits < creep.hitsMax});
+            if (!myCreeps || myCreeps.length == 0) return false;
+            
+            targetCreep = this.pos.findClosestByRange(myCreeps) || undefined;
+            if (targetCreep !== undefined) {
+                this.memory.healTarget = targetCreep.id;
+            }
+        }
+        if (targetCreep !== undefined) {
+            if (this.pos.inRangeTo(targetCreep, 1)) {
+                this.liveObj.heal(targetCreep);
+            } else {
+                this.liveObj.moveTo(targetCreep);
+            }
+        }
+        return true;
     }
 }
