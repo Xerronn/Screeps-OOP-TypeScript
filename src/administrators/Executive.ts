@@ -92,19 +92,20 @@ export default class Executive {
                         }
 
                         //every 100 ticks check to see if a road is below 2000 hits
-                        let curatorSpawned = Chronicler.readCuratorSpawned(this.room);
+                        let curatorSpawned = Chronicler.readRemoteCurated(this.room, remote);
                         if (Game.time % 100 == 0 && !curatorSpawned) {
                             let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
 
                             for (let road of allRoads) {
                                 if (road.hits < road.hitsMax / 2.5) {
-                                    this.spawnCurator(this.room);
-                                    Chronicler.writeCuratorSpawned(this.room, true);
+                                    this.spawnCurator(remote);
+                                    Chronicler.writeRemoteCurated(this.room, remote, true);
+                                    break;
                                 }
                             }
                         }
 
-                        //plan roads
+                        //plan roads and then spawn engineers and eventually miners
                         if (remoteData.roadsBuilt === undefined || remoteData.roadsBuilt === false) {
                             //get last road tile leading into the remote room
                             let exit = Game.rooms[this.room].findExitTo(remote);
