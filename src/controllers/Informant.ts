@@ -252,6 +252,10 @@ export default class Informant {
         for (let structure of impassibleStructures) {
             matrix.set(structure.pos.x, structure.pos.y, 0xff);
         }
+        if (Chronicler.readRoomActive(roomName)) {
+            let anchor = Chronicler.readSchema(roomName).main.anchor;
+            matrix.set(anchor.x + 1, anchor.y + 1, 0xff);
+        }
         //this.matrixCache[roomName] = matrix;
         return matrix;
     }
