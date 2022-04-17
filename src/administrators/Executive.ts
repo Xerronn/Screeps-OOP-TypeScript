@@ -1,6 +1,6 @@
+import Director from "controllers/Director";
 import Architect from "../controllers/Architect";
 import Chronicler from "../controllers/Chronicler";
-import Director from "../controllers/Director";
 import Informant from "../controllers/Informant";
 
 //entity that executes room logic
@@ -85,8 +85,23 @@ export default class Executive {
                         let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
                         if (numEnemies > 0) {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
+                            this.spawnGarrison(remote);
+                            Chronicler.writeRemoteGarrisoned(this.room, remote, true);
                         } else {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
+                        }
+
+                        //every 100 ticks check to see if a road is below 2000 hits
+                        let curatorSpawned = Chronicler.readCuratorSpawned(this.room);
+                        if (Game.time % 100 == 0 && !curatorSpawned) {
+                            let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
+
+                            for (let road of allRoads) {
+                                if (road.hits < road.hitsMax / 2.5) {
+                                    this.spawnCurator(this.room);
+                                    Chronicler.writeCuratorSpawned(this.room, true);
+                                }
+                            }
                         }
 
                         //plan roads
@@ -96,6 +111,29 @@ export default class Executive {
                             if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
                             Architect.buildRemotePaths(this.room, remote, exit);
                             Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
+                            let sources = liveRemote.find(FIND_SOURCES);
+                            for (let source of sources) {
+                                this.getSupervisor().initiate({
+                                    'body' : [
+                                        WORK, WORK, WORK, WORK, 
+                                        CARRY, CARRY, CARRY, CARRY,
+                                        MOVE, MOVE, MOVE, MOVE, 
+                                        MOVE, MOVE, MOVE, MOVE
+                                    ], 
+                                    'type': CIVITAS_TYPES.ENGINEER, 
+                                    'memory': {'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'offRoading': true}
+                                });
+
+                                let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
+                                let task = `global.Imperator.administrators[${this.room}].supervisor.initiate(
+                                    {
+                                        'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
+                                        'type': '${CIVITAS_TYPES.MINER}', 
+                                        'memory': objArr[0]
+                                    });
+                                `;
+                                Director.schedule(this.room, Game.time + 2000, task, [memory]);            
+                            }
                         }
                     }
                 }
@@ -223,9 +261,8 @@ export default class Executive {
             if (liveResource.type === 'source') {
                 //Spawn either the number of open spots times 2 or half of numToSpawn, whichever is lower
                 for (var i = 0; i < Math.min(numToSpawn / 2, liveResource.openSpots * 2); i++) {
-                    let memory = { "generation": 0, "sourceId": resource, "courierSpawned": false};
-                    let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': 'engineer', 'memory': objArr[1]});";
-                    Director.schedule(this.room, Game.time + (i * 10), task, [this.room, memory]);
+                    let memory = {"generation": 0, "sourceId": resource, "courierSpawned": false};
+                    this.getSupervisor().initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.ENGINEER, 'memory': memory})
                 }
             }
         }
@@ -308,20 +345,6 @@ export default class Executive {
             'type': CIVITAS_TYPES.EMISSARY,
             'memory': {'generation' : 0, 'task': task, 'assignedRoom': assignedRoom, 'offRoading': true}
         });
-    }
-
-    /**
-     * Method that spawns the two miners that will build the roads and containers in the remote
-     * @param {String} assignedRoom string representing the room they should move to first
-     */
-    spawnProspectors(assignedRoom: string) {
-        for (let i = 0; i < 2; i++) {
-            this.getSupervisor().initiate({
-                'body': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-                'type': CIVITAS_TYPES.MINER,
-                'memory': {'generation' : 0, 'assignedRoom': assignedRoom, 'offRoading': true}
-            });
-        }
     }
 
     /**
