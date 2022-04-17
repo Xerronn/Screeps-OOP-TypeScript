@@ -30,6 +30,10 @@ export default class Courier extends Worker {
             terminalId: Game.rooms[this.memory.spawnRoom].terminal?.id
         });
 
+        this.pathing = true;
+        this.stuckPos = this.pos;
+        this.stuckTick = 0;
+
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
         if (this.memory.terminalId !== undefined) {
@@ -80,18 +84,24 @@ export default class Courier extends Worker {
      * logic to run each tick
      */
     run(): boolean {
-        //if container no longer exists, its been replaced by a link
-        if (!this.container) {
-            //disable rebirth
-            delete this.memory.generation;
-            //rip
-            this.liveObj.suicide();
-            return false;
+        let replacementTime = this.path.length + (CREEP_SPAWN_TIME * this.body.length);
+        if (this.ticksToLive < replacementTime && this.memory.generation) this.replace();
+
+        if (this.fleeing) {
+            this.march(this.memory.spawnRoom);
         }
 
-        //evolve if the container ever gets full. it means the transporter is underpowered
-        if (this.container.store.getFreeCapacity() == 0 && this.evolved == false) {
-            this.evolve();
+        //if container no longer exists, its been replaced by a link
+        if (this.container === undefined) {
+            if (!this.remote) {
+                //disable rebirth
+                delete this.memory.generation;
+                //rip
+                this.liveObj.suicide();
+                return false;
+            } else {
+                this.march(this.assignedRoom);
+            }
         }
 
         if (this.store.getUsedCapacity() == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity() > 0)) {
@@ -163,6 +173,7 @@ export default class Courier extends Worker {
         if (this.pos.inRangeTo(this.container, 1)) {
             if (this.container.store.getUsedCapacity(resourceType) > this.store.getFreeCapacity(resourceType)) {
                 this.liveObj.withdraw(this.container, resourceType);
+                this.pathing = true;
             }
         } else {
             if (!this.pathing) {
@@ -180,6 +191,7 @@ export default class Courier extends Worker {
         if (this.terminal === undefined) return false;
         if (this.pos.inRangeTo(this.terminal, 1)) {
             this.liveObj.transfer(this.terminal, resourceType);
+            this.pathing = true;
         } else if (!this.pathing) {
             this.liveObj.travelTo(this.terminal);
         }
@@ -226,26 +238,9 @@ export default class Courier extends Worker {
     }
 
     /**
-     * Method to evolve creep if its base body isn't enough to keep up
+     * Method to spawn a replacement creep early
      */
-    evolve() {
-        //add one of each
-        //only if < 800 in case it fills up while transporter is dead
-        if (this.ticksToLive < 800 && this.target !== undefined && this.container !== undefined) {
-            //miners mine 12 energy per tick, and you have to travel both ways
-            let travelLength = this.target.pos.findPathTo(this.container).length * 12 * 2;
-            let targetCarryCount = Math.ceil(travelLength / 50);
-            let maxBody = Game.rooms[this.room].energyCapacityAvailable / 50 / 2;
-
-            let carryCount = Math.min(targetCarryCount, maxBody / 2);
-
-            let newBody: BodyPartConstant[] = [];
-            for (let i = 0; i < carryCount; i++) {
-                newBody.push(MOVE);
-                newBody.unshift(CARRY);
-            }
-            this.evolved = true;
-            this.memory.body = newBody;
-        }
+    replace() {
+        
     }
 }
