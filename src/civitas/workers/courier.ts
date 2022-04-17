@@ -85,7 +85,7 @@ export default class Courier extends Worker {
      */
     run(): boolean {
         let replacementTime = this.path.length + (CREEP_SPAWN_TIME * this.body.length);
-        if (this.ticksToLive < replacementTime && this.memory.generation) this.replace();
+        if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
 
         if (this.fleeing) {
             this.march(this.memory.spawnRoom);
@@ -174,6 +174,12 @@ export default class Courier extends Worker {
             if (this.container.store.getUsedCapacity(resourceType) > this.store.getFreeCapacity(resourceType)) {
                 this.liveObj.withdraw(this.container, resourceType);
                 this.pathing = true;
+            } else if (this.container.pos.lookFor(LOOK_RESOURCES).length > 0){
+                for (let res of this.container.pos.lookFor(LOOK_RESOURCES)) {
+                    if (res.resourceType === resourceType) {
+                        this.liveObj.pickup(res);
+                    }
+                }
             }
         } else {
             if (!this.pathing) {
@@ -194,6 +200,21 @@ export default class Courier extends Worker {
             this.pathing = true;
         } else if (!this.pathing) {
             this.liveObj.travelTo(this.terminal);
+        }
+        return true;
+    }
+
+    /**
+     * Method to deposit minerals to the terminal
+     * @param {STRING} resourceType
+     */
+    depositStorage(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
+        if (this.storage === undefined) return false;
+        if (this.pos.inRangeTo(this.storage, 1)) {
+            this.liveObj.transfer(this.storage, resourceType);
+            this.pathing = true;
+        } else if (!this.pathing) {
+            this.liveObj.travelTo(this.storage);
         }
         return true;
     }
@@ -235,12 +256,5 @@ export default class Courier extends Worker {
             }
         }
         return true;
-    }
-
-    /**
-     * Method to spawn a replacement creep early
-     */
-    replace() {
-        
     }
 }
