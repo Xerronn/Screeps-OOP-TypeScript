@@ -48,7 +48,6 @@ interface RoomFlags {
     bastionsFilled: boolean,
     curatorSpawned: boolean,
     doneScouting: boolean,
-    garrisonSpawned: boolean,
     workshopsFilled: boolean,
     boostingWorkshops: BoostingMemory,
 }
@@ -103,6 +102,7 @@ interface RenewalTemplate {
 interface RemoteMemory {
     status: REMOTE_STATUSES;
     distances: number[];
+    garrisoned?: boolean;
     roadsBuilt?: boolean;
 }
 

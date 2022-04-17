@@ -70,7 +70,6 @@ export default class Chronicler {
                     'numContractors': 0,
                     'curatorSpawned': false,
                     'doneScouting': false,
-                    'garrisonSpawned': false,
                     'workshopsFilled': false,
                     'boostingWorkshops': {}
                 },
@@ -151,6 +150,26 @@ export default class Chronicler {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
         Memory.rooms[room].remotes[remote].roadsBuilt = roadsBuilt;
+    }
+
+    /**
+     * Get the garrison spawned flag for a given room
+     * @param {String} room string representation of a room
+     * @returns the garrison spawned flag
+     */
+     static readRemoteGarrisoned(room: string, remote: string): boolean {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].remotes[remote].garrisoned || false;
+    }
+
+    /**
+     * Set the garrison spawned flag for a given room
+     * @param room 
+     * @param value 
+     */
+    static writeRemoteGarrisoned(room: string, remote: string, value: boolean) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].remotes[remote].garrisoned = value;
     }
     
     /**
@@ -234,26 +253,6 @@ export default class Chronicler {
     static writeGameStage(room: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].flags.gameStage = String(value);
-    }
-
-    /**
-     * Get the garrison spawned flag for a given room
-     * @param {String} room string representation of a room
-     * @returns the garrison spawned flag
-     */
-    static readGarrisonSpawned(room: string): boolean {
-        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        return Memory.rooms[room].flags.garrisonSpawned;
-    }
-
-    /**
-     * Set the garrison spawned flag for a given room
-     * @param room 
-     * @param value 
-     */
-    static writeGarrisonSpawned(room: string, value: boolean) {
-        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].flags.garrisonSpawned = value;
     }
 
     /**
