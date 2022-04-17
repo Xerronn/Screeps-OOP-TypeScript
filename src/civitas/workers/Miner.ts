@@ -195,7 +195,6 @@ export default class Miner extends Worker {
                 'memory': {
                     'generation' : 0,
                     'assignedRoom': this.assignedRoom,
-                    'targetRoom': this.assignedRoom, 
                     'offRoading': false,
                     'containerId': this.memory.containerId,
                     'resource': RESOURCE_ENERGY
