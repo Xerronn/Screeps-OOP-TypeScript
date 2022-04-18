@@ -1,3 +1,4 @@
+import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
 import Traveler from 'thirdParty/traveler';
 import Worker, {WorkerMemory} from './Worker';
@@ -233,6 +234,13 @@ export default class Courier extends Worker {
         if (this.storage === undefined) return false;
         if (this.pos.inRangeTo(this.storage, 1)) {
             this.liveObj.transfer(this.storage, resourceType);
+            if (resourceType === RESOURCE_ENERGY) {
+                let amount = this.store.getUsedCapacity(RESOURCE_ENERGY);
+                Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyDeposited', amount);
+                if (this.remote) {
+                    Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyDeposited', amount)
+                }
+            }
             this.pathing = true;
         } else if (!this.pathing) {
             this.liveObj.travelTo(this.storage);
