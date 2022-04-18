@@ -117,6 +117,8 @@ export default class Miner extends Worker {
     depositLink(link: StructureLink) {
         if (this.pos.inRangeTo(link, 1)) {
             this.liveObj.transfer(link, RESOURCE_ENERGY);
+            let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), link.store.getFreeCapacity(RESOURCE_ENERGY));
+            Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyDeposited', amount);
         } else {
             this.liveObj.travelTo(link);
         }
