@@ -98,7 +98,7 @@ export default class Miner extends Worker {
             }
             let success = this.liveObj.harvest(this.source);
             if (success === OK) {
-                let amount = Math.min(this.getActiveBodyParts(WORK) * 2, this.store.getFreeCapacity(RESOURCE_ENERGY));
+                let amount = this.getActiveBodyParts(WORK) * 2;
                 if (this.remote) {
                     Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyMined', amount);
                 } else Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyMined', amount);
