@@ -51,18 +51,21 @@ interface RoomFlags {
     boostingWorkshops: BoostingMemory;
 }
 
-type plainStatistics = 'energyDeposited' | 'energyUpgraded';
+type plainStatistics = 'energyDeposited' | 'energyUpgraded' | 'energyMined' | 'remoteEnergyDeposited';
 interface RoomStatistics {
     lastReset: number;
     remotes: {[roomName: string]: RemoteStatistics};
     energySpawning: {[key in CIVITAS_TYPES | LEGION_TYPES]: number};
     energyDeposited: number;
+    remoteEnergyDeposited: number;
+    energyMined: number;
     energyUpgraded: number;
 }
 
 interface RemoteStatistics {
     energySpent: number;
     energyDeposited: number;
+    energyMined: number;
     garrisons: number;
     workers: number;
 }

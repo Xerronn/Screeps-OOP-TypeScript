@@ -88,7 +88,9 @@ export default class Chronicler {
     static getEmptyStatistics(room: string): RoomStatistics {
         let statisticsMemory: RoomStatistics = {
             'lastReset': Game.time,
+            'energyMined': 0,
             'energyDeposited': 0,
+            'remoteEnergyDeposited': 0,
             'energyUpgraded': 0,
             'energySpawning': {
                 [CIVITAS_TYPES.ARBITER]: 0,
@@ -117,6 +119,7 @@ export default class Chronicler {
             if (remotes[remote].status === REMOTE_STATUSES.CLAIMED || remotes[remote].status === REMOTE_STATUSES.INVADED) {
                 statisticsMemory.remotes[remote] = {
                     'energySpent': 0,
+                    'energyMined': 0,
                     'energyDeposited': 0,
                     'garrisons': 0,
                     'workers': 0

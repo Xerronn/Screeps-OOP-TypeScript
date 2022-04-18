@@ -96,7 +96,13 @@ export default class Miner extends Worker {
             if (this.memory.travelTime === undefined && this.ticksToLive > 1400) {
                 this.memory.travelTime = Game.time - this.spawnTime;
             }
-            this.liveObj.harvest(this.source);
+            let success = this.liveObj.harvest(this.source);
+            if (success === OK) {
+                let amount = this.getActiveBodyParts(WORK) * 2;
+                if (this.remote) {
+                    Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyMined', amount);
+                } else Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyMined', amount);
+            }
         } else {
             this.liveObj.travelTo(target, {allowSwap: true});
         }
