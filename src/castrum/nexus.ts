@@ -55,7 +55,7 @@ export default class Nexus extends Castrum {
      * @param {Object} memory an optional memory object to spawn the creep with. Recommended only for rebirth. Do other memory stuff in objects
      * @returns
      */
-    spawnCreep(body: BodyPartConstant[], type: CivitasType | LegionType , memory: CreepMemory) {
+    spawnCreep(body: BodyPartConstant[], type: CIVITAS_TYPES | LEGION_TYPES , memory: CreepMemory) {
         let name = type + "<" + Game.time + ">"
 
         let spawnBody = body;
@@ -97,9 +97,7 @@ export default class Nexus extends Castrum {
             this.spawningThisTick = true;
 
             //keeping some energy expenditure stats
-            if (["hauler", "emissary", "prospector", "curator", "garrison"].includes(type)) {
-                this.statTracking(body);
-            }
+            this.statTracking(memory)
         }
         return success;
     }
@@ -109,10 +107,16 @@ export default class Nexus extends Castrum {
      * @param {String} type the type of the creep
      * @param {String} body the body of the creep
      */
-    statTracking(body: BodyPartConstant[]) {
-        let bodyCost = Informant.calculateBodyCost(body);
-
-        let currentValue = Chronicler.readStatistic(this.room, "RemoteEnergySpent");
-        Chronicler.writeStatistic(this.room, "RemoteEnergySpent", currentValue + bodyCost);
+    statTracking(memory: CreepMemory) {
+        let bodyCost = Informant.calculateBodyCost(memory.body);
+        //increment number spent on that creep type
+        Chronicler.writeIncrementSpawningStatistic(this.room, memory.type, bodyCost);
+        //if it is remote, increment the remote values
+        if (memory.assignedRoom !== this.room && Chronicler.readRemoteRegistered(this.room, memory.assignedRoom)) {
+            Chronicler.writeIncrementRemoteStatistic(this.room, memory.assignedRoom, 'energySpent', bodyCost);
+            if (memory.type === LEGION_TYPES.GARRISON) {
+                Chronicler.writeIncrementRemoteStatistic(this.room, memory.assignedRoom, 'garrisons', 1);
+            } else Chronicler.writeIncrementRemoteStatistic(this.room, memory.assignedRoom, 'workers', 1);
+        }
     }
 }
