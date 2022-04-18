@@ -388,6 +388,17 @@ export default class Chronicler {
     }
 
     /**
+     * Increment a room statistic
+     * @param room 
+     * @param stat 
+     * @param value 
+     */
+     static writeIncrementSpawningStatistic(room: string, creepType: CIVITAS_TYPES | LEGION_TYPES, value: number) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].statistics.energySpawning[creepType] += value;
+    }
+
+    /**
      * Get a room statistic
      * @param {String} room string representing the room
      * @param {String} stat the statistic to return
