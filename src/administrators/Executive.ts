@@ -79,9 +79,10 @@ export default class Executive {
                     let liveRemote = Game.rooms[remote];
 
                     //check that we have vision
-                    if (liveRemote !== undefined) {
+                    if (liveRemote === undefined) continue;
 
-                        //make creeps flee when invaders are present
+                    //make creeps flee when invaders are present
+                    if (!Chronicler.readRemoteGarrisoned(this.room, remote)) {
                         let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
                         if (numEnemies > 0) {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
@@ -90,51 +91,51 @@ export default class Executive {
                         } else {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                         }
+                    }
 
-                        //every 100 ticks check to see if a road is below 2000 hits
-                        let curatorSpawned = Chronicler.readRemoteCurated(this.room, remote);
-                        if (Game.time % 100 == 0 && !curatorSpawned) {
-                            let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
+                    //every 100 ticks check to see if a road is below 2000 hits
+                    let curatorSpawned = Chronicler.readRemoteCurated(this.room, remote);
+                    if (Game.time % 100 == 0 && !curatorSpawned) {
+                        let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
 
-                            for (let road of allRoads) {
-                                if (road.hits < road.hitsMax / 2.5) {
-                                    this.spawnCurator(remote);
-                                    Chronicler.writeRemoteCurated(this.room, remote, true);
-                                    break;
-                                }
+                        for (let road of allRoads) {
+                            if (road.hits < road.hitsMax / 2.5) {
+                                this.spawnCurator(remote);
+                                Chronicler.writeRemoteCurated(this.room, remote, true);
+                                break;
                             }
                         }
+                    }
 
-                        //plan roads and then spawn engineers and eventually miners
-                        if (remoteData.roadsBuilt === undefined || remoteData.roadsBuilt === false) {
-                            //get last road tile leading into the remote room
-                            let exit = Game.rooms[this.room].findExitTo(remote);
-                            if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
-                            Architect.buildRemotePaths(this.room, remote, exit);
-                            Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
-                            let sources = liveRemote.find(FIND_SOURCES);
-                            for (let source of sources) {
-                                this.getSupervisor().initiate({
-                                    'body' : [
-                                        WORK, WORK, WORK, WORK, 
-                                        CARRY, CARRY, CARRY, CARRY,
-                                        MOVE, MOVE, MOVE, MOVE, 
-                                        MOVE, MOVE, MOVE, MOVE
-                                    ], 
-                                    'type': CIVITAS_TYPES.ENGINEER, 
-                                    'memory': {'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'offRoading': true}
+                    //plan roads and then spawn engineers and eventually miners
+                    if (remoteData.roadsBuilt === undefined || remoteData.roadsBuilt === false) {
+                        //get last road tile leading into the remote room
+                        let exit = Game.rooms[this.room].findExitTo(remote);
+                        if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
+                        Architect.buildRemotePaths(this.room, remote, exit);
+                        Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
+                        let sources = liveRemote.find(FIND_SOURCES);
+                        for (let source of sources) {
+                            this.getSupervisor().initiate({
+                                'body' : [
+                                    WORK, WORK, WORK, WORK, 
+                                    CARRY, CARRY, CARRY, CARRY,
+                                    MOVE, MOVE, MOVE, MOVE, 
+                                    MOVE, MOVE, MOVE, MOVE
+                                ], 
+                                'type': CIVITAS_TYPES.ENGINEER, 
+                                'memory': {'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'offRoading': true}
+                            });
+
+                            let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
+                            let task = `global.Imperator.administrators[${this.room}].supervisor.initiate(
+                                {
+                                    'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
+                                    'type': '${CIVITAS_TYPES.MINER}', 
+                                    'memory': objArr[0]
                                 });
-
-                                let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
-                                let task = `global.Imperator.administrators[${this.room}].supervisor.initiate(
-                                    {
-                                        'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
-                                        'type': '${CIVITAS_TYPES.MINER}', 
-                                        'memory': objArr[0]
-                                    });
-                                `;
-                                Director.schedule(this.room, Game.time + 2000, task, [memory]);            
-                            }
+                            `;
+                            Director.schedule(this.room, Game.time + 2000, task, [memory]);            
                         }
                     }
                 }
