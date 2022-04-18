@@ -73,11 +73,38 @@ export default class Chronicler {
                 },
                 'schematic': schema,
                 'resources': resources,
-                'statistics': {},
+                'statistics': Chronicler.getEmptyStatistics(),
                 'remotes': {}
             }
         }
         return true;
+    }
+
+    static getEmptyStatistics(): RoomStatistics {
+        return {
+            'lastReset': Game.time,
+            'energyDeposited': 0,
+            'energyUpgraded': 0,
+            'energySpawning': {
+                [CIVITAS_TYPES.ARBITER]: 0,
+                [CIVITAS_TYPES.CHEMIST]: 0,
+                [CIVITAS_TYPES.CONTRACTOR]: 0,
+                [CIVITAS_TYPES.COURIER]: 0,
+                [CIVITAS_TYPES.CURATOR]: 0,
+                [CIVITAS_TYPES.EMISSARY]: 0,
+                [CIVITAS_TYPES.ENGINEER]: 0,
+                [CIVITAS_TYPES.EXCAVATOR]: 0,
+                [CIVITAS_TYPES.HOST]: 0,
+                [CIVITAS_TYPES.MINER]: 0,
+                [CIVITAS_TYPES.SCHOLAR]: 0,
+                [CIVITAS_TYPES.SCOUT]: 0,
+                
+                [LEGION_TYPES.EXECUTIONER]: 0,
+                [LEGION_TYPES.GARRISON]: 0,
+                [LEGION_TYPES.JESTER]: 0
+            },
+            'remotes': {}
+        }
     }
 
     /**
@@ -316,16 +343,12 @@ export default class Chronicler {
     static writeNumContractors(room: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].flags.numContractors = value;
-    }    
-
-    // /**
-    //  * Get remotes built flag for a given room
-    //  * @param {String} room string representing the room
-    //  * @returns value of Remotes built flag
-    //  */
-    // static getRemoteBuilt(room: string): boolean {
-    //     return Memory.rooms[room].flags.remoteBuilt;
-    // }
+    }
+    
+    static resetStatistics(room: string) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].statistics = Chronicler.getEmptyStatistics();
+    }
 
     /**
      * Get a room statistic
@@ -333,24 +356,42 @@ export default class Chronicler {
      * @param {String} stat the statistic to return
      * @returns  room sources object
      */
-    static readStatistic(room: string, stat: string): any {
+    static readStatistic(room: string, statistic: keyof RoomStatistics): any {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        try {
-            return Memory.rooms[room].statistics[stat];
-        } catch (err) {
-            throw new Error("Statistic doesn't exist");
-        }
+        return Memory.rooms[room].statistics[statistic];
     }
 
     /**
-     * Set a room statistic to a value
+     * Increment a room statistic
      * @param room 
      * @param stat 
      * @param value 
      */
-    static writeStatistic(room: string, stat: string, value: any) {
+    static writeIncrementStatistic(room: string, statistic: plainStatistics, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].statistics[stat] = value;
+        Memory.rooms[room].statistics[statistic] += value;
+    }
+
+    /**
+     * Get a room statistic
+     * @param {String} room string representing the room
+     * @param {String} stat the statistic to return
+     * @returns  room sources object
+     */
+     static readRemoteStatistic(room: string, remote: string, statistic: keyof RemoteStatistics): any {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].statistics.remotes[remote][statistic];
+    }
+
+    /**
+     * Increment a room statistic
+     * @param room 
+     * @param stat 
+     * @param value 
+     */
+    static writeIncrementRemoteStatistic(room: string, remote: string, statistic: keyof RemoteStatistics, value: number) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].statistics.remotes[remote][statistic] += value;
     }
 
     /**

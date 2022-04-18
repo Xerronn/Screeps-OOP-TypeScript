@@ -51,6 +51,7 @@ interface RoomFlags {
     boostingWorkshops: BoostingMemory;
 }
 
+type plainStatistics = 'energyDeposited' | 'energyUpgraded';
 interface RoomStatistics {
     lastReset: number;
     remotes: {[roomName: string]: RemoteStatistics};
