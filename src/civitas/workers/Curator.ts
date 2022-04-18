@@ -16,7 +16,7 @@ export default class Curator extends Worker {
     run() {
         //march to room and flee if enemies
         if (this.fleeing === true) {
-            return this.march(this.memory.spawnRoom);
+            return this.march(this.memory.spawnRoom, true);
         }
         
         if (this.arrived === false) {
