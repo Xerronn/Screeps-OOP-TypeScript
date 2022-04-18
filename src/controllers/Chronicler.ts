@@ -73,15 +73,15 @@ export default class Chronicler {
                 },
                 'schematic': schema,
                 'resources': resources,
-                'statistics': Chronicler.getEmptyStatistics(),
+                'statistics': Chronicler.getEmptyStatistics(room),
                 'remotes': {}
             }
         }
         return true;
     }
 
-    static getEmptyStatistics(): RoomStatistics {
-        return {
+    static getEmptyStatistics(room: string): RoomStatistics {
+        let statisticsMemory: RoomStatistics = {
             'lastReset': Game.time,
             'energyDeposited': 0,
             'energyUpgraded': 0,
@@ -105,6 +105,21 @@ export default class Chronicler {
             },
             'remotes': {}
         }
+
+        let remotes = Chronicler.readRemotes(room);
+
+        for (let remote in remotes) {
+            if (remotes[remote].status === REMOTE_STATUSES.CLAIMED || remotes[remote].status === REMOTE_STATUSES.INVADED) {
+                statisticsMemory.remotes[remote] = {
+                    'energySpent': 0,
+                    'energyDeposited': 0,
+                    'garrisons': 0,
+                    'workers': 0
+                }
+            }
+        }
+
+        return statisticsMemory;
     }
 
     /**
@@ -347,7 +362,7 @@ export default class Chronicler {
     
     static resetStatistics(room: string) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].statistics = Chronicler.getEmptyStatistics();
+        Memory.rooms[room].statistics = Chronicler.getEmptyStatistics(room);
     }
 
     /**
