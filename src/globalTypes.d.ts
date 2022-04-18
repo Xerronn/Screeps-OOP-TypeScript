@@ -19,7 +19,7 @@
 
 interface CreepMemory {
     name: string;
-    type: CivitasType | LegionType;
+    type: CIVITAS_TYPES | LEGION_TYPES;
     spawnRoom: string;
     generation: number | undefined;
     body: BodyPartConstant[];
@@ -110,7 +110,7 @@ interface StampPlacement {
 
 interface RenewalTemplate {
     body: BodyPartConstant[];
-    type: CivitasType | LegionType;
+    type: CIVITAS_TYPES | LEGION_TYPES;
     memory: CreepMemory | any;
 }
 

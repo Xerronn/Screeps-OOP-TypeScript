@@ -14,7 +14,7 @@ export default abstract class Civitas extends GameObj {
 
     //basic creep attributes
     name: string;
-    type: CivitasType | LegionType;;
+    type: CIVITAS_TYPES | LEGION_TYPES;
     memory: CreepMemory;
     store: StoreDefinition;
     body: BodyPartConstant[];

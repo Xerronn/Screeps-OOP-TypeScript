@@ -279,9 +279,6 @@ declare global {
         UNDEFINED = 'undefined'
     }
 
-    type CastrumType =
-        'bastion' | 'conduit' | 'market' | 'nexus' | 'workshop' | 'undefined';
-
     const enum CIVITAS_TYPES {
         ARBITER = 'arbiter',
         CHEMIST = 'chemist',
@@ -296,10 +293,6 @@ declare global {
         SCHOLAR = 'scholar',
         SCOUT = 'scout',
     }
-
-    type CivitasType =
-        'arbiter' | 'chemist' | 'contractor' | 'courier' | 'curator' |
-        'emissary' | 'engineer' | 'excavator' | 'miner' | 'host' | 'scholar' | 'scout';
 
     const enum LEGION_TYPES {
         EXECUTIONER = 'executioner',
