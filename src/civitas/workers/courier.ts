@@ -137,12 +137,10 @@ export default class Courier extends Worker {
         //if creep is sitting at its destination, there is nothing to do
         if (!reversed) {
             if (this.pos.isEqualTo(this.path[this.path.length - 1])) {
-                console.log(1);
                 return false;
             }
         } else {
             if (this.pos.isEqualTo(this.path[0])) {
-                console.log(2);
                 return false;
             }
         }
@@ -163,10 +161,8 @@ export default class Courier extends Worker {
         let path: RoomPosition[];
         if (!reversed) {
             path = this.path;
-            console.log(3);
         } else {
             path = this.reversedPath;
-            console.log(4);
         }
 
         for (let i in path) {
