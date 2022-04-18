@@ -50,6 +50,11 @@ export default class Chronicler {
         return Memory.rooms[room] !== undefined;
     }
 
+    static readRemoteRegistered(room: string, remote: string): boolean {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].remotes[remote] !== undefined;
+    }
+
     /**
      * Registers a room with some starting data
      * @param room
@@ -150,6 +155,7 @@ export default class Chronicler {
      */
     static readRemote(room: string, remote: string): RemoteMemory | undefined {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         return Memory.rooms[room].remotes[remote];
     }
 
@@ -161,6 +167,7 @@ export default class Chronicler {
      */
     static writeRemote(room: string, remote: string, data: RemoteMemory) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         let roomMemory = Memory.rooms[room];
         if (roomMemory.remotes === undefined) {
             roomMemory.remotes = {};
@@ -176,7 +183,7 @@ export default class Chronicler {
      */
     static writeRemoteStatus(room: string, remote: string, status: REMOTE_STATUSES) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         Memory.rooms[room].remotes[remote].status = status;
     }
 
@@ -188,7 +195,7 @@ export default class Chronicler {
      */
     static writeRemoteRoadsBuilt(room: string, remote: string, roadsBuilt: boolean) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        if (Chronicler.readRemote(room, remote) === undefined) throw new Error('Remote room does not exist');
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         Memory.rooms[room].remotes[remote].roadsBuilt = roadsBuilt;
     }
 
@@ -199,6 +206,7 @@ export default class Chronicler {
      */
      static readRemoteGarrisoned(room: string, remote: string): boolean {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         return Memory.rooms[room].remotes[remote].garrisoned || false;
     }
 
@@ -209,6 +217,7 @@ export default class Chronicler {
      */
     static writeRemoteGarrisoned(room: string, remote: string, value: boolean) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         Memory.rooms[room].remotes[remote].garrisoned = value;
     }
 
@@ -219,6 +228,7 @@ export default class Chronicler {
      */
      static readRemoteCurated(room: string, remote: string): boolean {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         return Memory.rooms[room].remotes[remote].curated || false;
     }
 
@@ -229,6 +239,7 @@ export default class Chronicler {
      */
     static writeRemoteCurated(room: string, remote: string, value: boolean) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         Memory.rooms[room].remotes[remote].curated = value;
     }
     
@@ -360,6 +371,10 @@ export default class Chronicler {
         Memory.rooms[room].flags.numContractors = value;
     }
     
+    /**
+     * Method to reset statistics memory for a room
+     * @param room 
+     */
     static resetStatistics(room: string) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].statistics = Chronicler.getEmptyStatistics(room);
@@ -406,6 +421,7 @@ export default class Chronicler {
      */
      static readRemoteStatistic(room: string, remote: string, statistic: keyof RemoteStatistics): any {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         return Memory.rooms[room].statistics.remotes[remote][statistic];
     }
 
@@ -417,6 +433,7 @@ export default class Chronicler {
      */
     static writeIncrementRemoteStatistic(room: string, remote: string, statistic: keyof RemoteStatistics, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        if (!Chronicler.readRemoteRegistered(room, remote)) throw new Error("Remote is not registered");
         Memory.rooms[room].statistics.remotes[remote][statistic] += value;
     }
 
