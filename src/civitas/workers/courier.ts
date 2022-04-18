@@ -171,7 +171,7 @@ export default class Courier extends Worker {
                 let nextDirection = this.pos.getDirectionTo(nextPos);
                 if (this.stuckTick > 0) {
                     let blockingCreeps = Game.rooms[this.room].lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
-                    if (blockingCreeps.length > 0 && blockingCreeps[0].my && blockingCreeps[0].memory.type !== this.memory.type) {
+                    if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
                         blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
                     }
                 }
