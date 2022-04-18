@@ -9,7 +9,7 @@
         [roomName: string]: {
             [tick: number]: {
                 [taskId: string]: {
-                    script: string,
+                    script: string;
                     objArr: any
                 }
             }
@@ -37,18 +37,33 @@ interface RoomMemory {
     flags: RoomFlags;
     schematic: RoomSchematic;
     resources: RoomResources;
-    statistics: any;   //todo
+    statistics: RoomStatistics;
     remotes: RoomRemotes;
 }
 
 interface RoomFlags {
-    gameStage: string,
-    roadsBuilt: boolean,
-    numContractors: number,
-    bastionsFilled: boolean,
-    doneScouting: boolean,
-    workshopsFilled: boolean,
-    boostingWorkshops: BoostingMemory,
+    gameStage: string;
+    roadsBuilt: boolean;
+    numContractors: number;
+    bastionsFilled: boolean;
+    doneScouting: boolean;
+    workshopsFilled: boolean;
+    boostingWorkshops: BoostingMemory;
+}
+
+interface RoomStatistics {
+    lastReset: number;
+    remotes: {[roomName: string]: RemoteStatistics};
+    energySpawning: {[key in CIVITAS_TYPES | LEGION_TYPES]: number};
+    energyDeposited: number;
+    energyUpgraded: number;
+}
+
+interface RemoteStatistics {
+    energySpent: number;
+    energyDeposited: number;
+    garrisons: number;
+    workers: number;
 }
 
 interface RoomRemotes {[roomName: string]: RemoteMemory;}
@@ -88,7 +103,7 @@ interface RoomPaths {
 
 interface Stamp extends Array<BuildableStructureConstant[]> {}
 interface StampPlacement {
-    anchor: Position,
+    anchor: Position;
     rotations: number
 }
 
