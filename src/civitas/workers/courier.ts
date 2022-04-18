@@ -1,4 +1,5 @@
 import Informant from 'controllers/Informant';
+import Traveler from 'thirdParty/traveler';
 import Worker, {WorkerMemory} from './Worker';
 
 interface CourierMemory extends WorkerMemory {
@@ -88,7 +89,7 @@ export default class Courier extends Worker {
         if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
 
         if (this.fleeing) {
-            this.march(this.memory.spawnRoom);
+            this.march(this.memory.spawnRoom, true);
         }
 
         //if container no longer exists, its been replaced by a link
@@ -135,10 +136,12 @@ export default class Courier extends Worker {
         //if creep is sitting at its destination, there is nothing to do
         if (!reversed) {
             if (this.pos.isEqualTo(this.path[this.path.length - 1])) {
+                console.log(1);
                 return false;
             }
         } else {
             if (this.pos.isEqualTo(this.path[0])) {
+                console.log(2);
                 return false;
             }
         }
@@ -156,10 +159,28 @@ export default class Courier extends Worker {
             //do something
             this.pathing = false;
         }
+        let path: RoomPosition[];
         if (!reversed) {
-            this.liveObj.moveByPath(this.path);
+            path = this.path;
+            console.log(3);
         } else {
-            this.liveObj.moveByPath(this.reversedPath);
+            path = this.reversedPath;
+            console.log(4);
+        }
+
+        for (let i in path) {
+            if (path[i].isEqualTo(this.pos)) {
+                let nextPos = path[parseInt(i) + 1];
+                let nextDirection = this.pos.getDirectionTo(nextPos);
+                if (this.stuckTick > 0) {
+                    let blockingCreeps = Game.rooms[this.room].lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
+                    if (blockingCreeps.length > 0 && blockingCreeps[0].my && blockingCreeps[0].memory.type !== this.memory.type) {
+                        blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
+                    }
+                }
+                this.liveObj.move(nextDirection);
+                return true;
+            }
         }
 
         return true;
