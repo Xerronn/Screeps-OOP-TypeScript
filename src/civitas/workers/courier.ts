@@ -231,7 +231,7 @@ export default class Courier extends Worker {
         if (this.pos.inRangeTo(this.storage, 1)) {
             this.liveObj.transfer(this.storage, resourceType);
             if (resourceType === RESOURCE_ENERGY) {
-                let amount = this.store.getUsedCapacity(RESOURCE_ENERGY);
+                let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), this.storage.store.getFreeCapacity(RESOURCE_ENERGY));
                 if (this.remote) {
                     Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyDeposited', amount);
                     Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'remoteEnergyDeposited', amount);
