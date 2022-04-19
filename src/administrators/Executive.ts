@@ -63,7 +63,7 @@ export default class Executive {
                         'type': CIVITAS_TYPES.CONTRACTOR,
                         'memory': { "generation": 0 }
                     });
-                    Chronicler.writeNumContractors(this.room, contractors + 1);
+                    Chronicler.writeIncrementNumContractors(this.room, 1);
                 }
             }
         }

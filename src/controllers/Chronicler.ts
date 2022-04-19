@@ -363,9 +363,9 @@ export default class Chronicler {
      * @param room 
      * @param value 
      */
-    static writeNumContractors(room: string, value: number) {
+    static writeIncrementNumContractors(room: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        Memory.rooms[room].flags.numContractors = value;
+        Memory.rooms[room].flags.numContractors += value;
     }
     
     static resetStatistics(room: string) {
