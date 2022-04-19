@@ -17,7 +17,9 @@ export default class Legionnaire extends Civitas {
         }
 
         let target = Game.rooms[this.room].find(FIND_HOSTILE_SPAWNS)[0];
-        this.kill(target);
+        if (target) {
+            this.kill(target);
+        }
         return;
     }
 
