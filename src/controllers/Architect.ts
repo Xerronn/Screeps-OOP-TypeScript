@@ -990,7 +990,9 @@ export default class Architect {
      */
     static cleanup(roomObj: Room) {
         let enemyBuildings = roomObj.find(FIND_STRUCTURES, {
-            filter: (struc) => {return struc.structureType != STRUCTURE_STORAGE && struc.structureType != STRUCTURE_TERMINAL}
+            filter: (struc) => {return struc.structureType !== STRUCTURE_STORAGE && 
+                struc.structureType !== STRUCTURE_TERMINAL && 
+                struc.structureType !== STRUCTURE_NUKER}
         }) as OwnedStructure[];
         for (let struct of enemyBuildings) {
             if (struct.my === true) continue;
