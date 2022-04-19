@@ -90,7 +90,7 @@ export default class Courier extends Worker {
         if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
 
         if (this.fleeing) {
-            this.march(this.memory.spawnRoom, true);
+            return this.march(this.memory.spawnRoom, true);
         }
 
         //if container no longer exists, its been replaced by a link
