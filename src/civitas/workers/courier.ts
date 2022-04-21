@@ -86,11 +86,13 @@ export default class Courier extends Worker {
      * logic to run each tick
      */
     run(): boolean {
-        let replacementTime = this.path.length + (CREEP_SPAWN_TIME * this.body.length);
-        if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
-
         if (this.fleeing) {
             return this.march(this.memory.spawnRoom, true);
+        }
+
+        if (this.path !== undefined) {
+            let replacementTime = this.path.length + (CREEP_SPAWN_TIME * this.body.length);
+            if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
         }
 
         //if container no longer exists, its been replaced by a link
