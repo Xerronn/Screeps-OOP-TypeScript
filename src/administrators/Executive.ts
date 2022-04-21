@@ -167,7 +167,6 @@ export default class Executive {
         switch (gameStage) {
             case 1:
                 //calculate anchor and build spawn
-                // // Architect.buildBunker(room);
                 if (Game.rooms[this.room].find(FIND_MY_SPAWNS).length > 0) {
                     //start the room off with the five basic engineers
                     this.phaseOne();
@@ -246,7 +245,7 @@ export default class Executive {
             case 7:
                 //just turned rcl 7
                 //build second source link and get rid of one professor
-                // Architect.buildSourceLinks(room);
+                Architect.buildSourceLink(this.room);
                 this.downscale();
                 break;
             case 7.1:
