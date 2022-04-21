@@ -81,6 +81,9 @@ export default class Executive {
                     //check that we have vision
                     if (liveRemote === undefined) continue;
 
+                    //get room status
+                    let status = remoteData.status;
+
                     //make creeps flee when invaders are present
                     if (!Chronicler.readRemoteGarrisoned(this.room, remote)) {
                         let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
@@ -92,6 +95,9 @@ export default class Executive {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                         }
                     }
+                    
+                    //don't proceed with any more logic if the room is currently invaded
+                    if (status === REMOTE_STATUSES.INVADED) continue;
 
                     //every 100 ticks check to see if a road is below 2000 hits
                     let curatorSpawned = Chronicler.readRemoteCurated(this.room, remote);
