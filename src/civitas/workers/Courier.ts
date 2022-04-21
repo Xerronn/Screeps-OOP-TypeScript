@@ -104,9 +104,7 @@ export default class Courier extends Worker {
                 //rip
                 this.liveObj.suicide();
                 return false;
-            } else {
-                this.march(this.assignedRoom);
-            }
+            } else this.march(this.assignedRoom);
         }
 
         if (this.store.getUsedCapacity() == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity() > 0)) {
