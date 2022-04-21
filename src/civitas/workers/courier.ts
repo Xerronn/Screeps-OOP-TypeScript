@@ -48,6 +48,19 @@ export default class Courier extends Worker {
         }
 
         this.evolved = false;
+    }
+
+    update(): boolean {
+        if (!super.update()) {
+            //creep is dead
+            return false;
+        }
+        //attributes that will change tick to tick
+        this.storage = Game.getObjectById(this.memory.storageId) || undefined;
+        this.container = Game.getObjectById(this.memory.containerId) || undefined;
+        if (this.memory.terminalId !== undefined) {
+            this.terminal = Game.getObjectById(this.memory.terminalId) || undefined;
+        }
 
         //defined cached path between the target and the container
         if (this.path === undefined && this.container !== undefined && this.target !== undefined) {
@@ -66,19 +79,7 @@ export default class Courier extends Worker {
 
             this.reversedPath = [...this.path].reverse();
         }
-    }
-
-    update(): boolean {
-        if (!super.update()) {
-            //creep is dead
-            return false;
-        }
-        //attributes that will change tick to tick
-        this.storage = Game.getObjectById(this.memory.storageId) || undefined;
-        this.container = Game.getObjectById(this.memory.containerId) || undefined;
-        if (this.memory.terminalId !== undefined) {
-            this.terminal = Game.getObjectById(this.memory.terminalId) || undefined;
-        }
+        
         return true;
     }
 
