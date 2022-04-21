@@ -70,6 +70,7 @@ export default class Executive {
 
         //Once gamestage is higher than 6.4, we start doing some remote logic
         if (gameStage >= 6.4) {
+            let start = Game.cpu.getUsed();
             let remotes = Chronicler.readRemotes(this.room);
             for (let remote in remotes) {
                 let remoteData = remotes[remote];
@@ -100,8 +101,7 @@ export default class Executive {
                     if (status === REMOTE_STATUSES.INVADED) continue;
 
                     //every 100 ticks check to see if a road is below 2000 hits
-                    let curatorSpawned = Chronicler.readRemoteCurated(this.room, remote);
-                    if (Game.time % 100 == 0 && !curatorSpawned) {
+                    if (Game.time % 100 == 0 && !Chronicler.readRemoteCurated(this.room, remote)) {
                         let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
 
                         for (let road of allRoads) {
@@ -109,6 +109,16 @@ export default class Executive {
                                 this.spawnCurator(remote);
                                 Chronicler.writeRemoteCurated(this.room, remote, true);
                                 break;
+                            }
+                        }
+                    }
+
+                    //check if there are ruins of roads and replace them if so
+                    let ruins = liveRemote.find(FIND_RUINS);
+                    if (ruins.length > 0) {
+                        for (let ruin of ruins) {
+                            if (ruin.structure.structureType === STRUCTURE_ROAD) {
+                                ruin.pos.createConstructionSite(STRUCTURE_ROAD);
                             }
                         }
                     }
