@@ -28,8 +28,13 @@ export default class Curator extends Worker {
             this.memory.task = "withdraw";
             this.withdrawContainer();
         } else {
-            this.memory.task = "repair"
-            this.repairRoads();
+            if (Game.rooms[this.assignedRoom].find(FIND_CONSTRUCTION_SITES).length > 0) {
+                this.memory.task = "build";
+                this.build();
+            } else {
+                this.memory.task = "repair"
+                this.repairRoads();
+            }   
         }
         return;
     }
