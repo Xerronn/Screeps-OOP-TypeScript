@@ -15,7 +15,6 @@ export default class Nexus extends Castrum {
 
     constructor(nexus: StructureSpawn) {
         super(nexus);
-        this.liveObj = nexus;
 
         this.id = nexus.id;
         this.name = nexus.name;
@@ -28,7 +27,6 @@ export default class Nexus extends Castrum {
 
     update(): boolean {
         if (!super.update()) return false;          //structure is dead
-        this.liveObj = Game.spawns[this.name];
         this.spawning = this.liveObj.spawning;
 
         if (!this.spawning) {
