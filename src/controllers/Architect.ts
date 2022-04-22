@@ -67,6 +67,7 @@ export default class Architect {
     static buildRoom(room: string, buildRoads: boolean) {
         this.buildExtensions(room, buildRoads);
         this.buildBastions(room, buildRoads);
+        this.buildNexus(room);
         this.buildMain(room, buildRoads);
     }
 
@@ -167,6 +168,40 @@ export default class Architect {
                     pos.createConstructionSite(STRUCTURE_ROAD);
                 }
             }
+        }
+    }
+
+    /**
+     * Method to build and repair workshops
+     * @param room 
+     */
+    static buildWorkshops(room: string) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let stamp = schema.labs;
+        let rotated = rotateStamp(STAMP_LAB, stamp.rotations);
+        let dimensions = rotated.length;
+        for (let x = 0; x < dimensions; x++) {
+            for (let y = 0; y < dimensions; y++) {
+                let building = rotated[x][y];
+                let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
+                pos.createConstructionSite(building);
+            }
+        }
+    }
+
+    /**
+     * Method to build and repair workshops
+     * @param room 
+     */
+     static buildNexus(room: string) {
+        let schema = Chronicler.readSchema(room);
+        let controller = Game.rooms[room].controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        let spots = schema.spawns;
+        for (let spot of spots) {
+            new RoomPosition(spot.x, spot.y, room).createConstructionSite(STRUCTURE_SPAWN);
         }
     }
 
