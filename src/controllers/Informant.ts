@@ -156,8 +156,13 @@ export default class Informant {
         }
         if (rcl == 7 && currentStage == 7 && numConstructionSites === 0
             && liveRoom.storage && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
-                //start chemical productions
+                //build workshops
                 calculation = 7.1;
+        }
+        if (rcl == 7 && currentStage == 7.1 && numConstructionSites === 0
+            && liveRoom.storage && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 100000) {
+                //start chemical productions
+                calculation = 7.2;
         }
         if (rcl == 8) {
             //todo: lots

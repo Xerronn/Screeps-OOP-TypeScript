@@ -1,3 +1,4 @@
+import Courier from "civitas/workers/Courier";
 import Director from "controllers/Director";
 import Architect from "../controllers/Architect";
 import Chronicler from "../controllers/Chronicler";
@@ -249,6 +250,10 @@ export default class Executive {
                 this.downscale();
                 break;
             case 7.1:
+                //build those expensive labs
+                Architect.buildWorkshops(this.room);
+                break;
+            case 7.2:
                 //everything is done building and storage has > 100,000 energy
                 this.spawnChemist();
                 break;
@@ -496,21 +501,24 @@ export default class Executive {
      * Method that removes one of the scholars and two haulers upon reaching rcl 7 and max creeps are available
      */
     downscale() {
-        //todo: redo this knowing that remote type creeps are not a thing
-        // let supervisor = this.getSupervisor();
-        // // delete supervisor.civitates.scholar[0].memory.generation;
-        // let haulers = supervisor.civitas.hauler;
+        let supervisor = this.getSupervisor();
+        delete supervisor.civitas[CIVITAS_TYPES.SCHOLAR][0].memory.generation;
+        let couriers = supervisor.civitas[CIVITAS_TYPES.COURIER];
 
-        // let sources = [];
-        // for (let hauler of haulers) {
-        //     if (!sources.includes(hauler.memory.source)) {
-        //         sources.push(hauler.memory.source);
-        //         delete hauler.memory.generation;
-        //     } else {
-        //         //make the hauler bigger to make up for the loss of his buddy
-        //         //lose out on some energy, but the cpu savings are worth it
-        //         hauler.evolve();
-        //     }
-        // }
+        let assignedContainers: {[source: Id<StructureContainer>]: Courier[]} = {}
+        for (let courier of couriers) {
+            if (courier.assignedRoom !== this.room) {
+                if (assignedContainers[courier.memory.containerId] === undefined) {
+                    assignedContainers[courier.memory.containerId] = [];
+                }
+                assignedContainers[courier.memory.containerId].push(courier);
+            }
+        }
+        for (let container in assignedContainers) {
+            if (assignedContainers[container as Id<StructureContainer>].length > 1) {
+                delete assignedContainers[container as Id<StructureContainer>][0].memory.generation;
+            }
+        }
+        
     }
 }
