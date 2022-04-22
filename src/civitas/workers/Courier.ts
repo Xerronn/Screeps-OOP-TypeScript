@@ -17,7 +17,6 @@ export default class Courier extends Worker {
     container?: StructureContainer;
     terminal?: StructureTerminal;
     target?: StructureStorage | StructureTerminal;
-    evolved: boolean;
 
     path: RoomPosition[];
     reversedPath: RoomPosition[];
@@ -46,8 +45,6 @@ export default class Courier extends Worker {
         } else {
             this.target = this.terminal;
         }
-
-        this.evolved = false;
     }
 
     update(): boolean {
@@ -282,5 +279,21 @@ export default class Courier extends Worker {
             }
         }
         return true;
+    }
+
+    /**
+     * Method to double the size of the courier for when two couriers are downsized to one
+     */
+    evolve() {
+        let carryCount = 0;
+        for (let part of this.body) {
+            if (part === CARRY) carryCount++;
+        }
+
+        let newBody: BodyPartConstant[] = [];
+        for (let i = 0; i < Math.min(32, carryCount * 2); i++) {
+            newBody.push(MOVE);
+        }
+        this.memory.body = newBody;
     }
 }
