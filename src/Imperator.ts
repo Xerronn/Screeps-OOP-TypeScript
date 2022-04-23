@@ -1,7 +1,6 @@
 import Supervisor from './administrators/Supervisor';
 import Executive from './administrators/Executive';
 import Chronicler from './controllers/Chronicler';
-import Architect from './controllers/Architect';
 
 //highest level class overseeing all operations in the game
 export default class Imperator {
