@@ -41,7 +41,7 @@ export default abstract class Castrum extends GameObj {
         return true;
     }
 
-    run(): boolean {
-        return false
+    run() {
+        return;
     }
 }
