@@ -876,7 +876,17 @@ export default class Architect {
         viableSpots[1].sort((a, b) => (center.getRangeTo(a.anchor.x, a.anchor.y) > center.getRangeTo(b.anchor.x, b.anchor.y)) ? 1 : -1);
         extensionStamps.push(...viableSpots[1]);
         extensionStamps = extensionStamps.slice(0, 10)
-        return extensionStamps;
+
+        //sort by closest to center
+        let mainAnchor = {
+            x: center.x - 1,
+            y: center.y - 1
+        }
+        let sortedExtensions = extensionStamps.sort((a, b) => 
+            this.coordinateDistance(a.anchor.x, a.anchor.y, mainAnchor.x, mainAnchor.y) - 
+            this.coordinateDistance(b.anchor.x, b.anchor.y, mainAnchor.x, mainAnchor.y)
+        );
+        return sortedExtensions;
     }
 
     /**
