@@ -83,7 +83,9 @@ export default class Architect {
         if (controller === undefined) throw Error("Room has no controller!");
         let numExtensions = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][controller.level];
         if (numExtensions == 0) return;
+        let stop = false;
         for (let stamp of schema.extensions) {
+            if (stop === true) return;
             let rotated = rotateStamp(STAMP_EXTENSION, stamp.rotations);
             let dimensions = rotated.length;
             for (let x = 0; x < dimensions; x++) {
@@ -95,7 +97,7 @@ export default class Architect {
                     }
                     let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
                     pos.createConstructionSite(building);
-                    if (numExtensions <= 0) return;
+                    if (numExtensions <= 0) stop = true;
                 }
             }
         }
@@ -181,13 +183,28 @@ export default class Architect {
         if (controller === undefined) throw Error("Room has no controller!");
         let stamp = schema.labs;
         let rotated = rotateStamp(STAMP_LAB, stamp.rotations);
+        //we need to build the labs in a set order as their positions are important.
+        let chosenCorner: RoomPosition;
+        if (stamp.rotations % 2 === 0) {
+            //even
+            chosenCorner = new RoomPosition(stamp.anchor.x, stamp.anchor.y + 3, room);
+        } else {
+            //odd
+            chosenCorner = new RoomPosition(stamp.anchor.x + 3, stamp.anchor.y + 3, room);
+        }
+        let positions = [];
         let dimensions = rotated.length;
         for (let x = 0; x < dimensions; x++) {
             for (let y = 0; y < dimensions; y++) {
-                let building = rotated[x][y];
-                let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
-                pos.createConstructionSite(building);
+                positions.push(new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room));
             }
+        }
+        //sort by distance to chosenCorner
+        positions = positions.sort((a,b) => a.getRangeTo(chosenCorner) - b.getRangeTo(chosenCorner));
+        
+        for (let pos of positions) {
+            let building = rotated[pos.x][pos.y];
+            pos.createConstructionSite(building);
         }
     }
 
