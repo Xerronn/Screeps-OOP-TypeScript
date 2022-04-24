@@ -1,15 +1,18 @@
 import Supervisor from './administrators/Supervisor';
 import Executive from './administrators/Executive';
 import Chronicler from './controllers/Chronicler';
+import Logistician from 'administrators/Logistician';
 
 //highest level class overseeing all operations in the game
 export default class Imperator {
     administrators: {[roomName: string]: {supervisor: Supervisor, executive: Executive}};
+    logistician: Logistician;
     dominion: string[];
 
     constructor() {
         this.dominion = _.filter(Game.rooms, room => room.controller && room.controller.my).map(room => room.name);
         this.administrators = {};
+        this.logistician = new Logistician();
     }
 
     /**
