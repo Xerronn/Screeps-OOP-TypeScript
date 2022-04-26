@@ -7,6 +7,7 @@ export default class Logistician {
     constructor() {
         this._markets = [];
         this._marketsTick = 0;
+        this.clean();
     }
     
     /**
