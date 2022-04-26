@@ -47,7 +47,9 @@ export default class Workshop extends Castrum {
                     Chronicler.writeWorkshopsFilled(this.room, false);
                 }
                 if (this.getReagentsReady() && this.cooldown == 0) {
-                    this.liveObj.runReaction(this.supervisor.reagentWorkshops[0].liveObj, this.supervisor.reagentWorkshops[1].liveObj);
+                    if (this.supervisor.reagentWorkshops.length === 2) {
+                        this.liveObj.runReaction(this.supervisor.reagentWorkshops[0].liveObj, this.supervisor.reagentWorkshops[1].liveObj);
+                    }
                 }
                 break;
         }
@@ -59,6 +61,9 @@ export default class Workshop extends Castrum {
      * Method that returns if the reagents are ready to react
      */
     getReagentsReady() {
+        if (this.supervisor.reagentWorkshops.length !== 2) {
+            throw new Error('Supervisor is not correctly obtaining reagent workshops');
+        }
         for (let workshop of this.supervisor.reagentWorkshops) {
             if (workshop.cooldown !== 0 || workshop.resourceCount === 0) {
                 return false;
@@ -76,9 +81,11 @@ export default class Workshop extends Castrum {
 
         for (let spot of offsets) {
             if (this.pos.x === anchor.x + spot[0] && this.pos.y === anchor.y + spot[1]) {
+                this.supervisor.reagentWorkshops.push(this);
                 return WORKSHOP_TYPES.REAGENT;
             }
         }
+        this.supervisor.productWorkshops.push(this);
         return WORKSHOP_TYPES.PRODUCT;
     }
 
