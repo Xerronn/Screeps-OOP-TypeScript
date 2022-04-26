@@ -53,7 +53,10 @@ export default class Emissary extends Worker {
                 });
             `
 
-            let reservedTicks = Game.rooms[this.assignedRoom].controller?.reservation?.ticksToEnd || 100;
+            let reservedTicks = 100;
+            if (controller.reservation?.username !== 'Invader') {
+                reservedTicks = Game.rooms[this.assignedRoom].controller?.reservation?.ticksToEnd || 100;
+            }
             Director.schedule(this.memory.spawnRoom, Game.time + reservedTicks - (travelTime * 2), task, [[...this.body], this.memory.type, {...this.memory}]);
             //no more rebirth for you
             delete this.memory.generation;
@@ -72,7 +75,9 @@ export default class Emissary extends Worker {
             if (controller.sign?.username !== this.liveObj.owner.username) {
                 this.sign(controller);
             }
-            this.liveObj.reserveController(controller);
+            if (controller.reservation?.username === 'Invader') {
+                this.liveObj.attackController(controller);
+            } else this.liveObj.reserveController(controller);
         } else {
             this.liveObj.travelTo(controller);
         }
