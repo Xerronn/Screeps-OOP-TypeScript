@@ -95,6 +95,7 @@ export default class Executive {
                             Chronicler.writeRemoteGarrisoned(this.room, remote, true);
                         } else if (liveRemote.controller?.reservation?.username === 'Invader') {
                             this.spawnGarrison(remote, false);
+                            this.spawnEmissary(remote, 'catchup');
                             Chronicler.writeRemoteGarrisoned(this.room, remote, true);
                         } else {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
@@ -358,19 +359,21 @@ export default class Executive {
 
     /**
      * Method that spawns an emissary to either claim a new room or reserve a remote room
-     * @param {String} task either 'reserve' or 'claim'
+     * @param {String} task either 'reserve', 'claim', or 'catchup'
      */
-    spawnEmissary(assignedRoom: string, task='reserve') {
+    spawnEmissary(assignedRoom: string, task: 'reserve' | 'claim' | 'catchup'='reserve') {
         let body;
-        if (task == 'reserve') {
+        if (task === 'reserve' || task === 'catchup') {
             body = [CLAIM, CLAIM, CLAIM, MOVE, MOVE, MOVE];
         } else {
             body = [CLAIM, MOVE, MOVE, MOVE, MOVE, MOVE];
         }
+        let memory: any = {'generation': 0, 'task': task, 'assignedRoom': assignedRoom, 'offRoading': true};
+        if (task === 'catchup') delete memory['generation'];
         this.getSupervisor().initiate({
             'body': body,
             'type': CIVITAS_TYPES.EMISSARY,
-            'memory': {'generation' : 0, 'task': task, 'assignedRoom': assignedRoom, 'offRoading': true}
+            'memory': memory
         });
     }
 
