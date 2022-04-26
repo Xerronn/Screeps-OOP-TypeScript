@@ -93,9 +93,14 @@ export default class Executive {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
                             this.spawnGarrison(remote);
                             Chronicler.writeRemoteGarrisoned(this.room, remote, true);
+                        } else if (liveRemote.controller?.reservation?.username === 'Invader') {
+                            this.spawnGarrison(remote, false);
+                            Chronicler.writeRemoteGarrisoned(this.room, remote, true);
                         } else {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                         }
+
+                        
                     }
                     
                     //don't proceed with any more logic if the room is currently invaded
@@ -466,14 +471,23 @@ export default class Executive {
      * Method that spawns defenders for remote rooms
      * @param {String} assignedRoom string representing the room
      */
-    spawnGarrison(assignedRoom: string) {
-        this.getSupervisor().initiate({
-            'body': [
+    spawnGarrison(assignedRoom: string, advanced=true) {
+        let body: BodyPartConstant[] = [
+            ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
+            ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK,
+            MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
+            MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
+        ]
+        if (advanced === true) {
+            body = [
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
                 ATTACK, ATTACK, ATTACK, ATTACK,
                 RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK,
                 HEAL, HEAL, HEAL
-            ],
+            ]
+        }
+        this.getSupervisor().initiate({
+            'body': body,
             'type': LEGION_TYPES.GARRISON,
             'memory': {'assignedRoom': assignedRoom}
         });
