@@ -124,14 +124,14 @@ export default class Worker extends Civitas {
         let liveObj: StructureTower | undefined;
         if (this.memory.fillTarget !== undefined) {
             let tmpObj = Game.getObjectById(this.memory.fillTarget) || undefined;
-            if (tmpObj !== undefined && tmpObj.structureType === STRUCTURE_TOWER) liveObj = tmpObj;
+            if (tmpObj !== undefined && tmpObj.structureType === STRUCTURE_TOWER && tmpObj.store.getFreeCapacity(RESOURCE_ENERGY) > tmpObj.store.getCapacity(RESOURCE_ENERGY) / 4) liveObj = tmpObj;
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
             let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj);
 
             let fillables = bastions.filter(
-                obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > obj.store.getCapacity(RESOURCE_ENERGY) / 4
             );
 
             liveObj = this.pos.findClosestByRange(fillables) || undefined;
