@@ -324,4 +324,9 @@ declare global {
         CONTROLLER = 'controller',
         CONTAINER = 'container'
     }
+
+    const enum WORKSHOP_TYPES {
+        REAGENT = 'reagent',
+        PRODUCT = 'product'
+    }
 }
