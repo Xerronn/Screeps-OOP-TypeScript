@@ -21,7 +21,10 @@ export default class Garrison extends Legionnaire {
             return this.march(this.assignedRoom);
         }
 
-        let target = Game.rooms[this.room].find(FIND_HOSTILE_CREEPS)[0];
+        let target: AnyOwnedStructure | AnyCreep = Game.rooms[this.room].find(FIND_HOSTILE_CREEPS)[0];
+        if (target === undefined) {
+            target = Game.rooms[this.room].find(FIND_HOSTILE_STRUCTURES)[0];
+        }
         if (target === undefined) {
             this.conclude();
             if (!this.medic()) this.garrison();
