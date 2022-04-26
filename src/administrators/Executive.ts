@@ -89,11 +89,12 @@ export default class Executive {
                     //make creeps flee when invaders are present
                     if (!Chronicler.readRemoteGarrisoned(this.room, remote)) {
                         let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
+                        let invaderCore = liveRemote.find(FIND_HOSTILE_STRUCTURES)[0];
                         if (numEnemies > 0) {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
                             this.spawnGarrison(remote);
                             Chronicler.writeRemoteGarrisoned(this.room, remote, true);
-                        } else if (liveRemote.controller?.reservation?.username === 'Invader') {
+                        } else if (invaderCore !== undefined) {
                             this.spawnGarrison(remote, false);
                             this.spawnEmissary(remote, 'catchup');
                             Chronicler.writeRemoteGarrisoned(this.room, remote, true);
