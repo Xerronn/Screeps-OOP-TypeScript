@@ -3,7 +3,7 @@ import Director from 'controllers/Director';
 import Worker, {WorkerMemory} from './Worker';
 
 interface EmissaryMemory extends WorkerMemory {
-    task: 'reserve' | 'claim' | 'done';
+    task: 'reserve' | 'catchup' | 'claim' | 'done';
 }
 
 export default class Emissary extends Worker {
@@ -31,6 +31,7 @@ export default class Emissary extends Worker {
                 this.claim(controller);
                 break;
             case 'reserve':
+            case 'catchup':
                 this.reserve(controller);
                 break;
             case 'done':
