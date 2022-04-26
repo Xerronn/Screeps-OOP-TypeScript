@@ -36,7 +36,7 @@ export default class Worker extends Civitas {
         if (this.pos.inRangeTo(controller, 3)) {
             this.liveObj.upgradeController(controller);
             let amount = Math.min(this.getActiveBodyParts(WORK), this.store.getUsedCapacity(RESOURCE_ENERGY))
-            Chronicler.writeIncrementStatistic(this.memory.assignedRoom, 'energyUpgraded', amount);
+            Chronicler.writeIncrementStatistic(this.assignedRoom, 'energyUpgraded', amount);
         } else {
             this.liveObj.moveTo(controller);
         }
