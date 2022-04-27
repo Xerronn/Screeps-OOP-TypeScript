@@ -16,7 +16,7 @@ export default class Curator extends Worker {
     run() {
         //march to room and flee if enemies
         if (this.fleeing === true) {
-            return this.march(this.memory.spawnRoom, true);
+            return this.march(this.spawnRoom, true);
         }
         
         if (this.arrived === false) {
@@ -123,7 +123,7 @@ export default class Curator extends Worker {
      */
     conclude() {
         delete this.memory.generation;
-        Chronicler.writeRemoteCurated(this.memory.spawnRoom, this.assignedRoom, false);
+        Chronicler.writeRemoteCurated(this.spawnRoom, this.assignedRoom, false);
         this.liveObj.suicide();
     }
 }

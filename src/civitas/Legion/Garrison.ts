@@ -9,7 +9,7 @@ export default class Garrison extends Legionnaire {
     update() {
         if (!super.update()) {
             //creep is dead, set flag so a new one can be spawned
-            Chronicler.writeRemoteGarrisoned(this.memory.spawnRoom, this.assignedRoom, false);
+            Chronicler.writeRemoteGarrisoned(this.spawnRoom, this.assignedRoom, false);
             return false;
         }
         //attributes that change tick to tick
@@ -50,6 +50,6 @@ export default class Garrison extends Legionnaire {
      * Method to finish up garrison work
      */
     conclude() {
-        Chronicler.writeRemoteStatus(this.memory.spawnRoom, this.assignedRoom, REMOTE_STATUSES.CLAIMED);
+        Chronicler.writeRemoteStatus(this.spawnRoom, this.assignedRoom, REMOTE_STATUSES.CLAIMED);
     }
 }

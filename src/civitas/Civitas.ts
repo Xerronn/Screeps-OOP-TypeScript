@@ -22,6 +22,7 @@ export default abstract class Civitas extends GameObj {
     ticksToLive: number;
     assignedRoom: string;
     spawnTime: number;
+    spawnRoom: string;
 
     constructor(civitas: Creep) {
         super();
@@ -33,6 +34,7 @@ export default abstract class Civitas extends GameObj {
         this.hitsMax = civitas.hitsMax;
         this.body = civitas.body.map(b => b.type);
         this.assignedRoom = civitas.memory.assignedRoom || civitas.memory.spawnRoom;
+        this.spawnRoom = civitas.memory.spawnRoom;
 
         //Parse spawn time from name
         let regex = this.name.match('(?<=\<)(.*?)(?=\>)') || [''];
@@ -106,7 +108,7 @@ export default abstract class Civitas extends GameObj {
      */
     boost(boostTypes: string[]) {
         // for (let boost of boostTypes) {
-        //     let workshopId = global.Chronicler.getBoostingWorkshops(this.memory.spawnRoom)[boost] || undefined;
+        //     let workshopId = global.Chronicler.getBoostingWorkshops(this.spawnRoom)[boost] || undefined;
         //     let workshop = global.Imperator.getWrapper(workshopId);
         //     if (!workshop) {
         //         continue;
@@ -141,18 +143,18 @@ export default abstract class Civitas extends GameObj {
     }
 
     get fleeing(): boolean {
-        return this.remote && Chronicler.readRemote(this.memory.spawnRoom, this.memory.assignedRoom)?.status === REMOTE_STATUSES.INVADED;
+        return this.remote && Chronicler.readRemote(this.spawnRoom, this.memory.assignedRoom)?.status === REMOTE_STATUSES.INVADED;
     }
 
     get remote(): boolean {
-        return this.memory.assignedRoom !== this.memory.spawnRoom;
+        return this.memory.assignedRoom !== this.spawnRoom;
     }
 
     get supervisor(): Supervisor {
-        return global.Imperator.administrators[this.memory.spawnRoom].supervisor;
+        return global.Imperator.administrators[this.spawnRoom].supervisor;
     }
 
     get executive(): Executive {
-        return global.Imperator.administrators[this.memory.spawnRoom].executive;
+        return global.Imperator.administrators[this.spawnRoom].executive;
     }
 }

@@ -45,7 +45,7 @@ export default class Miner extends Worker {
 
         //march to room and flee if enemies
         if (this.fleeing === true) {
-            return this.march(this.memory.spawnRoom, true);
+            return this.march(this.spawnRoom, true);
         }
 
         if (this.arrived === false) {
@@ -100,8 +100,8 @@ export default class Miner extends Worker {
             if (success === OK) {
                 let amount = this.getActiveBodyParts(WORK) * 2;
                 if (this.remote) {
-                    Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyMined', amount);
-                } else Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyMined', amount);
+                    Chronicler.writeIncrementRemoteStatistic(this.spawnRoom, this.assignedRoom, 'energyMined', amount);
+                } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyMined', amount);
             }
         } else {
             this.liveObj.travelTo(target, {allowSwap: true});
@@ -124,7 +124,7 @@ export default class Miner extends Worker {
         if (this.pos.inRangeTo(link, 1)) {
             this.liveObj.transfer(link, RESOURCE_ENERGY);
             let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), link.store.getFreeCapacity(RESOURCE_ENERGY));
-            Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyDeposited', amount);
+            Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyDeposited', amount);
         } else {
             this.liveObj.travelTo(link);
         }
@@ -180,7 +180,7 @@ export default class Miner extends Worker {
      * @returns assigned link ID
      */
     getLink(): Id<StructureLink> | undefined {
-        let roomSources = Chronicler.readResources(this.memory.spawnRoom);
+        let roomSources = Chronicler.readResources(this.spawnRoom);
         return roomSources[this.memory.sourceId].linkId;
     }
 

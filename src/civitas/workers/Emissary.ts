@@ -16,7 +16,7 @@ export default class Emissary extends Worker {
     run() {
         //march to room and flee if enemies
         if (this.fleeing) {
-            return this.march(this.memory.spawnRoom, true);
+            return this.march(this.spawnRoom, true);
         }
 
         if (!this.arrived) {
@@ -35,7 +35,7 @@ export default class Emissary extends Worker {
                 this.reserve(controller);
                 break;
             case 'done':
-                global.Imperator.initRoom(this.assignedRoom, this.memory.spawnRoom);
+                global.Imperator.initRoom(this.assignedRoom, this.spawnRoom);
                 this.liveObj.suicide();
                 break;
         }
@@ -47,7 +47,7 @@ export default class Emissary extends Worker {
             //basically rebirth but without the dying first
 
             let task = `
-                global.Imperator.administrators[\"` + this.memory.spawnRoom + `\"].supervisor.initiate({
+                global.Imperator.administrators[\"` + this.spawnRoom + `\"].supervisor.initiate({
                     'body': objArr[0],
                     'type': objArr[1],
                     'memory': objArr[2]
@@ -58,7 +58,7 @@ export default class Emissary extends Worker {
             if (controller.reservation?.username !== 'Invader') {
                 reservedTicks = Game.rooms[this.assignedRoom].controller?.reservation?.ticksToEnd || 100;
             }
-            Director.schedule(this.memory.spawnRoom, Game.time + reservedTicks - (travelTime * 2), task, [[...this.body], this.memory.type, {...this.memory}]);
+            Director.schedule(this.spawnRoom, Game.time + reservedTicks - (travelTime * 2), task, [[...this.body], this.memory.type, {...this.memory}]);
             //no more rebirth for you
             delete this.memory.generation;
         }

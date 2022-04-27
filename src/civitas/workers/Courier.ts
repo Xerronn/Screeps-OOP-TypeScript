@@ -27,8 +27,8 @@ export default class Courier extends Worker {
         super(courier);
 
         _.defaults(this.memory, {
-            storageId: Game.rooms[this.memory.spawnRoom].storage?.id,
-            terminalId: Game.rooms[this.memory.spawnRoom].terminal?.id
+            storageId: Game.rooms[this.spawnRoom].storage?.id,
+            terminalId: Game.rooms[this.spawnRoom].terminal?.id
         });
 
         this.pathing = true;
@@ -85,7 +85,7 @@ export default class Courier extends Worker {
      */
     run(): boolean {
         if (this.fleeing) {
-            return this.march(this.memory.spawnRoom, true);
+            return this.march(this.spawnRoom, true);
         }
 
         if (this.path !== undefined) {
@@ -231,9 +231,9 @@ export default class Courier extends Worker {
             if (resourceType === RESOURCE_ENERGY) {
                 let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), this.storage.store.getFreeCapacity(RESOURCE_ENERGY));
                 if (this.remote) {
-                    Chronicler.writeIncrementRemoteStatistic(this.memory.spawnRoom, this.assignedRoom, 'energyDeposited', amount);
-                    Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'remoteEnergyDeposited', amount);
-                } else Chronicler.writeIncrementStatistic(this.memory.spawnRoom, 'energyDeposited', amount);
+                    Chronicler.writeIncrementRemoteStatistic(this.spawnRoom, this.assignedRoom, 'energyDeposited', amount);
+                    Chronicler.writeIncrementStatistic(this.spawnRoom, 'remoteEnergyDeposited', amount);
+                } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyDeposited', amount);
             }
             this.pathing = true;
         } else if (!this.pathing) {

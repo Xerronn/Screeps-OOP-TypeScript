@@ -57,21 +57,21 @@ export default class Engineer extends Miner {
     }
 
     evolve(): void {
-        if (Game.rooms[this.memory.spawnRoom].energyCapacityAvailable >= 500) {
+        if (Game.rooms[this.spawnRoom].energyCapacityAvailable >= 500) {
             this.memory.body = [
                 WORK, WORK,
                 CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE
             ];
         }
-        if (Game.rooms[this.memory.spawnRoom].energyCapacityAvailable >= 750) {
+        if (Game.rooms[this.spawnRoom].energyCapacityAvailable >= 750) {
             this.memory.body = [
                 WORK, WORK, WORK,
                 CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ];
         }
-        if (Game.rooms[this.memory.spawnRoom].energyCapacityAvailable >= 1000) {
+        if (Game.rooms[this.spawnRoom].energyCapacityAvailable >= 1000) {
             this.memory.body = [
                 WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY,
