@@ -1,12 +1,27 @@
 import Market from '../castrum/Market';
 
+const INTERESTED_RESOURCES = [
+    // RESOURCE_ENERGY,
+    RESOURCE_HYDROGEN,
+    RESOURCE_OXYGEN,
+    RESOURCE_UTRIUM,
+    RESOURCE_LEMERGIUM,
+    RESOURCE_KEANIUM,
+    RESOURCE_ZYNTHIUM,
+    RESOURCE_CATALYST
+]
+
 export default class Logistician {
     _markets: Market[];      //all dominion markets
-    _marketsTick: number;               //last tick markets were refreshed
+    _marketsTick: number;    //last tick markets were refreshed
+
+    basicResources: ResourceConstant[]
 
     constructor() {
         this._markets = [];
         this._marketsTick = 0;
+
+        this.basicResources = INTERESTED_RESOURCES;
         this.clean();
     }
     

@@ -1,16 +1,5 @@
 import Castrum from './Castrum';
 
-const INTERESTED_RESOURCES = [
-    // RESOURCE_ENERGY,
-    RESOURCE_HYDROGEN,
-    RESOURCE_OXYGEN,
-    RESOURCE_UTRIUM,
-    RESOURCE_LEMERGIUM,
-    RESOURCE_KEANIUM,
-    RESOURCE_ZYNTHIUM,
-    RESOURCE_CATALYST
-]
-
 export default class Market extends Castrum {
     liveObj: StructureTerminal;
 
@@ -37,17 +26,18 @@ export default class Market extends Castrum {
 
     run() {
         if (this.cooldown > 0 || Game.time % 5 !== 0) return;
-        let netOrders = global.Imperator.logistician.getNetOrders(this.room);
-        for (let resource of INTERESTED_RESOURCES) {
+        let logistician = global.Imperator.logistician;
+        let netOrders = logistician.getNetOrders(this.room);
+        for (let resource of logistician.basicResources) {
             let netOrder = netOrders[resource] || 0;
             let currentAmount = this.store.getUsedCapacity(resource) + netOrder;
             let targetAmount = this.getTarget(resource);
 
             if (currentAmount + 1000 < targetAmount && resource !== this.nativeMineral) {
-                global.Imperator.logistician.requistion(this, resource, targetAmount - currentAmount);
+                logistician.requistion(this, resource, targetAmount - currentAmount);
                 return;
             } else if (currentAmount - 5000 > targetAmount) {
-                global.Imperator.logistician.sell(this.room, resource, currentAmount - targetAmount);
+                logistician.sell(this.room, resource, currentAmount - targetAmount);
                 return;
             }
         }
