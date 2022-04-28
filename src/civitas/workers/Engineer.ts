@@ -2,12 +2,12 @@ import Chronicler from "controllers/Chronicler";
 import Miner from "./Miner";
 
 export default class Engineer extends Miner {
-    advanced: boolean;      //whether it should do more advanced tasks
+    bootstrap: boolean;      //whether it should do more bootstrap tasks
 
     constructor(engineer: Creep) {
         super(engineer);
         
-        this.advanced = Game.rooms[this.assignedRoom].controller?.my || false;
+        this.bootstrap = Game.rooms[this.assignedRoom].controller?.my || false;
     }
 
     run() {
@@ -22,16 +22,16 @@ export default class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (this.advanced && Chronicler.readBastionsFilled(this.assignedRoom) === false) {
+        else if (this.bootstrap && Chronicler.readBastionsFilled(this.assignedRoom) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
-        } else if (this.advanced && Chronicler.readExtensionsFilled(this.assignedRoom) === false) {
+        } else if (this.bootstrap && Chronicler.readExtensionsFilled(this.assignedRoom) === false) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
         } else if (this.memory.buildTarget !== undefined || Game.rooms[this.assignedRoom].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
-        } else if (!this.advanced) {
+        } else if (!this.bootstrap || Chronicler.readGameStage(this.assignedRoom) >= 4.1) {
             delete this.memory.generation;
             this.liveObj.suicide();
         } else if (Game.rooms[this.room].storage === undefined || Game.rooms[this.room].storage?.my === false) {
