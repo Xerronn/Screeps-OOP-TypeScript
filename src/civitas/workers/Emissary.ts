@@ -35,7 +35,7 @@ export default class Emissary extends Worker {
                 this.reserve(controller);
                 break;
             case 'done':
-                global.Imperator.initRoom(this.assignedRoom, this.spawnRoom);
+                global.Imperator.initializeRoom(this.assignedRoom, this.spawnRoom);
                 this.liveObj.suicide();
                 break;
         }
