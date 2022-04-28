@@ -395,7 +395,7 @@ export default class Executive {
      * Method to spawn 4 remote engineers to bootstrap a new room
      * @param {String} assignedRoom String representing the room
      */
-    spawnDevelopers(assignedRoom: string) {
+    spawnEngineers(assignedRoom: string) {
         for (let i = 0; i < 4; i++) {
             this.getSupervisor().initiate({
                 'body': [
@@ -404,7 +404,7 @@ export default class Executive {
                     MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
                     MOVE, MOVE, MOVE, MOVE, MOVE
                 ],
-                'type': CIVITAS_TYPES.CONTRACTOR,
+                'type': CIVITAS_TYPES.ENGINEER,
                 'memory': {'generation':0, 'assignedRoom': assignedRoom, 'offRoading': true}
             });
         }
