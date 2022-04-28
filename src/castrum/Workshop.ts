@@ -62,7 +62,7 @@ export default class Workshop extends Castrum {
      */
     getReagentsReady() {
         if (this.supervisor.reagentWorkshops.length !== 2) {
-            throw new Error('Supervisor is not correctly obtaining reagent workshops');
+            throw new Error(`Supervisor is not correctly obtaining reagent workshops: ${JSON.stringify(this.supervisor.reagentWorkshops)}`);
         }
         for (let workshop of this.supervisor.reagentWorkshops) {
             if (workshop.cooldown !== 0 || workshop.resourceCount === 0) {
