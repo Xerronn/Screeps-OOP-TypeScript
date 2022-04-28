@@ -151,10 +151,10 @@ export default abstract class Civitas extends GameObj {
     }
 
     get supervisor(): Supervisor {
-        return global.Imperator.administrators[this.assignedRoom].supervisor;
+        return global.Imperator.administrators[this.spawnRoom].supervisor;
     }
 
     get executive(): Executive {
-        return global.Imperator.administrators[this.assignedRoom].executive;
+        return global.Imperator.administrators[this.spawnRoom].executive;
     }
 }
