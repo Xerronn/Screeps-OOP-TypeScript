@@ -113,6 +113,8 @@ export default class Chronicler {
             'remotes': {}
         }
 
+        if (!Chronicler.readRoomActive(room)) return statisticsMemory;
+
         let remotes = Chronicler.readRemotes(room);
 
         for (let remote in remotes) {
