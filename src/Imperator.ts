@@ -55,14 +55,14 @@ export default class Imperator {
      * Method that creates a supervisor and executive for a newly claimed room
      * @param {String} room String representing the room
      */
-    initRoom(room: string, originRoom: string) {
+    initializeRoom(room: string, originRoom: string) {
         this.refreshDominion();
         Chronicler.build();
         this.administrators[room] = {
             supervisor: new Supervisor(room),
             executive: new Executive(room)
         }
-        this.administrators[originRoom].executive.spawnDevelopers(room);
+        this.administrators[originRoom].executive.spawnEngineers(room);
     }
 
     /**
