@@ -104,6 +104,7 @@ export default class Supervisor {
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.EXTENSION && castrumType !== CASTRUM_TYPES.ROAD) {
+                if ((structure as OwnedStructure).my === false) continue;
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
                 eval(createObjStr);
