@@ -66,7 +66,8 @@ export default class Scout extends Worker {
         } else {
             //once we are there, we can do some logging
             let sources = Game.rooms[this.assignedRoom].find(FIND_SOURCES);
-            if (Game.rooms[this.assignedRoom].controller?.owner === undefined) {
+            //TODO: what if the room is current under control of an invader core?
+            if (Game.rooms[this.assignedRoom].controller?.owner === undefined && Game.rooms[this.assignedRoom].controller?.reservation === undefined) {
                 let data: RemoteMemory = {
                     status: REMOTE_STATUSES.SAFE,
                     distances: []
@@ -83,7 +84,7 @@ export default class Scout extends Worker {
                     distances: []
                 };
                 Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
-            } else if (Game.rooms[this.assignedRoom].controller?.owner !== undefined) {
+            } else if (Game.rooms[this.assignedRoom].controller?.owner !== undefined || Game.rooms[this.assignedRoom].controller?.reservation !== undefined) {
                 //log that the room is occupied
                 let data = {
                     status: REMOTE_STATUSES.DANGEROUS,
