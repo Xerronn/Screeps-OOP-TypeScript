@@ -34,7 +34,7 @@ export default class Engineer extends Miner {
         } else if (!this.advanced) {
             delete this.memory.generation;
             this.liveObj.suicide();
-        } else if (!Game.rooms[this.room].storage) {
+        } else if (Game.rooms[this.room].storage === undefined || Game.rooms[this.room].storage?.my === false) {
             this.memory.task = "upgradeController";
             this.upgradeController();
         } else {
