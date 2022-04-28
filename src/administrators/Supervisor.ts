@@ -101,6 +101,10 @@ export default class Supervisor {
         let thisRoom = Game.rooms[this.room];
         //initialize all structures in the room with their respective wrappers
         this.castrum = this.emptyCastrum;
+        this.primitives = this.emptyPrimitives;
+        this._primitives = this.emptyPrimitives;
+        this.reagentWorkshops = [];
+        this.productWorkshops = [];
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.EXTENSION && castrumType !== CASTRUM_TYPES.ROAD) {
