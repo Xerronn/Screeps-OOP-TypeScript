@@ -143,7 +143,7 @@ export default abstract class Civitas extends GameObj {
     }
 
     get fleeing(): boolean {
-        return this.remote && Chronicler.readRemote(this.spawnRoom, this.memory.assignedRoom)?.status === REMOTE_STATUSES.INVADED;
+        return this.remote && Chronicler.readRemote(this.spawnRoom, this.assignedRoom)?.status === REMOTE_STATUSES.INVADED;
     }
 
     get remote(): boolean {
@@ -151,10 +151,10 @@ export default abstract class Civitas extends GameObj {
     }
 
     get supervisor(): Supervisor {
-        return global.Imperator.administrators[this.spawnRoom].supervisor;
+        return global.Imperator.administrators[this.assignedRoom].supervisor;
     }
 
     get executive(): Executive {
-        return global.Imperator.administrators[this.spawnRoom].executive;
+        return global.Imperator.administrators[this.assignedRoom].executive;
     }
 }
