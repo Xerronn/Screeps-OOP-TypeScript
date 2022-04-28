@@ -2,8 +2,12 @@ import Chronicler from "controllers/Chronicler";
 import Miner from "./Miner";
 
 export default class Engineer extends Miner {
+    advanced: boolean;      //whether it should do more advanced tasks
+
     constructor(engineer: Creep) {
         super(engineer);
+        
+        this.advanced = Game.rooms[this.assignedRoom].controller?.my || false;
     }
 
     run() {
@@ -18,16 +22,16 @@ export default class Engineer extends Miner {
             }
             this.harvest();
         }
-        else if (!this.remote && Chronicler.readBastionsFilled(this.room) === false) {
+        else if (this.advanced && Chronicler.readBastionsFilled(this.assignedRoom) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
-        } else if (!this.remote && Chronicler.readExtensionsFilled(this.room) === false) {
+        } else if (this.advanced && Chronicler.readExtensionsFilled(this.assignedRoom) === false) {
             this.memory.task = "fillExtensions";
             this.fillExtensions();
-        } else if (this.memory.buildTarget !== undefined || Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
+        } else if (this.memory.buildTarget !== undefined || Game.rooms[this.assignedRoom].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
-        } else if (this.remote) {
+        } else if (!this.advanced) {
             delete this.memory.generation;
             this.liveObj.suicide();
         } else if (!Game.rooms[this.room].storage) {
