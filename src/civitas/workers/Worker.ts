@@ -1,3 +1,4 @@
+import Supervisor from 'administrators/Supervisor';
 import Chronicler from 'controllers/Chronicler';
 import Civitas from '../Civitas';
 
@@ -98,8 +99,12 @@ export default class Worker extends Civitas {
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-            let ext = this.supervisor.extensions;
-            let spawns = this.supervisor.castrum.nexus.map(s => s.liveObj);
+            let supervisor: Supervisor;
+            if (this.remote) {
+                supervisor = global.Imperator.administrators[this.assignedRoom].supervisor;
+            } else supervisor = this.supervisor;
+            let ext = supervisor.extensions;
+            let spawns = supervisor.castrum.nexus.map(s => s.liveObj);
 
             let fillables = spawns.concat(ext as any[]).filter(
                 obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
@@ -128,7 +133,11 @@ export default class Worker extends Civitas {
         }
 
         if (liveObj === undefined || liveObj.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
-            let bastions = this.supervisor.castrum.bastion.map(s => s.liveObj);
+            let supervisor: Supervisor;
+            if (this.remote) {
+                supervisor = global.Imperator.administrators[this.assignedRoom].supervisor;
+            } else supervisor = this.supervisor;
+            let bastions = supervisor.castrum.bastion.map(s => s.liveObj);
 
             let fillables = bastions.filter(
                 obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > obj.store.getCapacity(RESOURCE_ENERGY) / 4
