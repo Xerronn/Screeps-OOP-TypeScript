@@ -543,6 +543,7 @@ export default class Executive {
         for (let container in assignedContainers) {
             if (assignedContainers[container as Id<StructureContainer>].length > 1) {
                 delete assignedContainers[container as Id<StructureContainer>][0].memory.generation;
+                assignedContainers[container as Id<StructureContainer>][1].evolve(true);
             }
         }
         
