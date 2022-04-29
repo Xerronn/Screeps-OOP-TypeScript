@@ -195,8 +195,12 @@ export default class Executive {
                 }
                 break;
             case 4:
-                Architect.buildSourceContainers(this.room);
                 //just turned rcl 4
+                Architect.buildSourceContainers(this.room);
+                //destroy enemy's storage
+                if (Game.rooms[this.room].storage?.my !== true) {
+                    Game.rooms[this.room].storage?.destroy();
+                }
                 break;
             case 4.1:
                 //storage is built, time to switch to phase two
@@ -222,6 +226,10 @@ export default class Executive {
             case 6:
                 //just turned rcl 6
                 //build lots of expensive stuff
+                //destroy enemy's terminal
+                if (Game.rooms[this.room].terminal?.my !== true) {
+                    Game.rooms[this.room].terminal?.destroy();
+                }
                 break;
             case 6.1:
                 //build first source link
