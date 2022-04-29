@@ -189,11 +189,14 @@ export default class Miner extends Worker {
         let travelLength = travelTime * 12 * 2;
         let carryCount = Math.ceil(travelLength / 50);
         let numCouriers = Math.ceil(carryCount / 30);    //30 is the max carry parts we want on a single creep
+        let energyCapacity = Game.rooms[this.spawnRoom].energyCapacityAvailable;
 
         let body: BodyPartConstant[] = [];
         for (let i = 0; i < Math.ceil(carryCount / numCouriers); i++) {
+            if (energyCapacity < 100) break;
             body.push(MOVE);
             body.unshift(CARRY);
+            energyCapacity -= 100;
         }
 
         for (let i = 0; i < numCouriers; i++) {
