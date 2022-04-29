@@ -15,6 +15,11 @@ export default class Engineer extends Miner {
             return this.march(this.assignedRoom);
         }
 
+        //evolve the creep to meet expanding energy availability
+        if (this.ticksToLive < 2 && !this.remote) {
+            this.evolve();
+        }
+
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "harvest" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
             this.memory.task = "harvest";
             if (!this.noPillage) {
@@ -41,11 +46,6 @@ export default class Engineer extends Miner {
             this.depositStorage();
         }
         
-        //evolve the creep to meet expanding energy availability
-        if (this.ticksToLive < 2 && !this.remote) {
-            this.evolve();
-        }
-
         return;
     }
 
