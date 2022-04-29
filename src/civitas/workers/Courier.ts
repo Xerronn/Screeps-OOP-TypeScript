@@ -90,7 +90,10 @@ export default class Courier extends Worker {
 
         if (this.path !== undefined) {
             let replacementTime = this.path.length + (CREEP_SPAWN_TIME * this.body.length);
-            if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) this.replace();
+            if (this.ticksToLive < replacementTime && this.memory.generation !== undefined) {
+                if (this.remote === false) this.evolve(false);
+                this.replace();
+            }
         }
 
         //if container no longer exists, its been replaced by a link
@@ -284,16 +287,30 @@ export default class Courier extends Worker {
     /**
      * Method to double the size of the courier for when two couriers are downsized to one
      */
-    evolve() {
-        let carryCount = 0;
-        for (let part of this.body) {
-            if (part === CARRY) carryCount++;
-        }
+    evolve(double: boolean) {
+        let body: BodyPartConstant[] = [];
+        if (double) {
+            let carryCount = 0;
+            for (let part of this.body) {
+                if (part === CARRY) carryCount++;
+            }
 
-        let newBody: BodyPartConstant[] = [];
-        for (let i = 0; i < Math.min(32, carryCount * 2); i++) {
-            newBody.push(MOVE);
+            for (let i = 0; i < Math.min(32, carryCount * 2); i++) {
+                body.push(MOVE);
+            }
+        } else {
+            let travelLength = this.path.length * 12 * 2;
+            let carryCount = Math.ceil(travelLength / 50);
+            let numCouriers = Math.ceil(carryCount / 30);    //30 is the max carry parts we want on a single creep
+            let energyCapacity = Game.rooms[this.spawnRoom].energyCapacityAvailable;
+
+            for (let i = 0; i < Math.ceil(carryCount / numCouriers); i++) {
+                if (energyCapacity < 100) break;
+                body.push(MOVE);
+                body.unshift(CARRY);
+                energyCapacity -= 100;
+            }
         }
-        this.memory.body = newBody;
+        this.memory.body = body;
     }
 }
