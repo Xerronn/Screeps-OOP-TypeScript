@@ -147,7 +147,7 @@ export default abstract class Civitas extends GameObj {
     }
 
     get remote(): boolean {
-        return this.memory.assignedRoom !== this.spawnRoom;
+        return this.assignedRoom !== this.spawnRoom;
     }
 
     get supervisor(): Supervisor {
