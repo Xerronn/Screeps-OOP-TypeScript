@@ -21,7 +21,7 @@ export default class Logistician {
         this._markets = [];
         this._marketsTick = 0;
 
-        this.basicResources = INTERESTED_RESOURCES;
+        this.basicResources = INTERESTED_RESOURCES;     //minerals to automatically buy and sell
         this.clean();
     }
     
