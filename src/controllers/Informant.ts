@@ -264,6 +264,47 @@ export default class Informant {
         //this.matrixCache[roomName] = matrix;
         return matrix;
     }
+
+    /**
+     * Method that returns all supported recipies.
+     * TODO: support all chemicals
+     * @returns 
+     */
+    static getChemicalRecipes(chemical: RESOURCE_CATALYZED_GHODIUM_ACID | RESOURCE_GHODIUM_ACID | RESOURCE_HYDROXIDE | RESOURCE_GHODIUM_HYDRIDE | RESOURCE_GHODIUM | RESOURCE_ZYNTHIUM_KEANITE | RESOURCE_UTRIUM_LEMERGITE): Array<MineralCompoundConstant | MineralConstant> {
+        let reactions = {
+            [RESOURCE_CATALYZED_GHODIUM_ACID] : [RESOURCE_GHODIUM_ACID, RESOURCE_CATALYST],
+            [RESOURCE_GHODIUM_ACID]: [RESOURCE_GHODIUM_HYDRIDE, RESOURCE_HYDROXIDE],
+            [RESOURCE_HYDROXIDE]: [RESOURCE_HYDROGEN, RESOURCE_OXYGEN],
+            [RESOURCE_GHODIUM_HYDRIDE]: [RESOURCE_GHODIUM, RESOURCE_HYDROGEN],
+            [RESOURCE_GHODIUM]: [RESOURCE_ZYNTHIUM_KEANITE, RESOURCE_UTRIUM_LEMERGITE],
+            [RESOURCE_ZYNTHIUM_KEANITE]: [RESOURCE_ZYNTHIUM, RESOURCE_KEANIUM],
+            [RESOURCE_UTRIUM_LEMERGITE]: [RESOURCE_UTRIUM, RESOURCE_LEMERGIUM]
+        }
+        return reactions[chemical];
+    }
+    
+    /**
+     * Method to get the steps of making a chemical
+     * TODO: support all chemicals
+     */
+    static getChemicalSteps(chemical: RESOURCE_CATALYZED_GHODIUM_ACID | RESOURCE_GHODIUM_HYDRIDE) {
+        let steps = {
+            [RESOURCE_CATALYZED_GHODIUM_ACID]: [
+                RESOURCE_UTRIUM_LEMERGITE,
+                RESOURCE_ZYNTHIUM_KEANITE,
+                RESOURCE_GHODIUM,
+                RESOURCE_GHODIUM_HYDRIDE,
+                RESOURCE_HYDROXIDE,
+                RESOURCE_GHODIUM_ACID
+            ],
+            [RESOURCE_GHODIUM_HYDRIDE]: [
+                RESOURCE_UTRIUM_LEMERGITE,
+                RESOURCE_ZYNTHIUM_KEANITE,
+                RESOURCE_GHODIUM
+            ]
+        }
+        return steps[chemical];
+    }
 }
 declare global {
     //TYPES AND CONSTANTS
