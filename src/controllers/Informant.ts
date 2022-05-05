@@ -295,12 +295,14 @@ export default class Informant {
                 RESOURCE_GHODIUM,
                 RESOURCE_GHODIUM_HYDRIDE,
                 RESOURCE_HYDROXIDE,
-                RESOURCE_GHODIUM_ACID
+                RESOURCE_GHODIUM_ACID,
+                RESOURCE_CATALYZED_GHODIUM_ACID
             ],
             [RESOURCE_GHODIUM_HYDRIDE]: [
                 RESOURCE_UTRIUM_LEMERGITE,
                 RESOURCE_ZYNTHIUM_KEANITE,
-                RESOURCE_GHODIUM
+                RESOURCE_GHODIUM,
+                RESOURCE_GHODIUM_HYDRIDE
             ]
         }
         return steps[chemical];
