@@ -6,10 +6,12 @@ import Worker from './Worker';
 export default class Host extends Worker {
     idleSpot: {x: number, y: number};
     renewSpawnId?: Id<StructureSpawn>;
+    evolved: boolean;
 
     constructor(host: Creep) {
         super(host)
         let anchor = Chronicler.readSchema(this.room).main.anchor;
+        this.evolved = false;
         this.idleSpot = {
             'x': anchor.x - 1,
             'y': anchor.y - 1
@@ -43,6 +45,12 @@ export default class Host extends Worker {
                 let roomPosIdle = new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.room);
                 this.liveObj.travelTo(roomPosIdle);
             }
+
+            //only check once every global reset
+            if (this.evolved === false) {
+                this.evolve();
+                this.evolved = true;
+            }
         }
         return true;
     }
@@ -50,28 +58,13 @@ export default class Host extends Worker {
     /**
      * Method to get the creep to renew itself to help prevent softlocks
      */
-    renew(usePrime=false) {
+    renew() {
         let renewSpawn = Game.getObjectById(this.renewSpawnId || "" as Id<any>) || undefined;
 
         if (renewSpawn === undefined) {
             //get all nexuses
             let nexuses = this.supervisor.castrum["nexus"] as any;
             let chosenNexus = nexuses[0];
-            if (nexuses.length > 1) {
-                for (let nexus of nexuses) {
-                    if (nexus.prime) {
-                        //select the prime nexus if the renewer wants to use the prime
-                        if (usePrime) {
-                            chosenNexus = nexus;
-                        } else continue;
-                    } else {
-                        //if not wanting to use prime, select the first one that isn't prime
-                        if (!usePrime) {
-                            chosenNexus = nexus;
-                        } else continue;
-                    }
-                }
-            }
             this.renewSpawnId = chosenNexus.liveObj.id;
             renewSpawn = chosenNexus.liveObj;
         }
@@ -85,10 +78,6 @@ export default class Host extends Worker {
                 this.fillExtensions();
             }
             return;
-        }
-
-        if (this.evolve() && this.memory.task == "renewFill") {
-            return; //if evolving, just stop here
         }
 
         //if we get to this point, energyAvailable is > 300, so we can set task to just renew fully
