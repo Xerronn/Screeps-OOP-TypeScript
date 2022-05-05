@@ -151,6 +151,7 @@ export default class Supervisor {
     run() {
         //first delete last tick's cache of primitives
         this._primitives = this.emptyPrimitives;
+        var errInfo = '';
         try {
             //first all creeps
             let civitas = this.civitas;
@@ -159,6 +160,7 @@ export default class Supervisor {
                 for (var civ of this.civitas[type]) {
                     if (civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
+                    errInfo = `${civ.name} working in room ${civ.assignedRoom}`
                     civ.run();
                     let usedCpu = Game.cpu.getUsed() - startcpu;
 
@@ -176,12 +178,13 @@ export default class Supervisor {
                 for (let struc of this.castrum[cType]) {
                     //block workshops from running when they are reserved
                     if (cType !== CASTRUM_TYPES.WORKSHOP || this.workshopReservation < Game.time) {
+                        errInfo = `${struc.type} in room ${this.room}`
                         struc.run();
                     }
                 }
             }
         } catch (roomErr: any) {
-            let errorMessage = `<b style='color:red;'>Room FAILURE with message ${roomErr.message} at ${roomErr.stack}</b>`
+            let errorMessage = `<b style='color:red;'>Room FAILURE during execution of '${errInfo}' with message '${roomErr.message}'' at ${roomErr.stack}</b>`
             console.log(errorMessage);
             if (Game.time % 30 == 0) {
                 Game.notify(errorMessage);
