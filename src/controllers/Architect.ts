@@ -584,7 +584,7 @@ export default class Architect {
             throw new Error("Room is not viable");
         }
 
-        let best = candidates.sort((a, b) => (a.distance > b.distance) ? 1 : -1)[0];
+        let best = candidates.sort((a, b) => (a.score - (a.distance * .25) < b.score - (b.distance * .25)) ? 1 : -1)[0];
 
         let topLeft = {
             'x': Math.max(1, best.x - 5),
@@ -807,7 +807,7 @@ export default class Architect {
                 }
                 clusterData[currentValue].size++;
                 let colors = ['', 'red', 'orange', 'yellow', 'blue', 'green', 'purple', 'white', 'brown', 'black']
-                // vis.circle(x, y, {'fill': colors[clonedMatrix.get(x, y)]})
+                new RoomVisual(center.roomName).circle(x, y, {'fill': colors[clonedMatrix.get(x, y)]})
             }
         }
 
@@ -815,11 +815,10 @@ export default class Architect {
         //sort by largest and place extensions until 10 are placed
 
         let clusterDataArr = Object.values(clusterData);
-        let viableSpots: StampPlacement[][]= [];
+        let viableSpots: StampPlacement[]= [];
         clusterDataArr.sort((a, b) => (a.size < b.size) ? 1 : -1);
         let tree: StampPlacement[] = [];
-        for (let cluster of clusterDataArr.slice(0, 2)) {
-            viableSpots.push([]);
+        for (let cluster of clusterDataArr) {
             let start = {
                 'anchor': cluster.anchor,
                 'rotations': 1
@@ -831,7 +830,7 @@ export default class Architect {
                 }
             }
 
-            viableSpots[viableSpots.length - 1].push(start);
+            viableSpots.push(start);
             tree.push(start);
             while (tree.length > 0) {
                 let current = tree.shift();
@@ -856,26 +855,19 @@ export default class Architect {
                                 clonedMatrix.set(candidate.anchor.x + i, candidate.anchor.y + j, 254);
                             }
                         }
-                        viableSpots[viableSpots.length - 1].push(candidate);
+                        viableSpots.push(candidate);
                         tree.push(candidate);
                     }
                 }
             }
         }
-        let numSpots = 0;
-        for (let v of viableSpots) {
-            numSpots += v.length;
-        }
-        if (numSpots < 10) {
-            throw new Error("Room is not viable");
-        }
 
-        //take all the stamps in the first cluster
-        extensionStamps.push(...viableSpots[0]);
+        // //take all the stamps in the first cluster
+        // extensionStamps.push(...viableSpots[0]);
         //sort all the stamps from the second cluster and then add them all
-        viableSpots[1].sort((a, b) => (center.getRangeTo(a.anchor.x, a.anchor.y) > center.getRangeTo(b.anchor.x, b.anchor.y)) ? 1 : -1);
-        extensionStamps.push(...viableSpots[1]);
-        extensionStamps = extensionStamps.slice(0, 10)
+        viableSpots = viableSpots.sort((a, b) => (center.getRangeTo(a.anchor.x, a.anchor.y) > center.getRangeTo(b.anchor.x, b.anchor.y)) ? 1 : -1);
+        // extensionStamps.push(...viableSpots[1]);
+        extensionStamps = viableSpots.slice(0, 10)
 
         //sort by closest to center
         let mainAnchor = {
@@ -886,6 +878,11 @@ export default class Architect {
             this.coordinateDistance(a.anchor.x, a.anchor.y, mainAnchor.x, mainAnchor.y) - 
             this.coordinateDistance(b.anchor.x, b.anchor.y, mainAnchor.x, mainAnchor.y)
         );
+
+        if (sortedExtensions.length < 9) {
+            throw new Error("Room is not viable");
+        }
+
         return sortedExtensions;
     }
 
