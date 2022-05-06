@@ -442,7 +442,7 @@ export default class Executive {
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ],
             'type': CIVITAS_TYPES.CHEMIST,
-            'memory': {'generation':0}
+            'memory': {'generation':0, 'task': 'idle'}
         });
     }
 
