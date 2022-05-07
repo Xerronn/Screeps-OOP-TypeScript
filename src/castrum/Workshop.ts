@@ -10,6 +10,7 @@ export default class Workshop extends Castrum {
     workshopType: WORKSHOP_TYPES;
     resource: MineralConstant | MineralCompoundConstant;
     resourceCount: number;
+    boosting: boolean;
 
     constructor(workshop: StructureLab) {
         super(workshop);
@@ -20,6 +21,7 @@ export default class Workshop extends Castrum {
         this.workshopType = this.classify()
         this.resource = this.liveObj.mineralType || RESOURCE_HYDROGEN;
         this.resourceCount = this.store.getUsedCapacity(this.resource);
+        this.boosting = this.getBoosting();
     }
 
     update(): boolean {
@@ -89,10 +91,10 @@ export default class Workshop extends Castrum {
         return WORKSHOP_TYPES.PRODUCT;
     }
 
-    get boosting(): boolean {
+    getBoosting(): boolean {
         let boostingWorkshops = Chronicler.readBoostingWorkshops(this.room);
-        for (let id in Object.keys(boostingWorkshops)) {
-            if (this.id === id) {
+        for (let boosting of Object.values(boostingWorkshops)) {
+            if (this.id === boosting.workshop) {
                 return true
             }
         }
