@@ -1,3 +1,4 @@
+import Workshop from 'castrum/Workshop';
 import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
 import Worker, {WorkerMemory} from './worker'
@@ -52,11 +53,11 @@ export default class Chemist extends Worker {
             return;
         }
 
+        //stop any reactions from running while they are being filled
+        if (this.memory.task === "supplyReagents") this.supervisor.reserveWorkshops();
+
         //handle boosting of creeps
-        // if (this.memory.boosting === true) {
-        //     if (this.memory.task === "supplyReagents" || this.memory.task === "awaitingSupply") this.getSupervisor().reserveWorkshops();
-        //     if (this.prepareBoosts()) return true;
-        // }
+        if (this.prepareBoosts()) return;
 
         //reagent labs are empty of minerals and creep is doing nothing
         if (this.getReagentsEmpty() && this.memory.task === "idle") {
@@ -70,8 +71,6 @@ export default class Chemist extends Worker {
             this.memory.task = "supplyReagents"
         }
         if (this.memory.task === "supplyReagents") {
-            //stop any reactions from running while they are being filled
-            this.supervisor.reserveWorkshops();
             if (this.fillReagents()) return;
 
             //done supplying labs
@@ -87,6 +86,52 @@ export default class Chemist extends Worker {
             if (this.depositStore()) return;
             this.liveObj.travelTo(new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.spawnRoom));
         }
+    }
+
+    prepareBoosts(): boolean {
+        let boostingWorkshops = Chronicler.readBoostingWorkshops(this.spawnRoom);
+        let boost: MineralBoostConstant;
+        for (boost in boostingWorkshops) {
+            let boostingWorkshop = boostingWorkshops[boost];
+            let workshop = Informant.getWrapper(boostingWorkshop?.workshop || "" as Id<StructureLab>) as Workshop;
+
+            //if we don't have enough boost to do the body, then just skip it
+            if (workshop === undefined || boostingWorkshop === undefined || 
+                this.getChemicalAmount(boost) + this.store.getUsedCapacity(boost) + workshop.store.getUsedCapacity(boost) < boostingWorkshop?.amount) {
+
+                boostingWorkshops[boost] = undefined;
+                continue;
+            }
+
+            if (this.depositStore(boost)) return true;
+
+            //empty the workshop of its minerals if it does not contain the boost
+            let product = workshop.resource;
+            if (product !== boost && workshop.store.getUsedCapacity(product) > 0) {
+                if (this.withdrawWorkshop(workshop.liveObj, product)) return true;
+            }
+            if (workshop.resourceCount < boostingWorkshop.amount) {
+                //withdraw the boost we need
+                let tripAmount = Math.min(
+                    this.store.getFreeCapacity(boost), 
+                    boostingWorkshop.amount - workshop.store.getUsedCapacity(boost)
+                );
+                if (this.store.getUsedCapacity(boost) < tripAmount) {
+                    if (this.withdrawStore(boost, tripAmount)) return true;
+                }
+
+                //deposit it in the lab
+                if (this.pos.inRangeTo(workshop.liveObj, 1)) {
+                    this.liveObj.transfer(workshop.liveObj, boost, tripAmount);
+                } else {
+                    this.liveObj.travelTo(workshop.liveObj);
+                }
+                return true;
+            }
+        }
+
+        Chronicler.writeBoostingWorkshops(this.spawnRoom, boostingWorkshops);
+        return false;
     }
 
     fillReagents() {
