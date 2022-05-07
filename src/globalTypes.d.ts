@@ -126,5 +126,5 @@ interface RemoteMemory {
 }
 
 type BoostingMemory = {
-    [mineral in MineralBoostConstant]?: Id<StructureLab>;
+    [mineral in MineralBoostConstant]?: {workshop: Id<StructureLab>, amount: number};
 }
