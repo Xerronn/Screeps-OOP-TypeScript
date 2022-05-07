@@ -30,7 +30,8 @@ import Conduit from 'castrum/Conduit';                  Conduit;
 import Workshop from 'castrum/Workshop';                Workshop;
 import Nexus from 'castrum/Nexus';                      Nexus;
 import Bastion from 'castrum/Bastion';                  Bastion;
-import Market from 'castrum/Market';                    Market;
+import Market from 'castrum/Market';import Chronicler from 'controllers/Chronicler';
+                    Market;
 
 export default class Supervisor {
     room: string;
@@ -241,9 +242,9 @@ export default class Supervisor {
                         generationIncremented++;
                     }
 
-                    if (boost) {
+                    if (boost === true) {
                         //handle if the creep will be boosted when it spawns
-                        let boostType = this.prepareBoosts(template.type, newBody);
+                        var boostType = this.calculateBoosts(template.type);
                         if (boostType !== undefined) {
                             template.memory.boost = boostType;
                         }
@@ -253,6 +254,7 @@ export default class Supervisor {
 
                     if (success == OK) {
                         //don't try spawning on another spawn
+                        if (boost === true && boostType !== undefined) this.prepareBoosts(boostType, newBody);
                         break;
                     } else {
                         //so we can reschedule
@@ -323,7 +325,7 @@ export default class Supervisor {
      * @param {String} creepType role of the creep
      * @returns the boost type for the role
      */
-    prepareBoosts(creepType: CIVITAS_TYPES | LEGION_TYPES, body: BodyPartConstant[]) {
+    calculateBoosts(creepType: CIVITAS_TYPES | LEGION_TYPES): MineralBoostConstant[] | undefined{
         let rcl = Game.rooms[this.room].controller?.level || 0;
         let boostTypes;
         switch (creepType) {
@@ -342,8 +344,12 @@ export default class Supervisor {
             return undefined;
         }
 
-        let boostCounts = [];
-        for (let boost of boostTypes) {
+        return [...boostTypes];
+    }
+
+    prepareBoosts(boosts: MineralBoostConstant[], body: BodyPartConstant[]) {
+        let boostingWorkshops = Chronicler.readBoostingWorkshops(this.room);
+        for (let boost of boosts) {
             let partType;
             for (let part in BOOSTS) {
                 if (Object.keys(BOOSTS[part]).includes(boost)) {
@@ -351,17 +357,24 @@ export default class Supervisor {
                     break;
                 }
             }
-
             let numParts = 0;
             for (let part of body) {
                 if (part == partType) {
                     numParts++;
                 }
             }
-            boostCounts.push(numParts * 30);
+            for (let workshop of this.productWorkshops) {
+                if (workshop.boosting === false) {
+                    boostingWorkshops[boost] = {
+                        workshop: workshop.id as Id<StructureLab>,
+                        amount: numParts * 30
+                    }
+                    workshop.boosting = true;
+                }
+                break;
+            }
         }
-
-        return [...boostTypes];
+        Chronicler.writeBoostingWorkshops(this.room, boostingWorkshops);
     }
 
     /**
