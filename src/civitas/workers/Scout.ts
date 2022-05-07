@@ -66,8 +66,9 @@ export default class Scout extends Worker {
         } else {
             //once we are there, we can do some logging
             let sources = Game.rooms[this.assignedRoom].find(FIND_SOURCES);
-            //TODO: what if the room is current under control of an invader core?
-            if (Game.rooms[this.assignedRoom].controller?.owner === undefined && Game.rooms[this.assignedRoom].controller?.reservation === undefined) {
+            if (Game.rooms[this.assignedRoom].controller?.owner === undefined && 
+                (Game.rooms[this.assignedRoom].controller?.reservation === undefined || 
+                Game.rooms[this.assignedRoom].controller?.reservation?.username === 'Invader')) {
                 let data: RemoteMemory = {
                     status: REMOTE_STATUSES.SAFE,
                     distances: []
