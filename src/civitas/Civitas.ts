@@ -121,15 +121,16 @@ export default abstract class Civitas extends GameObj {
      */
     boost(): boolean {
         for (let boost of this.memory.boost || []) {
-            let workshopId = Chronicler.readBoostingWorkshops(this.spawnRoom)[boost] || undefined;
-            if (workshopId === undefined) continue;
-            let workshop = Informant.getWrapper(workshopId) as Workshop;
+            let workshopData = Chronicler.readBoostingWorkshops(this.spawnRoom)[boost] || undefined;
+            if (workshopData === undefined) continue;
+            let workshop = Informant.getWrapper(workshopData.workshop) as Workshop;
             if (!workshop) {
                 continue;
             }
 
             if (this.pos.inRangeTo(workshop.liveObj, 1)) {
                 workshop.liveObj.boostCreep(this.liveObj);
+                workshop.boosting = false;
                 let old = Chronicler.readBoostingWorkshops(this.room);
                 old[boost] = undefined;
                 Chronicler.writeBoostingWorkshops(this.room, old);
