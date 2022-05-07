@@ -125,6 +125,6 @@ interface RemoteMemory {
     curated?: boolean;
 }
 
-interface BoostingMemory {
-    [lab: Id<StructureLab>]: MineralBoostConstant;
+type BoostingMemory = {
+    [mineral in MineralBoostConstant]?: Id<StructureLab>;
 }
