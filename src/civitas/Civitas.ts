@@ -1,6 +1,8 @@
 import Executive from 'administrators/Executive';
 import Supervisor from 'administrators/Supervisor';
+import Workshop from 'castrum/Workshop';
 import Chronicler from 'controllers/Chronicler';
+import Informant from 'controllers/Informant';
 import GameObj from '../GameObj';
 
 export default abstract class Civitas extends GameObj {
@@ -80,6 +82,10 @@ export default abstract class Civitas extends GameObj {
      * Things to run before anything else. If returns true, then continue to run. Otherwise terminate here
      */
     preTick(): boolean {
+        if (this.memory.boost !== undefined && this.ticksToLive > 1400) {
+            if (this.boost()) return false;
+            delete this.memory.boost;
+        }
         return true;
     }
 
@@ -113,27 +119,27 @@ export default abstract class Civitas extends GameObj {
      * Method to boost the creep with a already prepared lab
      * @param {string[]} boostType
      */
-    boost(boostTypes: string[]) {
-        // for (let boost of boostTypes) {
-        //     let workshopId = global.Chronicler.getBoostingWorkshops(this.spawnRoom)[boost] || undefined;
-        //     let workshop = global.Imperator.getWrapper(workshopId);
-        //     if (!workshop) {
-        //         continue;
-        //     }
+    boost(): boolean {
+        for (let boost of this.memory.boost || []) {
+            let workshopId = Chronicler.readBoostingWorkshops(this.spawnRoom)[boost] || undefined;
+            if (workshopId === undefined) continue;
+            let workshop = Informant.getWrapper(workshopId) as Workshop;
+            if (!workshop) {
+                continue;
+            }
 
-        //     if (this.pos.inRangeTo(workshop.liveObj, 1)) {
-        //         workshop.liveObj.boostCreep(this.liveObj);
-        //         workshop.boosting = false;
-        //         let old = global.Chronicler.getBoostingWorkshops(this.room);
-        //         old[boost] = undefined;
-        //         global.Chronicler.setBoostingWorkshops(this.room, old);
-        //         continue;
-        //     } else {
-        //         this.liveObj.travelTo(workshop.liveObj);
-        //     }
-        //     return true;
-        // }
-        // return false;
+            if (this.pos.inRangeTo(workshop.liveObj, 1)) {
+                workshop.liveObj.boostCreep(this.liveObj);
+                let old = Chronicler.readBoostingWorkshops(this.room);
+                old[boost] = undefined;
+                Chronicler.writeBoostingWorkshops(this.room, old);
+                continue;
+            } else {
+                this.liveObj.travelTo(workshop.liveObj);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
