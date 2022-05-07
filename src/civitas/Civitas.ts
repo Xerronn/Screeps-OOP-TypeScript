@@ -77,6 +77,13 @@ export default abstract class Civitas extends GameObj {
     }
 
     /**
+     * Things to run before anything else. If returns true, then continue to run. Otherwise terminate here
+     */
+    preTick(): boolean {
+        return true;
+    }
+
+    /**
      * Empty run method because this class is not meant to be instantiated
      * @returns {false}
      */

@@ -160,8 +160,9 @@ export default class Supervisor {
                 for (var civ of this.civitas[type]) {
                     if (civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
-                    errInfo = `${civ.name} working in room ${civ.assignedRoom}`
-                    civ.run();
+                    errInfo = `${civ.name} working in room ${civ.assignedRoom}`;
+                    let success = civ.preTick();
+                    if (success === true) civ.run();
                     let usedCpu = Game.cpu.getUsed() - startcpu;
 
                     if (usedCpu > 0.3 && global.logger == true) {
