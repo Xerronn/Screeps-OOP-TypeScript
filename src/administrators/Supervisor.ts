@@ -241,14 +241,13 @@ export default class Supervisor {
                         generationIncremented++;
                     }
 
-                    //todo: REDO the whole boosting process and chemist logic
-                    // if (boost) {
-                    //     //handle if the creep will be boosted when it spawns
-                    //     let boostType = this.prepareBoosts(template.type, newBody);
-                    //     if (boostType !== undefined) {
-                    //         template.memory.boost = boostType;
-                    //     }
-                    // }
+                    if (boost) {
+                        //handle if the creep will be boosted when it spawns
+                        let boostType = this.prepareBoosts(template.type, newBody);
+                        if (boostType !== undefined) {
+                            template.memory.boost = boostType;
+                        }
+                    }
 
                     let success = nexus.spawnCreep(newBody, template.type, { ...template.memory });
 
@@ -317,6 +316,52 @@ export default class Supervisor {
         let origArr = this.castrum[type];
         let index = origArr.indexOf(castrumType as any);
         if (index >= 0) origArr.splice(index, 1);
+    }
+
+    /**
+     * Method that gets the chemist to prepare for boosting a creep and returns the type of boost
+     * @param {String} creepType role of the creep
+     * @returns the boost type for the role
+     */
+    prepareBoosts(creepType: CIVITAS_TYPES | LEGION_TYPES, body: BodyPartConstant[]) {
+        let rcl = Game.rooms[this.room].controller?.level || 0;
+        let boostTypes;
+        switch (creepType) {
+            case CIVITAS_TYPES.SCHOLAR:
+                if (rcl === 7) {
+                    boostTypes = [RESOURCE_GHODIUM_HYDRIDE];
+                } else if (rcl === 8) {
+                    boostTypes = [RESOURCE_CATALYZED_GHODIUM_ACID];
+                }
+                break;
+            case LEGION_TYPES.EXECUTIONER:
+                boostTypes = [RESOURCE_CATALYZED_GHODIUM_ALKALIDE, RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE];
+                break;
+        }
+        if (boostTypes === undefined) {
+            return undefined;
+        }
+
+        let boostCounts = [];
+        for (let boost of boostTypes) {
+            let partType;
+            for (let part in BOOSTS) {
+                if (Object.keys(BOOSTS[part]).includes(boost)) {
+                    partType = part;
+                    break;
+                }
+            }
+
+            let numParts = 0;
+            for (let part of body) {
+                if (part == partType) {
+                    numParts++;
+                }
+            }
+            boostCounts.push(numParts * 30);
+        }
+
+        return [...boostTypes];
     }
 
     /**
