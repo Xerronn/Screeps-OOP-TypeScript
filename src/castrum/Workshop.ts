@@ -91,7 +91,7 @@ export default class Workshop extends Castrum {
 
     get boosting(): boolean {
         let boostingWorkshops = Chronicler.readBoostingWorkshops(this.room);
-        for (let id in boostingWorkshops) {
+        for (let id in Object.keys(boostingWorkshops)) {
             if (this.id === id) {
                 return true
             }
