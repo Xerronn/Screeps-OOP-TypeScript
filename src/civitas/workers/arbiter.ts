@@ -74,7 +74,7 @@ export default class Arbiter extends Host {
             if (this.conduit?.needsFilling == true) {
                 if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdrawStorage" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                     this.memory.task = "withdrawStorage";
-                    this.withdrawStorage();
+                    if (!this.withdrawStorage()) this.withdrawTerminal();
                     return true;
                 }
                 this.memory.task = "depositLink";
@@ -180,7 +180,7 @@ export default class Arbiter extends Host {
      * Overloaded withdrawStorage with no moves
      */
     withdrawStorage(numEnergy?: number): boolean {
-        if (this.storage === undefined) return false;
+        if (this.storage === undefined || this.storage.store.getUsedCapacity(RESOURCE_ENERGY) === 0) return false;
         if (numEnergy !== undefined) {
             this.liveObj.withdraw(this.storage, RESOURCE_ENERGY, numEnergy);
         } else {
