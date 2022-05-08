@@ -43,12 +43,11 @@ export default class Workshop extends Castrum {
                 
                 break;
             case WORKSHOP_TYPES.PRODUCT:
-                if (this.boosting) return;
-
-                if (this.store.getFreeCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY) / 4) {
+                if (this.store.getUsedCapacity(RESOURCE_ENERGY) < this.store.getCapacity(RESOURCE_ENERGY) / 4) {
                     Chronicler.writeWorkshopsFilled(this.room, false);
                 }
-                if (this.getReagentsReady() && this.cooldown == 0) {
+
+                if (this.boosting === false && this.supervisor.workshopReservation < Game.time && this.getReagentsReady() && this.cooldown == 0) {
                     if (this.supervisor.reagentWorkshops.length === 2) {
                         this.liveObj.runReaction(this.supervisor.reagentWorkshops[0].liveObj, this.supervisor.reagentWorkshops[1].liveObj);
                     }

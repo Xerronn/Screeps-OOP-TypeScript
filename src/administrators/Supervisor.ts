@@ -178,11 +178,8 @@ export default class Supervisor {
             let cType: keyof typeof castrum;
             for (cType in castrum) {
                 for (let struc of this.castrum[cType]) {
-                    //block workshops from running when they are reserved
-                    if (cType !== CASTRUM_TYPES.WORKSHOP || this.workshopReservation < Game.time) {
-                        errInfo = `${struc.type} in room ${this.room}`
-                        struc.run();
-                    }
+                    errInfo = `${struc.type} in room ${this.room}`
+                    struc.run();
                 }
             }
         } catch (roomErr: any) {
