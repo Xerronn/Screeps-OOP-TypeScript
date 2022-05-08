@@ -59,6 +59,11 @@ export default class Chemist extends Worker {
         //handle boosting of creeps
         if (this.prepareBoosts()) return;
 
+        if (Chronicler.readWorkshopsFilled(this.spawnRoom) === false) {
+            this.energizeWorkshops();
+            return;
+        } 
+
         //reagent labs are empty of minerals and creep is doing nothing
         if (this.getReagentsEmpty() && this.memory.task === "idle") {
             this.memory.task = "withdraw";
@@ -78,14 +83,9 @@ export default class Chemist extends Worker {
             //end the reservation
             this.supervisor.reserveWorkshops(0);
         }
-
-        if (Chronicler.readWorkshopsFilled(this.spawnRoom) === false) {
-            this.fillWorkshops();
-        } else {
-            //empty stores
-            if (this.depositStore()) return;
-            this.liveObj.travelTo(new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.spawnRoom));
-        }
+        //empty stores
+        if (this.depositStore()) return;
+        this.liveObj.travelTo(new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.spawnRoom));
     }
 
     prepareBoosts(): boolean {
@@ -207,7 +207,7 @@ export default class Chemist extends Worker {
      * Method to fill workshops with energy
      * @returns 
      */
-    fillWorkshops(): boolean {
+    energizeWorkshops(): boolean {
         let productWorkshops = this.supervisor.productWorkshops;
         for (let workshop of productWorkshops) {
             if (workshop.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
