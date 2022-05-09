@@ -110,7 +110,7 @@ export default class Nexus extends Castrum {
         //increment number spent on that creep type
         Chronicler.writeIncrementSpawningStatistic(this.room, memory.type, bodyCost);
         //if it is remote, increment the remote values
-        if (memory.assignedRoom !== this.room && Chronicler.readRemoteRegistered(this.room, memory.assignedRoom)) {
+        if (memory.assignedRoom !== undefined && memory.assignedRoom !== this.room && Chronicler.readRemoteRegistered(this.room, memory.assignedRoom)) {
             Chronicler.writeIncrementRemoteStatistic(this.room, memory.assignedRoom, 'energySpent', bodyCost);
             if (memory.type === LEGION_TYPES.GARRISON) {
                 Chronicler.writeIncrementRemoteStatistic(this.room, memory.assignedRoom, 'garrisons', 1);
