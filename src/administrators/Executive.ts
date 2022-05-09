@@ -521,6 +521,7 @@ export default class Executive {
                 break;
             }
         }
+        Chronicler.resetStatistics(this.room);
     }
 
     /**

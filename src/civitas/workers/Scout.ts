@@ -31,7 +31,7 @@ export default class Scout extends Worker {
             }
             this.memory.targetRooms = targets;
         }
-        this.assignedRoom = this.memory.targetRooms[0];
+        this.assignedRoom = this.spawnRoom;
     }
 
     update(): boolean {
