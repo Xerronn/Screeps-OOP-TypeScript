@@ -87,6 +87,11 @@ export default abstract class Civitas extends GameObj {
             if (this.boost()) return false;
             delete this.memory.boost;
         }
+        if (this.room === this.spawnRoom && this.hits < this.hitsMax) {
+            for (let bastion of this.supervisor.castrum[CASTRUM_TYPES.BASTION]) {
+                bastion.liveObj.heal(this.liveObj);
+            }
+        }
         return true;
     }
 
