@@ -63,6 +63,7 @@ export default abstract class Civitas extends GameObj {
                     "memory": {...this.memory}
                 };
                 this.supervisor.initiate(template);
+                delete this.memory.generation;
             }
             //delete this wrapper
             this.supervisor.dismiss(this);
