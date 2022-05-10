@@ -159,7 +159,7 @@ export default class Executive {
                                     'memory': objArr[0]
                                 });
                             `;
-                            Director.schedule(this.room, Game.time + 2000, task, [memory]);            
+                            Director.schedule(this.room, Game.time + 3000, task, [memory]);            
                         }
                     }
                 }
