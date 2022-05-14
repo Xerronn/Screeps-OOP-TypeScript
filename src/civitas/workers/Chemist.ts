@@ -208,6 +208,7 @@ export default class Chemist extends Worker {
      * @returns 
      */
     energizeWorkshops(): boolean {
+        if (this.depositStore(RESOURCE_ENERGY)) return true;
         let productWorkshops = this.supervisor.productWorkshops;
         for (let workshop of productWorkshops) {
             if (workshop.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
