@@ -275,6 +275,9 @@ export default class Executive {
             case 8:
                 //TODO: lots and lots
                 break;
+            case 8.1:
+                Architect.buildWorkshops(this.room);
+                break;
         }
     }
 

@@ -168,6 +168,11 @@ export default class Informant {
             //todo: lots
             calculation = 8;
         }
+        if (rcl === 8 && currentStage === 8 && numConstructionSites === 0
+            && liveRoom.storage && liveRoom.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 200000) {
+            //todo: lots
+            calculation = 8.1;
+        }
 
         return calculation;
     }
