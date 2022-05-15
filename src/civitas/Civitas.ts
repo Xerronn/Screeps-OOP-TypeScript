@@ -164,7 +164,15 @@ export default abstract class Civitas extends GameObj {
      moveByPath(path: RoomPosition[]): boolean {
         //if creep is sitting at its destination, there is nothing to do
         if (this.pos.isEqualTo(path[path.length - 1])) {
+            this.stuckTick = 0;
             return false;
+        }
+
+        if (this.stuckTick > 3) {
+            //do something
+            this.liveObj.travelTo(path[path.length - 1]);
+            console.log(this.name + ' ' + 'pathing');
+            return true;
         }
 
         //detect if creep is stuck, and path normally if necessary
@@ -174,11 +182,6 @@ export default abstract class Civitas extends GameObj {
         } else {
             this.stuckPos = this.pos;
             this.stuckTick++;
-        }
-
-        if (this.stuckTick > 3) {
-            //do something
-            
         }
 
         for (let i in path) {
