@@ -20,9 +20,6 @@ export default class Courier extends Worker {
 
     path: RoomPosition[];
     reversedPath: RoomPosition[];
-    stuckTick: number;
-    stuckPos: RoomPosition;
-    pathing: boolean;
     constructor(courier: Creep) {
         super(courier);
 
@@ -30,10 +27,6 @@ export default class Courier extends Worker {
             storageId: Game.rooms[this.spawnRoom].storage?.id,
             terminalId: Game.rooms[this.spawnRoom].terminal?.id
         });
-
-        this.pathing = true;
-        this.stuckPos = this.pos;
-        this.stuckTick = 0;
 
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
@@ -114,11 +107,11 @@ export default class Courier extends Worker {
             //pickup dropped energy from the current tile
             this.withdrawDropped(this.memory.resource);
 
-            if (this.pathing) this.moveByPath();
+            this.moveByPath(this.path);
             this.withdrawContainer(this.memory.resource);
         } else {
             this.memory.task = "deposit";
-            if (this.pathing) this.moveByPath(true);
+            this.moveByPath(this.reversedPath);
             //only put energy into storage, the rest goes to terminal
             if (this.memory.resource == RESOURCE_ENERGY) {
                 this.depositStorage(this.memory.resource);
@@ -130,61 +123,6 @@ export default class Courier extends Worker {
     }
 
     /**
-     * Method to travel along the cached path
-     * @param {Boolean} reversed go in the opposite direction
-     * @param {Boolean} reset reset the path to the start
-     */
-    moveByPath(reversed: boolean = false) {
-        //if creep is sitting at its destination, there is nothing to do
-        if (!reversed) {
-            if (this.pos.isEqualTo(this.path[this.path.length - 1])) {
-                return false;
-            }
-        } else {
-            if (this.pos.isEqualTo(this.path[0])) {
-                return false;
-            }
-        }
-
-        //detect if creep is stuck, and path normally if necessary
-        if (this.stuckPos.x != this.pos.x || this.stuckPos.y != this.pos.y) {
-            this.stuckPos = this.pos;
-            this.stuckTick = 0;
-        } else {
-            this.stuckPos = this.pos;
-            this.stuckTick++;
-        }
-
-        if (this.stuckTick > 3) {
-            //do something
-            this.pathing = false;
-        }
-        let path: RoomPosition[];
-        if (!reversed) {
-            path = this.path;
-        } else {
-            path = this.reversedPath;
-        }
-
-        for (let i in path) {
-            if (path[i].isEqualTo(this.pos)) {
-                let nextPos = path[parseInt(i) + 1];
-                let nextDirection = this.pos.getDirectionTo(nextPos);
-                if (this.stuckTick > 0) {
-                    let blockingCreeps = Game.rooms[this.room].lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
-                    if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
-                        blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
-                    }
-                }
-                this.liveObj.move(nextDirection);
-                return true;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Move to assigned container and withdraw if the container can fill the creep
      */
     withdrawContainer(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
@@ -192,17 +130,12 @@ export default class Courier extends Worker {
         if (this.pos.inRangeTo(this.container, 1)) {
             if (this.container.store.getUsedCapacity(resourceType) > this.store.getFreeCapacity(resourceType)) {
                 this.liveObj.withdraw(this.container, resourceType);
-                this.pathing = true;
             } else if (this.container.pos.lookFor(LOOK_RESOURCES).length > 0){
                 for (let res of this.container.pos.lookFor(LOOK_RESOURCES)) {
                     if (res.resourceType === resourceType) {
                         this.liveObj.pickup(res);
                     }
                 }
-            }
-        } else {
-            if (!this.pathing) {
-                this.liveObj.travelTo(this.container);
             }
         }
         return true;
@@ -216,9 +149,6 @@ export default class Courier extends Worker {
         if (this.terminal === undefined) return false;
         if (this.pos.inRangeTo(this.terminal, 1)) {
             this.liveObj.transfer(this.terminal, resourceType);
-            this.pathing = true;
-        } else if (!this.pathing) {
-            this.liveObj.travelTo(this.terminal);
         }
         return true;
     }
@@ -238,9 +168,6 @@ export default class Courier extends Worker {
                     Chronicler.writeIncrementStatistic(this.spawnRoom, 'remoteEnergyDeposited', amount);
                 } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyDeposited', amount);
             }
-            this.pathing = true;
-        } else if (!this.pathing) {
-            this.liveObj.travelTo(this.storage);
         }
         return true;
     }

@@ -3,6 +3,7 @@ import Supervisor from 'administrators/Supervisor';
 import Workshop from 'castrum/Workshop';
 import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
+import Traveler from 'thirdParty/traveler';
 import GameObj from '../GameObj';
 
 export default abstract class Civitas extends GameObj {
@@ -22,9 +23,13 @@ export default abstract class Civitas extends GameObj {
     body: BodyPartConstant[];
     spawning: boolean;
     ticksToLive: number;
+
+    //custom attributes
     assignedRoom: string;
     spawnTime: number;
     spawnRoom: string;
+    stuckTick: number;      //number of ticks a creep has been stuck in a position
+    stuckPos: RoomPosition;
 
     constructor(civitas: Creep) {
         super();
@@ -38,10 +43,6 @@ export default abstract class Civitas extends GameObj {
         this.assignedRoom = civitas.memory.assignedRoom || civitas.memory.spawnRoom;
         this.spawnRoom = civitas.memory.spawnRoom;
 
-        //Parse spawn time from name
-        let regex = this.name.match('(?<=\<)(.*?)(?=\>)') || [''];
-        this.spawnTime = parseInt(regex[0]);
-
         //attributes that change every tick
         this.memory = civitas.memory;
         this.store = civitas.store;
@@ -50,6 +51,12 @@ export default abstract class Civitas extends GameObj {
         this.hits = civitas.hits;
         this.spawning = civitas.spawning;
         this.ticksToLive = civitas.ticksToLive || 1500;
+
+        //Parse spawn time from name
+        let regex = this.name.match('(?<=\<)(.*?)(?=\>)') || [''];
+        this.spawnTime = parseInt(regex[0]);
+        this.stuckTick = 0;
+        this.stuckPos = this.pos;
     }
 
     update(): boolean {
@@ -146,6 +153,49 @@ export default abstract class Civitas extends GameObj {
             }
             return true;
         }
+        return false;
+    }
+
+    /**
+     * Custom moveByPath implementation with creep swapping
+     * @param path 
+     * @returns boolean on whether it is still moving
+     */
+     moveByPath(path: RoomPosition[]): boolean {
+        //if creep is sitting at its destination, there is nothing to do
+        if (this.pos.isEqualTo(path[path.length - 1])) {
+            return false;
+        }
+
+        //detect if creep is stuck, and path normally if necessary
+        if (this.stuckPos.x != this.pos.x || this.stuckPos.y != this.pos.y) {
+            this.stuckPos = this.pos;
+            this.stuckTick = 0;
+        } else {
+            this.stuckPos = this.pos;
+            this.stuckTick++;
+        }
+
+        if (this.stuckTick > 3) {
+            //do something
+            
+        }
+
+        for (let i in path) {
+            if (path[i].isEqualTo(this.pos)) {
+                let nextPos = path[parseInt(i) + 1];
+                let nextDirection = this.pos.getDirectionTo(nextPos);
+                if (this.stuckTick > 0) {
+                    let blockingCreeps = Game.rooms[this.room].lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
+                    if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
+                        blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
+                    }
+                }
+                this.liveObj.move(nextDirection);
+                return true;
+            }
+        }
+
         return false;
     }
 
