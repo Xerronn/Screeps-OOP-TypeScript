@@ -21,7 +21,7 @@ export default class Informant {
             let supervisor = global.Imperator.administrators[room.name].supervisor;
             let castrumType = Informant.mapGameToClass(liveObj.structureType);
             if (castrumType === undefined) return undefined;
-            if (castrumType === CASTRUM_TYPES.CONTAINER || castrumType === CASTRUM_TYPES.EXTENSION || castrumType === CASTRUM_TYPES.ROAD || castrumType === CASTRUM_TYPES.UNDEFINED) {
+            if (castrumType === CASTRUM_TYPES.CONTAINER || castrumType === CASTRUM_TYPES.EXTENSION || castrumType === CASTRUM_TYPES.ROAD || castrumType === CASTRUM_TYPES.UNDEFINED || castrumType === CASTRUM_TYPES.CAPACITOR) {
                 throw Error('Primitive types do not have wrappers')
             }
             let structures = supervisor.castrum[castrumType];
@@ -322,6 +322,7 @@ declare global {
         MARKET = 'market',
         NEXUS = 'nexus',
         WORKSHOP = 'workshop',
+        CAPACITOR = 'capacitor',
 
         //primitives
         CONTAINER = 'container',

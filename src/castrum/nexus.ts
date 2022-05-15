@@ -85,8 +85,9 @@ export default class Nexus extends Castrum {
         memory.spawnRoom = this.room;
         memory.body = spawnBody;
 
-        let options: any = {
-            'memory': memory
+        let options: SpawnOptions = {
+            'memory': memory,
+            'energyStructures': this.supervisor.energyStructures
         };
         
         let success = this.liveObj.spawnCreep(spawnBody, name, options);

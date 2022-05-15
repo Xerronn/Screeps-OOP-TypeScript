@@ -2,6 +2,7 @@
 import Informant from 'controllers/Informant';          Informant;
 import Director from 'controllers/Director';            Director;
 import Executive from './Executive';                    Executive;
+import Chronicler from 'controllers/Chronicler';        Chronicler;
 
 //worker imports
 import Civitas from 'civitas/Civitas';                  Civitas;
@@ -30,8 +31,8 @@ import Conduit from 'castrum/Conduit';                  Conduit;
 import Workshop from 'castrum/Workshop';                Workshop;
 import Nexus from 'castrum/Nexus';                      Nexus;
 import Bastion from 'castrum/Bastion';                  Bastion;
-import Market from 'castrum/Market';import Chronicler from 'controllers/Chronicler';
-                    Market;
+import Market from 'castrum/Market';                    Market;
+import Capacitor from 'castrum/Capacitor';              Capacitor;
 
 export default class Supervisor {
     room: string;
@@ -60,6 +61,7 @@ export default class Supervisor {
         [CASTRUM_TYPES.MARKET]: Market[],
         [CASTRUM_TYPES.NEXUS]: Nexus[],
         [CASTRUM_TYPES.WORKSHOP]: Workshop[],
+        [CASTRUM_TYPES.CAPACITOR]: Capacitor[]
     };
     primitives: {                                           //castrum that I don't need full logic wrappers for
         [CASTRUM_TYPES.CONTAINER]: Id<StructureContainer>[],
@@ -77,8 +79,11 @@ export default class Supervisor {
 
     controllerLink: Conduit | undefined;                    //these get set in the conduit class when they self-classify
     storageLink: Conduit | undefined;                       //
-    reagentWorkshops: Array<Workshop>;
-    productWorkshops: Array<Workshop>;
+    reagentWorkshops: Array<Workshop>;                      //these get set in the workshop class when they self-classify
+    productWorkshops: Array<Workshop>;                      //
+
+    extensionOrder: Id<StructureExtension | StructureSpawn>[];      //What order extensions should be drawn from for optimal filling.
+    _extensionOrder: Array<StructureExtension | StructureSpawn>;
 
     constructor(room: string) {
         this.room = room;
@@ -93,6 +98,9 @@ export default class Supervisor {
 
         this.reagentWorkshops = [];
         this.productWorkshops = [];
+
+        this.extensionOrder = [];
+        this._extensionOrder = [];
     }
 
     /**
@@ -118,6 +126,11 @@ export default class Supervisor {
                 this.primitives[castrumType].push(structure.id as any);
             }
         }
+
+        //group up extensions into stamps(capacitors)
+        this.wrapCapacitors();
+        //optimal order of draining extensions
+        this.extensionOrder = this.getExtensionOrder();
 
         if (onlyStructures) return;
 
@@ -150,8 +163,9 @@ export default class Supervisor {
      * Function that runs all objects in the room
      */
     run() {
-        //first delete last tick's cache of primitives
+        //first delete last tick's cache of primitives and extensions
         this._primitives = this.emptyPrimitives;
+        this._extensionOrder = [];
         var errInfo = '';
         try {
             //first all creeps
@@ -375,6 +389,31 @@ export default class Supervisor {
     }
 
     /**
+     * Function to wrap capacitors
+     */
+    wrapCapacitors() {
+        let schema = Chronicler.readSchema(this.room);
+        for (let ext of schema.extensions) {
+            this.castrum[CASTRUM_TYPES.CAPACITOR].push(new Capacitor(ext, this.room))
+        }
+    }
+
+    getExtensionOrder(): Id<StructureExtension | StructureSpawn>[] {
+        let spawns = this.castrum[CASTRUM_TYPES.NEXUS];
+        let capacitors = this.castrum[CASTRUM_TYPES.CAPACITOR];
+        let sortedExtensions: Id<StructureExtension | StructureSpawn>[] = [];
+        for (let spawn of spawns) {
+            sortedExtensions.push(spawn.id);
+        }
+        for (let capacitor of capacitors) {
+            for (let extensionId of capacitor.extensions) {
+                sortedExtensions.push(extensionId);
+            }
+        }
+        return sortedExtensions;
+    }
+
+    /**
      * Method to block spawning for n ticks
      */
     reserveNexus(numTicks = 5) {
@@ -416,6 +455,7 @@ export default class Supervisor {
             [CASTRUM_TYPES.MARKET]: [],
             [CASTRUM_TYPES.NEXUS]: [],
             [CASTRUM_TYPES.WORKSHOP]: [],
+            [CASTRUM_TYPES.CAPACITOR]: []
         }
     }
 
@@ -433,6 +473,18 @@ export default class Supervisor {
      */
     get executive(): Executive {
         return global.Imperator.administrators[this.room].executive;
+    }
+
+    get energyStructures(): Array<StructureExtension | StructureSpawn> {
+        if (this._extensionOrder.length === 0) {
+            let extensions: Array<StructureExtension | StructureSpawn> = [];
+            this.extensionOrder.forEach(function(s) {
+                let liveObj = Game.getObjectById(s) || undefined;
+                if (liveObj !== undefined) extensions.push(liveObj);
+            })
+            this._extensionOrder = extensions;
+        }
+        return this._extensionOrder;
     }
 
     get containers(): StructureContainer[] {
