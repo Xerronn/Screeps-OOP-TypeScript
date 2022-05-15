@@ -1,6 +1,7 @@
 //can't really extend castrum because this will be a collection of structures acting as one
 export default class Capacitor {
     room: string;
+    id: string;
     type: string;
     extensions: Id<StructureExtension>[];
     center: Position;
@@ -27,6 +28,7 @@ export default class Capacitor {
             }
         }
         this.extensions = extensions;
+        this.id = this.extensions[0] || "";
     }
 
     update() {
