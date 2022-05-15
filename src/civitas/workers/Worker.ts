@@ -103,7 +103,7 @@ export default class Worker extends Civitas {
             if (this.remote) {
                 supervisor = global.Imperator.administrators[this.assignedRoom].supervisor;
             } else supervisor = this.supervisor;
-            let ext = supervisor.extensions;
+            let ext = Game.rooms[this.room].find(FIND_MY_STRUCTURES, {filter:{structureType: STRUCTURE_EXTENSION}})
             let spawns = supervisor.castrum.nexus.map(s => s.liveObj);
 
             let fillables = spawns.concat(ext as any[]).filter(

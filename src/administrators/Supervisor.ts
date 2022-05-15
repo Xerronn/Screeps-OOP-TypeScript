@@ -65,12 +65,10 @@ export default class Supervisor {
     };
     primitives: {                                           //castrum that I don't need full logic wrappers for
         [CASTRUM_TYPES.CONTAINER]: Id<StructureContainer>[],
-        [CASTRUM_TYPES.EXTENSION]: Id<StructureExtension>[],
         [CASTRUM_TYPES.ROAD]: Id<StructureRoad>[]
     };
     _primitives: {                                          //the current tick live game objects
         [CASTRUM_TYPES.CONTAINER]: StructureContainer[],
-        [CASTRUM_TYPES.EXTENSION]: StructureExtension[],
         [CASTRUM_TYPES.ROAD]: StructureRoad[]
     }
 
@@ -116,7 +114,7 @@ export default class Supervisor {
         this.productWorkshops = [];
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.EXTENSION && castrumType !== CASTRUM_TYPES.ROAD) {
+            if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.ROAD) {
                 if ((structure as OwnedStructure).my === false) continue;
                 let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
                     castrumType.slice(1) + "(structure));";
@@ -323,7 +321,7 @@ export default class Supervisor {
      */
     decommission(castrumType: Castrum): void {
         let type = castrumType.type;
-        if (type === CASTRUM_TYPES.CONTAINER || type === CASTRUM_TYPES.EXTENSION || type === CASTRUM_TYPES.ROAD || type === CASTRUM_TYPES.UNDEFINED) {
+        if (type === CASTRUM_TYPES.CONTAINER || type === CASTRUM_TYPES.ROAD || type === CASTRUM_TYPES.UNDEFINED) {
             throw Error('Primitive types cannot be decommissioned')
         }
         let origArr = this.castrum[type];
@@ -462,7 +460,6 @@ export default class Supervisor {
     get emptyPrimitives() {
         return {
             [CASTRUM_TYPES.CONTAINER]: [],
-            [CASTRUM_TYPES.EXTENSION]: [],
             [CASTRUM_TYPES.ROAD]: []
         }
     }
@@ -497,18 +494,6 @@ export default class Supervisor {
             this._primitives[CASTRUM_TYPES.CONTAINER] = containers;
         }
         return this._primitives[CASTRUM_TYPES.CONTAINER];
-    }
-
-    get extensions(): StructureExtension[] {
-        if (this._primitives[CASTRUM_TYPES.EXTENSION].length === 0) {
-            let extensions: StructureExtension[] = [];
-            this.primitives[CASTRUM_TYPES.EXTENSION].forEach(function(s) {
-                let liveObj = Game.getObjectById(s) || undefined;
-                if (liveObj !== undefined) extensions.push(liveObj);
-            })
-            this._primitives[CASTRUM_TYPES.EXTENSION] = extensions;
-        }
-        return this._primitives[CASTRUM_TYPES.EXTENSION];
     }
 
     get roads(): StructureRoad[] {
