@@ -36,5 +36,17 @@ export default class Capacitor {
     }
 
     run() {
+
+    }
+
+    get full(): boolean {
+        for (let ext of this.extensions) {
+            let liveExt = Game.getObjectById(ext) || undefined;
+            if (liveExt === undefined) continue;
+            if (liveExt.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }
