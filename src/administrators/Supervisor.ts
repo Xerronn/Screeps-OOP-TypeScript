@@ -165,15 +165,14 @@ export default class Supervisor {
         this._primitives = this.emptyPrimitives;
         this._extensionOrder = [];
         var errInfo = '';
-        try {
-            //first all creeps
-            let civitas = this.civitas;
-            let type: keyof typeof civitas
-            for (type in this.civitas) {
-                for (var civ of this.civitas[type]) {
+        //first all creeps
+        let civitas = this.civitas;
+        let type: keyof typeof civitas
+        for (type in this.civitas) {
+            for (var civ of this.civitas[type]) {
+                try {
                     if (civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
-                    errInfo = `${civ.name} working in room ${civ.assignedRoom}`;
                     let success = civ.preTick();
                     if (success === true) civ.run();
                     let usedCpu = Game.cpu.getUsed() - startcpu;
@@ -182,23 +181,30 @@ export default class Supervisor {
                         console.log(civ.name);
                         console.log(usedCpu);
                     }
+                } catch (roomErr: any) {
+                    let errorMessage = `<b style='color:red;'>Room FAILURE during execution of ${civ.name} working in room ${civ.assignedRoom} with message '${roomErr.message}'' at ${roomErr.stack}</b>`
+                    console.log(errorMessage);
+                    if (Game.time % 30 == 0) {
+                        Game.notify(errorMessage);
+                    }
                 }
             }
+        }
 
-            //then all structures
-            let castrum = this.castrum;
-            let cType: keyof typeof castrum;
-            for (cType in castrum) {
-                for (let struc of this.castrum[cType]) {
-                    errInfo = `${struc.type} in room ${this.room}`
+        //then all structures
+        let castrum = this.castrum;
+        let cType: keyof typeof castrum;
+        for (cType in castrum) {
+            for (let struc of this.castrum[cType]) {
+                try {
                     struc.run();
+                } catch (roomErr: any) {
+                    let errorMessage = `<b style='color:red;'>Room FAILURE during execution of ${struc.type} in room ${this.room} with message '${roomErr.message}'' at ${roomErr.stack}</b>`
+                    console.log(errorMessage);
+                    if (Game.time % 30 == 0) {
+                        Game.notify(errorMessage);
+                    }
                 }
-            }
-        } catch (roomErr: any) {
-            let errorMessage = `<b style='color:red;'>Room FAILURE during execution of '${errInfo}' with message '${roomErr.message}'' at ${roomErr.stack}</b>`
-            console.log(errorMessage);
-            if (Game.time % 30 == 0) {
-                Game.notify(errorMessage);
             }
         }
     }
