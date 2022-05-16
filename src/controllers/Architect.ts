@@ -203,7 +203,7 @@ export default class Architect {
         positions = positions.sort((a,b) => a.getRangeTo(chosenCorner) - b.getRangeTo(chosenCorner));
         
         for (let pos of positions) {
-            let building = rotated[pos.x][pos.y];
+            let building = rotated[pos.x-stamp.anchor.x][pos.y-stamp.anchor.y];
             pos.createConstructionSite(building);
         }
     }
