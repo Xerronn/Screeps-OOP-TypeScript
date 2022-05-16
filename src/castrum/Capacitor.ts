@@ -4,22 +4,23 @@ export default class Capacitor {
     id: string;
     type: string;
     extensions: Id<StructureExtension>[];
-    center: Position;
+    center: RoomPosition;
 
     constructor(extensionStamp: StampPlacement, room: string) {
         this.room = room;
         this.type = CASTRUM_TYPES.CAPACITOR;
-        this.center = {
-            x: extensionStamp.anchor.x + 1, 
-            y: extensionStamp.anchor.y + 1
-        }
+        this.center = new RoomPosition(
+            extensionStamp.anchor.x + 1, 
+            extensionStamp.anchor.y + 1,
+            this.room
+        );
         let area = Game.rooms[room].lookAtArea(
             extensionStamp.anchor.y, 
             extensionStamp.anchor.x, 
             extensionStamp.anchor.y + 2, 
             extensionStamp.anchor.x + 2, 
             true
-            );
+        );
         
         let extensions: Id<StructureExtension>[] = [];
         for (let res of area) {
