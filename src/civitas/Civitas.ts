@@ -171,7 +171,7 @@ export default abstract class Civitas extends GameObj {
         if (this.stuckTick > 3) {
             //do something
             this.liveObj.travelTo(path[path.length - 1]);
-            console.log(this.name + ' ' + 'pathing');
+            // console.log(this.name + ' ' + 'pathing');
             return true;
         }
 
