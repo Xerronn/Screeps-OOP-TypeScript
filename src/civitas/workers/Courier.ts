@@ -223,6 +223,7 @@ export default class Courier extends Worker {
             }
 
             for (let i = 0; i < Math.min(32, carryCount * 2); i++) {
+                body.push(CARRY);
                 body.push(MOVE);
             }
         } else {
