@@ -348,7 +348,7 @@ export default class Executive {
     spawnArbiter() {
         this.getSupervisor().initiate({
             'body': [
-                CARRY, CARRY, CARRY, CARRY, MOVE, MOVE
+                CARRY, CARRY, CARRY, CARRY, CARRY, MOVE
             ],
             'type': CIVITAS_TYPES.ARBITER,
             'memory': {
