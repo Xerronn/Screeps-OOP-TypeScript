@@ -89,6 +89,21 @@ export default class Worker extends Civitas {
     }
 
     /**
+     * Method that moves to the storage and withdraws energy
+     * @returns if the task was executed
+     */
+    withdrawTerminal(): boolean {
+        let terminal = Game.rooms[this.room].terminal;
+        if (terminal === undefined || terminal.store.getUsedCapacity(RESOURCE_ENERGY) < this.store.getFreeCapacity(RESOURCE_ENERGY)) return false;
+
+        if (this.pos.inRangeTo(terminal, 1)) {
+            this.liveObj.withdraw(terminal, RESOURCE_ENERGY);
+        } else this.liveObj.travelTo(terminal);
+
+        return true;
+    }
+
+    /**
      * Function to fill spawn and extensions
      */
     fillExtensions(): boolean {
