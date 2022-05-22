@@ -44,17 +44,7 @@ export default class Arbiter extends Host {
     }
 
     run(): boolean {
-        // if (this.ticksToLive < 300 || this.memory.task == "renew" || this.memory.task == "renewFill") {
-        //     //start the loop by setting task to renewFill
-        //     //this task will block spawning, but keep filling
-        //     //until reaching the required energy for a full renew
-        //     if (this.memory.task != "renew") {
-        //         this.memory.task = "renewFill";
-        //     }
-        //     //renew with usePrime
-        //     this.renew(true);
-        //     return true;
-        // }
+        if (this.ticksToLive < 2) this.evolve();
 
         if (!this.position()) return true;
 
@@ -258,14 +248,15 @@ export default class Arbiter extends Host {
             //once the room has a terminal
             newBody= [
                 //400 carry capacity
-                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY
+                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE
             ]
         }
         if (liveRoom.controller.level == 8) {
             //800 carry capacity
             newBody = [
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY
+                CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                MOVE
             ]
         }
 
