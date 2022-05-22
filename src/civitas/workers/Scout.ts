@@ -41,7 +41,10 @@ export default class Scout extends Worker {
                 //log that room is dangerous
                 let data: RemoteMemory = {
                     status: REMOTE_STATUSES.DANGEROUS,
-                    distances: []
+                    distances: [],
+                    roadsBuilt: false,
+                    garrisoned: Game.time,
+                    curated: Game.time
                 }
                 Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
             }
@@ -66,33 +69,31 @@ export default class Scout extends Worker {
         } else {
             //once we are there, we can do some logging
             let sources = Game.rooms[this.assignedRoom].find(FIND_SOURCES);
+            let data: RemoteMemory = {
+                status: REMOTE_STATUSES.SAFE,
+                distances: [],
+                roadsBuilt: false,
+                garrisoned: Game.time,
+                curated: Game.time
+            };
             if (Game.rooms[this.assignedRoom].controller?.owner === undefined && 
                 (Game.rooms[this.assignedRoom].controller?.reservation === undefined || 
                 Game.rooms[this.assignedRoom].controller?.reservation?.username === 'Invader')) {
-                let data: RemoteMemory = {
-                    status: REMOTE_STATUSES.SAFE,
-                    distances: []
-                };
+                
                 for (let source of sources) {
                     //todo: use pathfinder to see if a route is possible and get length
                     data.distances.push(this.pos.findPathTo(source).length);
                 }
-                Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
             } else if (!Game.rooms[this.assignedRoom].controller) {
                 //log that the room is a highway
-                let data = {
-                    status: REMOTE_STATUSES.UNINTERESTING,
-                    distances: []
-                };
-                Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
+                data.status = REMOTE_STATUSES.UNINTERESTING;
             } else if (Game.rooms[this.assignedRoom].controller?.owner !== undefined || Game.rooms[this.assignedRoom].controller?.reservation !== undefined) {
                 //log that the room is occupied
-                let data = {
-                    status: REMOTE_STATUSES.DANGEROUS,
-                    distances: []
-                };
-                Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
+                data.status = REMOTE_STATUSES.DANGEROUS;
             }
+
+            Chronicler.writeRemote(this.spawnRoom, this.assignedRoom, data);
+
 
             //then move to next room
             this.memory.targetRooms.shift();

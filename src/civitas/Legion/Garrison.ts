@@ -9,7 +9,7 @@ export default class Garrison extends Legionnaire {
     update() {
         if (!super.update()) {
             //creep is dead, set flag so a new one can be spawned
-            Chronicler.writeRemoteGarrisoned(this.spawnRoom, this.assignedRoom, false);
+            Chronicler.writeRemoteGarrisoned(this.spawnRoom, this.assignedRoom, Game.time);
             return false;
         }
         //attributes that change tick to tick

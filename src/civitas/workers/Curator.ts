@@ -123,7 +123,7 @@ export default class Curator extends Worker {
      */
     conclude() {
         delete this.memory.generation;
-        Chronicler.writeRemoteCurated(this.spawnRoom, this.assignedRoom, false);
+        Chronicler.writeRemoteCurated(this.spawnRoom, this.assignedRoom, Game.time);
         this.liveObj.suicide();
     }
 }

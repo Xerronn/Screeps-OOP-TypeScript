@@ -207,9 +207,9 @@ export default class Chronicler {
      * @param {String} room string representation of a room
      * @returns the garrison spawned flag
      */
-     static readRemoteGarrisoned(room: string, remote: string): boolean {
+     static readRemoteGarrisoned(room: string, remote: string): number {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        return Memory.rooms[room].remotes[remote].garrisoned || false;
+        return Memory.rooms[room].remotes[remote].garrisoned;
     }
 
     /**
@@ -217,7 +217,7 @@ export default class Chronicler {
      * @param room 
      * @param value 
      */
-    static writeRemoteGarrisoned(room: string, remote: string, value: boolean) {
+    static writeRemoteGarrisoned(room: string, remote: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].remotes[remote].garrisoned = value;
     }
@@ -227,9 +227,9 @@ export default class Chronicler {
      * @param {String} room string representation of a room
      * @returns the curator spawned flag
      */
-     static readRemoteCurated(room: string, remote: string): boolean {
+     static readRemoteCurated(room: string, remote: string): number {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
-        return Memory.rooms[room].remotes[remote].curated || false;
+        return Memory.rooms[room].remotes[remote].curated;
     }
 
     /**
@@ -237,7 +237,7 @@ export default class Chronicler {
      * @param room 
      * @param value 
      */
-    static writeRemoteCurated(room: string, remote: string, value: boolean) {
+    static writeRemoteCurated(room: string, remote: string, value: number) {
         if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
         Memory.rooms[room].remotes[remote].curated = value;
     }

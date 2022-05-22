@@ -87,17 +87,17 @@ export default class Executive {
                     let status = remoteData.status;
 
                     //make creeps flee when invaders are present
-                    if (!Chronicler.readRemoteGarrisoned(this.room, remote)) {
+                    if (Chronicler.readRemoteGarrisoned(this.room, remote) < Game.time) {
                         let numEnemies = liveRemote.find(FIND_HOSTILE_CREEPS).length;
                         let invaderCore = liveRemote.find(FIND_HOSTILE_STRUCTURES)[0];
                         if (numEnemies > 0) {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.INVADED);
                             this.spawnGarrison(remote);
-                            Chronicler.writeRemoteGarrisoned(this.room, remote, true);
+                            Chronicler.writeRemoteGarrisoned(this.room, remote, Game.time + 1500);
                         } else if (invaderCore !== undefined) {
                             this.spawnGarrison(remote, false);
                             this.spawnEmissary(remote, 'catchup');
-                            Chronicler.writeRemoteGarrisoned(this.room, remote, true);
+                            Chronicler.writeRemoteGarrisoned(this.room, remote, Game.time + 1500);
                         } else {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                         }
@@ -109,13 +109,13 @@ export default class Executive {
                     if (status === REMOTE_STATUSES.INVADED) continue;
 
                     //every 100 ticks check to see if a road is below 2000 hits
-                    if (Game.time % 100 == 0 && !Chronicler.readRemoteCurated(this.room, remote)) {
+                    if (Game.time % 100 == 0 && Chronicler.readRemoteCurated(this.room, remote) < Game.time) {
                         let allRoads = liveRemote.find(FIND_STRUCTURES, {filter:{structureType: STRUCTURE_ROAD}});
 
                         for (let road of allRoads) {
                             if (road.hits < road.hitsMax / 2.5) {
                                 this.spawnCurator(remote);
-                                Chronicler.writeRemoteCurated(this.room, remote, true);
+                                Chronicler.writeRemoteCurated(this.room, remote, Game.time + 1500);
                                 break;
                             }
                         }

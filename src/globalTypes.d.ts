@@ -120,9 +120,9 @@ interface RenewalTemplate {
 interface RemoteMemory {
     status: REMOTE_STATUSES;
     distances: number[];
-    garrisoned?: boolean;
-    roadsBuilt?: boolean;
-    curated?: boolean;
+    roadsBuilt: boolean;
+    garrisoned: number;
+    curated: number;
 }
 
 type BoostingMemory = {
