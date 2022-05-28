@@ -139,18 +139,8 @@ export default class Executive {
                         Architect.buildRemotePaths(this.room, remote, exit);
                         Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
                         let sources = liveRemote.find(FIND_SOURCES);
+                        this.spawnEngineers(remote);
                         for (let source of sources) {
-                            this.getSupervisor().initiate({
-                                'body' : [
-                                    WORK, WORK, WORK, WORK, 
-                                    CARRY, CARRY, CARRY, CARRY,
-                                    MOVE, MOVE, MOVE, MOVE, 
-                                    MOVE, MOVE, MOVE, MOVE
-                                ], 
-                                'type': CIVITAS_TYPES.ENGINEER, 
-                                'memory': {'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'offRoading': true}
-                            });
-
                             let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
                             let task = `global.Imperator.administrators[${this.room}].supervisor.initiate(
                                 {
@@ -403,21 +393,25 @@ export default class Executive {
 
 
     /**
-     * Method to spawn 4 remote engineers to bootstrap a new room
+     * Method to spawn 4 remote engineers to bootstrap a new room or remote
      * @param {String} assignedRoom String representing the room
      */
     spawnEngineers(assignedRoom: string) {
-        for (let i = 0; i < 4; i++) {
-            this.getSupervisor().initiate({
-                'body': [
-                    WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
-                    CARRY, CARRY, CARRY, CARRY, CARRY,
-                    MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,
-                    MOVE, MOVE, MOVE, MOVE, MOVE
-                ],
-                'type': CIVITAS_TYPES.ENGINEER,
-                'memory': {'generation':0, 'assignedRoom': assignedRoom, 'offRoading': true}
-            });
+        let liveRoom = Game.rooms[assignedRoom];
+        if (liveRoom === undefined) throw Error('Room not in vision');
+        let sources = liveRoom.find(FIND_SOURCES);
+        for (let source of sources) {
+            for (let i = 0; i < 2; i++) {
+                this.getSupervisor().initiate({
+                    'body': [
+                        WORK, WORK, WORK, WORK, WORK, WORK, 
+                        CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
+                    ],
+                    'type': CIVITAS_TYPES.ENGINEER,
+                    'memory': {'generation':0, 'assignedRoom': assignedRoom, 'sourceId': source.id, 'offRoading': true}
+                });
+            }
         }
     }
 
