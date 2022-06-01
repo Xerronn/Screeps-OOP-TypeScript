@@ -32,7 +32,13 @@ export default class Director {
                         let task = Memory.directives[room][tick][id];
                         let objArr = task.objArr;
                         if (objArr) {   //needed because of typescript shenanigans
-                            eval(task.script);
+                            try {
+                                eval(task.script);
+                            } catch(taskErr: any) {
+                                let errorMessage = `<b style='color:red;'>Room FAILURE during execution of directive ${task.script}</b>`
+                                console.log(errorMessage);
+                                Director.schedule(room, Game.time + 25, task.script, objArr);
+                            }
                         }
                     }
                     delete Memory.directives[room][tick];
