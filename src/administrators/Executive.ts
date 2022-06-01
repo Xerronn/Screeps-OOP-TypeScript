@@ -142,7 +142,7 @@ export default class Executive {
                         this.spawnEngineers(remote);
                         for (let source of sources) {
                             let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
-                            let task = `global.Imperator.administrators[${this.room}].supervisor.initiate(
+                            let task = `global.Imperator.administrators["${this.room}"].supervisor.initiate(
                                 {
                                     'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
                                     'type': '${CIVITAS_TYPES.MINER}', 
