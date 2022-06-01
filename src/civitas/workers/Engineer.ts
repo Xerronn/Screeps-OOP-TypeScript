@@ -20,6 +20,12 @@ export default class Engineer extends Miner {
             this.evolve();
         }
 
+        if (this.memory.generation !== undefined && 
+            (!this.remote && Chronicler.readGameStage(this.assignedRoom) >= 4.1) ||                         //for engineers generated during phase one
+            (this.remote && this.bootstrap && Chronicler.readGameStage(this.assignedRoom) >= 3.1)) {        //for remote engineers bootstrapping a new room
+            delete this.memory.generation;
+        } 
+
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "harvest" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
             this.memory.task = "harvest";
             if (!this.noPillage) {
@@ -36,7 +42,7 @@ export default class Engineer extends Miner {
         } else if (this.memory.buildTarget !== undefined || Game.rooms[this.assignedRoom].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
-        } else if (!this.bootstrap || Chronicler.readGameStage(this.assignedRoom) >= 4.1) {
+        } else if (!this.bootstrap) {   //for engineers building up a remote mining room
             delete this.memory.generation;
             this.liveObj.suicide();
         } else if (Game.rooms[this.room].storage === undefined || Game.rooms[this.room].storage?.my === false) {
