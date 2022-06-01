@@ -55,7 +55,8 @@ export default class Worker extends Civitas {
                 liveSite = tmpObj;
             } else {
                 //if the tmpObj is null, it means that the target has been built
-                global.Imperator.administrators[this.assignedRoom].supervisor.wrap(true);
+                let admins = global.Imperator.administrators[this.assignedRoom];
+                if (admins !== undefined) admins.supervisor.wrap(true);
                 delete this.memory.buildTarget;
             }
         }
