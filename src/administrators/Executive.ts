@@ -132,7 +132,7 @@ export default class Executive {
                     }
 
                     //plan roads and then spawn engineers and eventually miners
-                    if (remoteData.roadsBuilt === undefined || remoteData.roadsBuilt === false) {
+                    if (remoteData.roadsBuilt === false) {
                         //get last road tile leading into the remote room
                         let exit = Game.rooms[this.room].findExitTo(remote);
                         if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
