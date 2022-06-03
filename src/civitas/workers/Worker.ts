@@ -78,9 +78,9 @@ export default class Worker extends Civitas {
      * Method that moves to the storage and withdraws energy
      * @returns if the task was executed
      */
-    withdrawStorage(): boolean {
+    withdrawStorage(buffer: boolean = false): boolean {
         let storage = Game.rooms[this.room].storage;
-        if (storage === undefined || storage.store.getUsedCapacity(RESOURCE_ENERGY) < this.store.getFreeCapacity(RESOURCE_ENERGY)) return false;
+        if (storage === undefined || storage.store.getUsedCapacity(RESOURCE_ENERGY) - (15000 * (buffer ? 1 : 0)) < this.store.getFreeCapacity(RESOURCE_ENERGY)) return false;
 
         if (this.pos.inRangeTo(storage, 1)) {
             this.liveObj.withdraw(storage, RESOURCE_ENERGY);

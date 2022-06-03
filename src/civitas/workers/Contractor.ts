@@ -12,7 +12,7 @@ export default class Contractor extends Worker {
      run(): boolean {
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
             this.memory.task = "withdraw";
-            this.withdrawStorage();
+            this.withdrawStorage(true);
         } else if (Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length > 0) {
             this.memory.task = "build";
             this.build();
