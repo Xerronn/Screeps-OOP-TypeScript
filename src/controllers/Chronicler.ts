@@ -132,6 +132,17 @@ export default class Chronicler {
         return statisticsMemory;
     }
 
+    static registerRemote(room: string, remote: string) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].statistics.remotes[remote] = {
+            'energySpent': 0,
+            'energyMined': 0,
+            'energyDeposited': 0,
+            'garrisons': 0,
+            'workers': 0
+        }
+    }
+
     /**
      * Reads the stamp locations for a room
      * @param room 

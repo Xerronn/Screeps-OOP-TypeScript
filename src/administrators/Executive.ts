@@ -506,10 +506,12 @@ export default class Executive {
      * Select remotes, then build roads
      */
     remote() {
+        Chronicler.resetStatistics(this.room);
         let remotes = Chronicler.readRemotes(this.room);
         for (let remote in remotes) {
             let remoteData = remotes[remote];
             if (remoteData.status == REMOTE_STATUSES.SAFE && remoteData.distances.length === 2) {
+                Chronicler.registerRemote(this.room, remote)
                 let exit = Game.rooms[this.room].findExitTo(remote);
                 if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
                 Architect.buildExitPaths(this.room, exit);
@@ -518,7 +520,6 @@ export default class Executive {
                 break;
             }
         }
-        Chronicler.resetStatistics(this.room);
     }
 
     /**
