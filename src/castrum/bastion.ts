@@ -4,8 +4,9 @@ import Castrum from './Castrum';
 export default class Bastion extends Castrum {
     id: Id<StructureTower>;
     liveObj: StructureTower;
-    store: Store<RESOURCE_ENERGY, false>
+    store: Store<RESOURCE_ENERGY, false>;
 
+    attacking: boolean;
     repairTargets: Id<StructureRoad | StructureContainer>[];
 
     constructor(bastion: StructureTower) {
@@ -13,6 +14,7 @@ export default class Bastion extends Castrum {
         this.id = bastion.id;
         this.liveObj = bastion;
         this.store = this.liveObj.store;
+        this.attacking = false;
 
         this.repairTargets = [];
         this.findRepairTargets();
@@ -38,6 +40,7 @@ export default class Bastion extends Castrum {
             this.findRepairTargets();
         }
         if (!this.simpleAttack()) {     //todo: better attack implementation
+            this.attacking = false;
             this.repair();
         }
         return true;
@@ -50,6 +53,7 @@ export default class Bastion extends Castrum {
      simpleAttack(): boolean {
         var closestHostile = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if (closestHostile !== null) {
+            this.attacking = true;
             this.liveObj.attack(closestHostile);
             return true;
         }
@@ -87,6 +91,16 @@ export default class Bastion extends Castrum {
 
         if (target && this.store.getUsedCapacity(RESOURCE_ENERGY) > 250) {
             this.liveObj.repair(target);
+        }
+    }
+
+    /**
+     * Method to heal a creep, only when not attacking
+     * @param creep 
+     */
+    heal(creep: Creep) {
+        if (this.attacking === false) {
+            this.liveObj.heal(creep);
         }
     }
 }
