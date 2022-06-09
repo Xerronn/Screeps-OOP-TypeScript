@@ -62,16 +62,6 @@ export default abstract class Civitas extends GameObj {
     update(): boolean {
         this.liveObj = Game.creeps[this.name];
         if (this.liveObj === undefined) {
-            //only rebirth if the generation flag is there. If you want a creep to rebirth, set generation = 0 in the memory
-            if (this.memory.generation !== undefined) {
-                let template = {
-                    "body": [...this.body],
-                    "type": this.memory.type,
-                    "memory": {...this.memory}
-                };
-                this.supervisor.initiate(template);
-                delete this.memory.generation;
-            }
             //delete this wrapper
             this.supervisor.dismiss(this);
             return false; //creep is dead
