@@ -171,7 +171,7 @@ export default class Supervisor {
         for (type in this.civitas) {
             for (var civ of this.civitas[type]) {
                 try {
-                    if (civ.liveObj.spawning) continue;
+                    if (civ.liveObj === undefined || civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
                     let success = civ.preTick();
                     if (success === true) civ.run();
