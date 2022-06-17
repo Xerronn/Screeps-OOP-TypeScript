@@ -315,16 +315,6 @@ export default class Supervisor {
      * @param {Civitas} civitas
      */
     dismiss(civitasType: Civitas): void {
-        //only rebirth if the generation flag is there. If you want a creep to rebirth, set generation = 0 in the memory
-        if (civitasType.memory.generation !== undefined) {
-            let template = {
-                "body": [...civitasType.body],
-                "type": civitasType.type,
-                "memory": {...civitasType.memory}
-            };
-            this.initiate(template);
-            delete civitasType.memory.generation;
-        }
         let origArr = this.civitas[civitasType.type];
         let index = origArr.indexOf(civitasType as any);
         if (index >= 0) origArr.splice(index, 1);
