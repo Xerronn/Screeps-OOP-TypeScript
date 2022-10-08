@@ -8,12 +8,16 @@ export default class Imperator {
     administrators: {[roomName: string]: {supervisor: Supervisor, executive: Executive}};
     logistician: Logistician;
     dominion: string[];
+    matrixCache: {[roomName: string]: CostMatrix};
+    matrixExpirations: {[roomName: string]: number};
     spawnTime: number;
 
     constructor() {
         this.dominion = _.filter(Game.rooms, room => room.controller && room.controller.my).map(room => room.name);
         this.administrators = {};
         this.logistician = new Logistician();
+        this.matrixCache = {};
+        this.matrixExpirations = {};
         this.spawnTime = Game.time;
     }
 

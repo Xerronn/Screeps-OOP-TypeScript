@@ -229,7 +229,9 @@ export default class Informant {
      */
     static getCostMatrix(roomName: string) {
         //! TODO: figure out why the cacheing isnt working
-        //if (this.matrixCache[roomName]) return this.matrixCache[roomName];
+        if (global.Imperator.matrixCache[roomName] !== undefined && Game.time < global.Imperator.matrixExpirations[roomName]) {
+            return global.Imperator.matrixCache[roomName];
+        }
         let room = Game.rooms[roomName];
         let matrix = new PathFinder.CostMatrix();
         if (room === undefined) return false;
@@ -264,7 +266,8 @@ export default class Informant {
             let anchor = Chronicler.readSchema(roomName).main.anchor;
             matrix.set(anchor.x + 1, anchor.y + 1, 0xff);
         }
-        //this.matrixCache[roomName] = matrix;
+        global.Imperator.matrixCache[roomName] = matrix;
+        global.Imperator.matrixExpirations[roomName] = Game.time + 3000;
         return matrix;
     }
 
