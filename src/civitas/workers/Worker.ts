@@ -107,7 +107,7 @@ export default class Worker extends Civitas {
     /**
      * Function to fill spawn and extensions
      */
-    fillExtensions(): boolean {
+    fillExtensions(onlyNexus: boolean = false): boolean {
         let liveObj: StructureSpawn | StructureExtension | undefined;
         if (this.memory.fillTarget !== undefined) {
             let tmpObj = Game.getObjectById(this.memory.fillTarget) || undefined;
@@ -119,12 +119,15 @@ export default class Worker extends Civitas {
             if (this.remote) {
                 supervisor = global.Imperator.administrators[this.assignedRoom].supervisor;
             } else supervisor = this.supervisor;
-            let ext = Game.rooms[this.room].find(FIND_MY_STRUCTURES, {filter:{structureType: STRUCTURE_EXTENSION}})
             let spawns = supervisor.castrum.nexus.map(s => s.liveObj);
+            let fillables: StructureSpawn[];
+            if (!onlyNexus) {
+                let ext = Game.rooms[this.room].find(FIND_MY_STRUCTURES, {filter:{structureType: STRUCTURE_EXTENSION}})
 
-            let fillables = spawns.concat(ext as any[]).filter(
-                obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-            );
+                fillables = spawns.concat(ext as any[]).filter(
+                    obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                );
+            } else fillables = spawns;
 
             liveObj = this.pos.findClosestByRange(fillables) || undefined;
             if (liveObj === undefined) return false;
