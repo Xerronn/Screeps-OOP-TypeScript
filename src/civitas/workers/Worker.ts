@@ -124,10 +124,12 @@ export default class Worker extends Civitas {
             if (!onlyNexus) {
                 let ext = Game.rooms[this.room].find(FIND_MY_STRUCTURES, {filter:{structureType: STRUCTURE_EXTENSION}})
 
-                fillables = spawns.concat(ext as any[]).filter(
-                    obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-                );
+                fillables = spawns.concat(ext as any[])
             } else fillables = spawns;
+
+            fillables = fillables.filter(
+                obj => obj.store && obj.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+            );
 
             liveObj = this.pos.findClosestByRange(fillables) || undefined;
             if (liveObj === undefined) return false;
