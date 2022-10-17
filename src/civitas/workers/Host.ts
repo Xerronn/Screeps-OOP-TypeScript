@@ -1,23 +1,22 @@
+import Capacitor from 'castrum/Capacitor';
 import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
-import Nexus from 'castrum/Nexus';
 import Worker from './Worker';
 
 export default class Host extends Worker {
-    idleSpot: {x: number, y: number};
+    idleSpot: RoomPosition;
+    capacitorPaths: {[id: string]: RoomPosition[]};     //lazy cache of paths to each capacitor
     renewSpawnId?: Id<StructureSpawn>;
+    currentCapacitor?: Capacitor;
     evolved: boolean;
 
     constructor(host: Creep) {
         super(host)
-        let anchor = Chronicler.readSchema(this.room).main.anchor;
         this.evolved = false;
-        this.idleSpot = {
-            'x': anchor.x - 1,
-            'y': anchor.y - 1
-        }
+        this.idleSpot = this.getIdleSpot();
+        this.capacitorPaths = {};
     }
-
+    
     run(): boolean {
         if (this.memory.generation !== undefined && (this.ticksToLive < 300 || this.memory.task == "renew" || this.memory.task == "renewFill")) {
             //start the loop by setting task to rewnewFill
@@ -32,27 +31,86 @@ export default class Host extends Worker {
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) < EXTENSION_ENERGY_CAPACITY[Game.rooms[this.room].controller?.level || 7] ||
             (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                 this.memory.task = "withdraw";
-                this.withdrawStorage();
+                this.withdrawEnergy();
         } else if (Chronicler.readBastionsFilled(this.room) === false) {
             this.memory.task = "fillTowers";
             this.fillTowers();
         } else if (Chronicler.readExtensionsFilled(this.room) === false) {
             this.memory.task = "fillExtensions";
-            this.fillExtensions();
+            this.energizeCapacitors();
         } else { //move to idle spot
             this.memory.task = "idle";
-            if (this.pos.x != this.idleSpot.x || this.pos.y != this.idleSpot.y) {
-                let roomPosIdle = new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.room);
-                this.liveObj.travelTo(roomPosIdle);
-            }
+            this.returnToIdleSpot();
 
-            //only check once every global reset
+            //only check once every global reset or after spawning
             if (this.evolved === false) {
                 this.evolve();
                 this.evolved = true;
             }
         }
         return true;
+    }
+
+    /**
+     * Method to withdraw from storage, or if its empty, the terminal
+     * 
+     * @returns if the task was executed
+     */
+    withdrawEnergy(): boolean {
+        //return to idle spot first for pathing optimizations
+        if (!this.returnToIdleSpot()) {
+            if (this.withdrawStorage() === false) {
+                return this.withdrawTerminal();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Method to fill up groups of extensions collected as capacitors with energy
+     */
+    energizeCapacitors(): boolean {
+        //find a capacitor that needs filling. capacitor list is already sorted
+        if (this.currentCapacitor === undefined || this.currentCapacitor.full) {
+            this.currentCapacitor = undefined;
+            if (this.store.getFreeCapacity() > 0) this.memory.task = 'withdraw';
+            for (let capacitor of this.supervisor.castrum[CASTRUM_TYPES.CAPACITOR]) {
+                if (!capacitor.full) this.currentCapacitor = capacitor;
+            }
+        }
+        if (this.currentCapacitor === undefined) {
+            //try filling nexus
+            if (this.fillExtensions(true)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        let path = this.capacitorPaths[this.currentCapacitor.id];
+        if (path === undefined) {
+            path = PathFinder.search(
+                this.idleSpot,
+                {
+                    "pos" : this.currentCapacitor.center,
+                    "range" : 0
+                },
+                {
+                    "roomCallback": Informant.getCostMatrix,
+                    "plainCost": 2,
+                    "swampCost": 10
+                }
+            ).path;
+            path.unshift(this.idleSpot);
+            this.capacitorPaths[this.currentCapacitor.id] = path;
+        }
+        if (this.moveByPath(path)) return true;
+        for (let ext of this.currentCapacitor.extensions) {
+            let liveExt = Game.getObjectById(ext);
+            if (liveExt === null || liveExt.store.getFreeCapacity(RESOURCE_ENERGY) === 0) continue;
+            this.liveObj.transfer(liveExt, RESOURCE_ENERGY);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -134,5 +192,43 @@ export default class Host extends Worker {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Method to move the creep to its idle spot
+     * @returns true if creep is moving
+     */
+    returnToIdleSpot(): boolean {
+        if (this.pos.x != this.idleSpot.x || this.pos.y != this.idleSpot.y) {
+            let roomPosIdle = new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.room);
+            this.liveObj.travelTo(roomPosIdle);
+            return true;
+        }
+        return false;
+    }
+
+    getIdleSpot() {
+        let schema = Chronicler.readSchema(this.room).main;
+        let rotations = schema.rotations;
+        let offsets = [1, 0];
+        switch(rotations) {
+            case 1:
+                offsets = [1, 0];
+                break;
+            case 2:
+                offsets = [2, 1];
+                break;
+            case 3:
+                offsets = [1, 2];
+                break;
+            case 4:
+                offsets = [0, 1];
+                break;
+        }
+        return new RoomPosition(
+            schema.anchor.x + offsets[0],
+            schema.anchor.y + offsets[1],
+            this.room
+        );
     }
 }
