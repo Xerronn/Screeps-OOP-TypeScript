@@ -9,7 +9,6 @@ export default class Nexus extends Castrum {
 
     name: string;
     spawning: Spawning | null;
-    wrapped: boolean;               //if the currently spawning creep has been wrapped yet
     spawningThisTick: boolean;      //if the nexus has already return OK to spawn something this tick
     reservedTick: number;           //if the nexus is currently reserved by a renewing creep
 
@@ -19,9 +18,6 @@ export default class Nexus extends Castrum {
         this.id = nexus.id;
         this.name = nexus.name;
         this.spawning = nexus.spawning;
-        if (!this.spawning) {
-            this.wrapped = false
-        } else this.wrapped = true;
         this.spawningThisTick = false;
     }
 
@@ -29,19 +25,14 @@ export default class Nexus extends Castrum {
         if (!super.update()) return false;          //structure is dead
         this.spawning = this.liveObj.spawning;
 
-        if (!this.spawning) {
-            this.wrapped = false;
-        }
-
         this.spawningThisTick = false;
 
         return true;
     }
 
     run() {
-        if (this.spawning && !this.wrapped) {
+        if (this.spawning && this.spawning.remainingTime === 2) {
             this.supervisor.wrapCreep(this.spawning.name);
-            this.wrapped = true;
         }
         return true;
     }

@@ -83,6 +83,8 @@ export default class Supervisor {
     extensionOrder: Id<StructureExtension | StructureSpawn>[];      //What order extensions should be drawn from for optimal filling.
     _extensionOrder: Array<StructureExtension | StructureSpawn>;
 
+    lastdismissal: number;
+
     constructor(room: string) {
         this.room = room;
 
@@ -99,6 +101,8 @@ export default class Supervisor {
 
         this.extensionOrder = [];
         this._extensionOrder = [];
+
+        this.lastdismissal = 0;
     }
 
     /**
@@ -315,6 +319,7 @@ export default class Supervisor {
      * @param {Civitas} civitas
      */
     dismiss(civitasType: Civitas): void {
+        this.lastdismissal = Game.time;
         let origArr = this.civitas[civitasType.type];
         let index = origArr.indexOf(civitasType as any);
         if (index >= 0) origArr.splice(index, 1);
@@ -393,7 +398,7 @@ export default class Supervisor {
     }
 
     /**
-     * Function to wrap capacitors
+     * Function to wrap capacitors. Schema is already sorted by nearest to center, so capacitors are as well
      */
     wrapCapacitors() {
         let schema = Chronicler.readSchema(this.room);

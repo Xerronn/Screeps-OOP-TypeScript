@@ -128,3 +128,10 @@ interface RemoteMemory {
 type BoostingMemory = {
     [mineral in MineralBoostConstant]?: {workshop: Id<StructureLab>, amount: number};
 }
+
+type StoreStructure = StructureContainer | StructureExtension | StructureTower | StructureStorage | StructureTerminal | StructureFactory | StructureLab | StructureLink | StructureNuker;
+interface PathCache {
+    path: RoomPosition[],
+    stuckTick: number,
+    stuckPos: Position
+}
