@@ -9,9 +9,11 @@ export default class Executive {
     room: string;
 
     architect: Architect;
+    bug: number;
     
     constructor(room: string) {
         this.room = room;
+        this.bug = 0;
         if (!Chronicler.readRoomRegistered(this.room)) {
             let schematic = Architect.plan(this.room);
             let resources = Informant.prospect(this.room);
@@ -30,9 +32,12 @@ export default class Executive {
             sum += civitas[creepType].length;
         }
         if (Object.keys(Game.creeps).length !== Object.keys(Memory.creeps).length) {
-            let message = `${global.Imperator.spawnTime} is last global reset. ${Game.time} is current time. ${Object.keys(Game.creeps).length}, ${Object.keys(Memory.creeps).length}, ${sum}`;
-            Game.notify(message)
-        }
+            this.bug++;
+            if (this.bug > 3) {
+                let message = `${this.getSupervisor().lastdismissal} is last dismissal. ${Game.time} is current time. ${Object.keys(Game.creeps).length}, ${Object.keys(Memory.creeps).length}, ${sum}`;
+                Game.notify(message)
+            }
+        } else this.bug = 0;
         if (Game.time % 30 === 0) {
             let calculation = Informant.calculateGameStage(this.room);
             let current = Chronicler.readGameStage(this.room);
