@@ -91,7 +91,7 @@ export default class Arbiter extends Host {
                 this.memory.task = "withdraw";
                 let amount = energyTarget - this.terminal.store.getUsedCapacity(RESOURCE_ENERGY);
                 let tripAmount = Math.min(amount, this.store.getFreeCapacity(RESOURCE_ENERGY));
-                this.withdrawStorage(tripAmount);
+                this.withdrawStorage(false, tripAmount);
                 return true;
             } else {
                 this.memory.task = "deposit";
@@ -169,7 +169,7 @@ export default class Arbiter extends Host {
     /**
      * Overloaded withdrawStorage with no moves
      */
-    withdrawStorage(numEnergy?: number): boolean {
+    withdrawStorage(buffer: boolean = false, numEnergy?: number): boolean {
         if (this.storage === undefined || this.storage.store.getUsedCapacity(RESOURCE_ENERGY) === 0) return false;
         if (numEnergy !== undefined) {
             this.liveObj.withdraw(this.storage, RESOURCE_ENERGY, numEnergy);
