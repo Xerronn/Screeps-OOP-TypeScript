@@ -1044,6 +1044,73 @@ export default class Architect {
     }
 
     /**
+     * Method to smartly place walls around base
+     * @param room 
+     */
+    static placeWalls(room: string) {
+        let distanceMatrix = Architect.distanceTransform(room);
+        let terrainMatrix = Architect.terrainMatrix(room);
+        let schema = Chronicler.readSchema(room);
+        let liveRoom = Game.rooms[room];
+
+        function callback(room: string) {
+            return terrainMatrix;
+        }
+
+        let center = new RoomPosition(schema.main.anchor.x + 1, schema.main.anchor.y + 1, room);
+        let roomExits = [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP];
+        let wallPos: RoomPosition[] = [];
+
+        for (let direction of roomExits) {
+            let allExits = liveRoom.find(direction);
+            let goals = [];
+            for (let exit of allExits) {
+                goals.push({
+                        pos: exit,
+                        range : 1
+                });
+            }
+            //keep searching towards this exit until the path is incomplete
+            for (let i = 0; i<60;i++) {
+                //path find to the current exit
+                let pathToExit = PathFinder.search(
+                    center,
+                    goals, 
+                    {
+                        plainCost: 0,
+                        swampCost: 0,
+                        roomCallback: callback,
+                        maxRooms: 1,
+                        maxCost: 255
+                    }
+                );
+                if (pathToExit.incomplete) {
+                    console.log(i); 
+                    break;
+                }
+                
+                // let currentBest: {distance: number, pos: RoomPosition} = {distance: 100, pos: pathToExit.path[7]};
+                // for (let pos of pathToExit.path.slice(0, pathToExit.path.length - 3)) {
+                //     let distance = distanceMatrix.get(pos.x, pos.y);
+                //     if (distance < currentBest.distance) {
+                //         currentBest.pos = {x: pos.x, y: pos.y};
+                //         currentBest.distance = distance;
+                //     }
+                // }
+                pathToExit.path.splice(0, 15);
+
+                //push the first pos of the route, then repath
+                if (pathToExit.path.length == 0) continue;
+                wallPos.push(pathToExit.path[0]);
+                terrainMatrix.set(pathToExit.path[0].x, pathToExit.path[0].y, 0xff);
+            }
+        }
+        for (let pos of wallPos) {
+            new RoomVisual().circle(pos.x, pos.y);
+        }
+    }
+
+    /**
      * Mathod to clear out any left over junk from previous inhabitants
      * @param roomObj
      */
@@ -1121,6 +1188,20 @@ export default class Architect {
         }
 
         return topDownPass;
+    }
+
+    static terrainMatrix(room: string) {
+        let matrix = new PathFinder.CostMatrix;
+        let roomTerrain = Game.rooms[room].getTerrain();
+        for (let x = 0; x < 50; x++) {
+            for (let y = 0; y < 50; y++) {
+                if (roomTerrain.get(x, y) === TERRAIN_MASK_WALL) {
+                    matrix.set(x, y, 0xff);
+                }
+            }
+        }
+
+        return matrix;
     }
 
     /**
