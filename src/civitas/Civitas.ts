@@ -71,7 +71,8 @@ export default abstract class Civitas extends GameObj {
                 };
                 this.supervisor.initiate(template);
                 delete this.memory.generation;
-            } else this.supervisor.dismiss(this);
+            }
+            this.supervisor.dismiss(this);
             
             return false; //creep is dead
         }
@@ -121,7 +122,7 @@ export default abstract class Civitas extends GameObj {
         }
         
         if (this.room !== room || (deep && !this.pos.inRangeTo(25, 25, 15))) {
-            this.liveObj.travelTo(new RoomPosition(25, 25, room));
+            this.liveObj.travelTo(new RoomPosition(25, 25, room), {'preferHighway': true});
             return true;
         }
         return false;
