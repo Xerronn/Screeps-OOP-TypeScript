@@ -173,7 +173,7 @@ export default class Supervisor {
         let civitas = this.civitas;
         let type: keyof typeof civitas
         for (type in this.civitas) {
-            for (var civ of this.civitas[type]) {
+            for (var civ of [...this.civitas[type]]) {
                 try {
                     if (civ.liveObj === undefined || civ.liveObj.spawning) continue;
                     let startcpu = Game.cpu.getUsed()
@@ -199,7 +199,7 @@ export default class Supervisor {
         let castrum = this.castrum;
         let cType: keyof typeof castrum;
         for (cType in castrum) {
-            for (let struc of this.castrum[cType]) {
+            for (let struc of [...this.castrum[cType]]) {
                 try {
                     struc.run();
                 } catch (roomErr: any) {
@@ -220,7 +220,7 @@ export default class Supervisor {
         let civitas = this.civitas;
         let type: keyof typeof civitas
         for (type in this.civitas) {
-            for (let civ of this.civitas[type]) {
+            for (let civ of [...this.civitas[type]]) {
                 civ.update();
             }
         }
@@ -229,7 +229,7 @@ export default class Supervisor {
         let castrum = this.castrum;
         let cType: keyof typeof castrum;
         for (cType in this.castrum) {
-            for (let struc of castrum[cType]) {
+            for (let struc of [...castrum[cType]]) {
                 struc.update();
             }
         }
