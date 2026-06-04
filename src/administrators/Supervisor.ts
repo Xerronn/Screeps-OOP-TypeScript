@@ -1,38 +1,65 @@
 //administrator imports
-import Informant from 'controllers/Informant';          Informant;
-import Director from 'controllers/Director';            Director;
-import Executive from './Executive';                    Executive;
-import Chronicler from 'controllers/Chronicler';        Chronicler;
+import Informant from 'controllers/Informant';
+import Director from 'controllers/Director';
+import Executive from './Executive';
+import Chronicler from 'controllers/Chronicler';
 
 //worker imports
-import Civitas from 'civitas/Civitas';                  Civitas;
-import Miner from 'civitas/workers/Miner';              Miner;
-import Engineer from 'civitas/workers/Engineer';        Engineer;
-import Courier from 'civitas/workers/Courier';          Courier;
-import Scholar from 'civitas/workers/Scholar';          Scholar;
-import Host from 'civitas/workers/Host';                Host;
-import Contractor from 'civitas/workers/Contractor';    Contractor;
-import Arbiter from 'civitas/workers/Arbiter';          Arbiter;
-import Excavator from 'civitas/workers/excavator';      Excavator;
-import Scout from 'civitas/workers/scout';              Scout;
-import Chemist from 'civitas/workers/Chemist';          Chemist;
-import Curator from 'civitas/workers/Curator';          Curator;
-import Emissary from 'civitas/workers/Emissary';        Emissary;
+import Civitas from 'civitas/Civitas';
+import Miner from 'civitas/workers/Miner';
+import Engineer from 'civitas/workers/Engineer';
+import Courier from 'civitas/workers/Courier';
+import Scholar from 'civitas/workers/Scholar';
+import Host from 'civitas/workers/Host';
+import Contractor from 'civitas/workers/Contractor';
+import Arbiter from 'civitas/workers/Arbiter';
+import Excavator from 'civitas/workers/excavator';
+import Scout from 'civitas/workers/scout';
+import Chemist from 'civitas/workers/Chemist';
+import Curator from 'civitas/workers/Curator';
+import Emissary from 'civitas/workers/Emissary';
 
 //legion imports
-import Executioner from 'civitas/Legion/Executioner';   Executioner;
-import Garrison from 'civitas/Legion/Garrison';         Garrison;
-import Jester from 'civitas/Legion/Jester';             Jester;
+import Executioner from 'civitas/Legion/Executioner';
+import Garrison from 'civitas/Legion/Garrison';
+import Jester from 'civitas/Legion/Jester';
 
 
 //structure imports
-import Castrum from 'castrum/Castrum';                  Castrum;
-import Conduit from 'castrum/Conduit';                  Conduit;
-import Workshop from 'castrum/Workshop';                Workshop;
-import Nexus from 'castrum/Nexus';                      Nexus;
-import Bastion from 'castrum/Bastion';                  Bastion;
-import Market from 'castrum/Market';                    Market;
-import Capacitor from 'castrum/Capacitor';              Capacitor;
+import Castrum from 'castrum/Castrum';
+import Conduit from 'castrum/Conduit';
+import Workshop from 'castrum/Workshop';
+import Nexus from 'castrum/Nexus';
+import Bastion from 'castrum/Bastion';
+import Market from 'castrum/Market';
+import Capacitor from 'castrum/Capacitor';
+
+// Class registries for dynamic instantiation (replaces eval)
+const CIVITAS_CLASS_MAP: { [key: string]: new (creep: Creep) => Civitas } = {
+    [CIVITAS_TYPES.ARBITER]: Arbiter,
+    [CIVITAS_TYPES.CHEMIST]: Chemist,
+    [CIVITAS_TYPES.CONTRACTOR]: Contractor,
+    [CIVITAS_TYPES.COURIER]: Courier,
+    [CIVITAS_TYPES.CURATOR]: Curator,
+    [CIVITAS_TYPES.EMISSARY]: Emissary,
+    [CIVITAS_TYPES.ENGINEER]: Engineer,
+    [CIVITAS_TYPES.EXCAVATOR]: Excavator,
+    [CIVITAS_TYPES.HOST]: Host,
+    [CIVITAS_TYPES.MINER]: Miner,
+    [CIVITAS_TYPES.SCHOLAR]: Scholar,
+    [CIVITAS_TYPES.SCOUT]: Scout,
+    [LEGION_TYPES.EXECUTIONER]: Executioner,
+    [LEGION_TYPES.GARRISON]: Garrison,
+    [LEGION_TYPES.JESTER]: Jester,
+};
+
+const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
+    [CASTRUM_TYPES.BASTION]: Bastion,
+    [CASTRUM_TYPES.CONDUIT]: Conduit,
+    [CASTRUM_TYPES.MARKET]: Market,
+    [CASTRUM_TYPES.NEXUS]: Nexus,
+    [CASTRUM_TYPES.WORKSHOP]: Workshop,
+};
 
 export default class Supervisor {
     room: string;
@@ -120,9 +147,10 @@ export default class Supervisor {
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.ROAD) {
                 if ((structure as OwnedStructure).my === false) continue;
-                let createObjStr = "this.castrum[\"" + castrumType + "\"].push(new " + castrumType.charAt(0).toUpperCase() +
-                    castrumType.slice(1) + "(structure));";
-                eval(createObjStr);
+                const Class = CASTRUM_CLASS_MAP[castrumType];
+                if (Class) {
+                    (this.castrum as any)[castrumType].push(new Class(structure));
+                }
             } else if (castrumType !== CASTRUM_TYPES.UNDEFINED) {
                 //cache for basic structures like roads and containers
                 this.primitives[castrumType].push(structure.id as any);
@@ -141,10 +169,10 @@ export default class Supervisor {
         //initialize all creeps in the room to their respective classes
         for (let creepMem of _.filter(Memory.creeps, c => c.spawnRoom == this.room)) {
             if (Game.creeps[creepMem.name]) {
-                let createObjStr = "this.civitas[\"" + creepMem.type + "\"].push(new " + creepMem.type.charAt(0).toUpperCase() +
-                    creepMem.type.slice(1) + "(Game.creeps[\"" + creepMem.name + "\"]));";
-
-                eval(createObjStr);
+                const Class = CIVITAS_CLASS_MAP[creepMem.type];
+                if (Class) {
+                    (this.civitas as any)[creepMem.type].push(new Class(Game.creeps[creepMem.name]));
+                }
             } else {
                 //the creep is dead. This should only happen if a creep dies on the same tick as a global reset.
                 //if it is a rebirth creep, rebirth it, otherwise delete the memory
@@ -305,10 +333,12 @@ export default class Supervisor {
         let creep = Game.creeps[creepName];
         //check if the creep has already been wrapped
         if (!Informant.getWrapper(creep.id)) {
-            let createObjStr = "this.civitas[\"" + creep.memory.type + "\"].push(new " + creep.memory.type.charAt(0).toUpperCase() +
-                creep.memory.type.slice(1) + "(Game.creeps[\"" + creep.name + "\"]));";
-
-            eval(createObjStr);
+            let type = creep.memory.type;
+            const Class = CIVITAS_CLASS_MAP[type];
+            if (!Class || !(this.civitas as any)[type]) {
+                return false;
+            }
+            (this.civitas as any)[type].push(new Class(creep));
             return true;
         }
         return false;
