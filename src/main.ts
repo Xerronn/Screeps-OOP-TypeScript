@@ -1,6 +1,6 @@
 import Imperator from './Imperator';
 import Director from "./controllers/Director";
-import Traveler from "./thirdParty/traveler";
+import Traveler from "./thirdParty/Traveler";
 declare global {
     namespace NodeJS {
         interface Global {

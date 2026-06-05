@@ -3,7 +3,7 @@ import Supervisor from 'administrators/Supervisor';
 import Workshop from 'castrum/Workshop';
 import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
-import Traveler from 'thirdParty/traveler';
+import Traveler from 'thirdParty/Traveler';
 import GameObj from '../GameObj';
 
 export default abstract class Civitas extends GameObj {

@@ -1,6 +1,6 @@
 import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
-import Traveler from 'thirdParty/traveler';
+import Traveler from 'thirdParty/Traveler';
 import Worker, {WorkerMemory} from './Worker';
 
 interface CourierMemory extends WorkerMemory {

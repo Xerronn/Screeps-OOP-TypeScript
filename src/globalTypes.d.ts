@@ -1,7 +1,9 @@
 /**
- * INTERFACES
- */
- interface Memory {
+  * INTERFACES
+  */
+  declare var _: typeof import('lodash');
+
+  interface Memory {
     creeps: {[creepName: string]: CreepMemory};
     gFlags: {[flagName: string]: string | boolean};
     rooms: {[roomName: string]: RoomMemory};
