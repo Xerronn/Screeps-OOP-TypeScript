@@ -506,6 +506,18 @@ export default class Supervisor {
     }
 
     /**
+     * Spawns a panic Host creep to fill extensions and towers in emergency situations
+     * Call from terminal: global.Imperator.administrators["W8N3"].supervisor.panic()
+     */
+    panic(): void {
+        this.initiate({
+            body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE],
+            type: CIVITAS_TYPES.HOST,
+            memory: {}
+        });
+    }
+
+    /**
      * Getter to return the paired executive
      * @returns Executive
      */
