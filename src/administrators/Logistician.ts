@@ -53,7 +53,8 @@ export default class Logistician {
         if (currentBest !== undefined) {
             return currentBest.liveObj.send(resource, currentBestAmount, roomMarket.room);
         } 
-        return this.purchase(roomMarket.room, resource, amountRequested);
+        let purchaseResult = this.purchase(roomMarket.room, resource, amountRequested);
+        return purchaseResult ?? ERR_NOT_FOUND;
     }
 
     /**
@@ -62,13 +63,15 @@ export default class Logistician {
      * @param resource 
      * @param amountRequested 
      */
-    purchase(room:string, resource: ResourceConstant, amountRequested: number): ScreepsReturnCode {
+    purchase(room:string, resource: ResourceConstant, amountRequested: number): ScreepsReturnCode | null {
         //first get energy data for transfer costs
         let energyData = this.getTwoWeekAverages(RESOURCE_ENERGY);
+        if (!energyData) return null;
         let energyPrice = energyData.avgPrice;
 
         //now get price history for the resource we are interested in
         let marketInfo = this.getTwoWeekAverages(resource);
+        if (!marketInfo) return null;
         let sellOrders = Game.market.getAllOrders({type: ORDER_SELL, resourceType: resource});
         let targetPrice = parseFloat((marketInfo["avgPrice"] * 1.15).toFixed(3)); //maybe include marketInfo["stddevPrice"]
 
@@ -110,9 +113,10 @@ export default class Logistician {
      * @param resourceToSell 
      * @param amountToSell 
      */
-    sell(room: string, resourceToSell: ResourceConstant, amountToSell: number): ScreepsReturnCode {
+    sell(room: string, resourceToSell: ResourceConstant, amountToSell: number): ScreepsReturnCode | null {
         //TODO: maybe sell to buy orders
         let marketInfo = this.getTwoWeekAverages(resourceToSell);
+        if (!marketInfo) return null;
         let price = parseFloat((marketInfo["avgPrice"] * 0.85).toFixed(3));
         return Game.market.createOrder({
             type: ORDER_SELL,
@@ -167,8 +171,9 @@ export default class Logistician {
      * @param resource 
      * @returns 
      */
-    getTwoWeekAverages(resource: ResourceConstant): {avgPrice: number, stddevPrice: number} {
+    getTwoWeekAverages(resource: ResourceConstant): {avgPrice: number, stddevPrice: number} | null {
         let fourteenDays = Game.market.getHistory(resource);
+        if (!fourteenDays || !Array.isArray(fourteenDays) || fourteenDays.length === 0) return null;
 
         let averages = [];
         let stddev = [];

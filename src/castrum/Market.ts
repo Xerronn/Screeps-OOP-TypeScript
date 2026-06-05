@@ -37,7 +37,10 @@ export default class Market extends Castrum {
                 logistician.requistion(this, resource, targetAmount - currentAmount);
                 return;
             } else if (currentAmount - 5000 > targetAmount) {
-                logistician.sell(this.room, resource, currentAmount - targetAmount);
+                let history = Game.market.getHistory(resource);
+                if (!history || !Array.isArray(history) || history.length === 0) continue;
+                let result = logistician.sell(this.room, resource, currentAmount - targetAmount);
+                if (result === null) continue;
                 return;
             }
         }
