@@ -106,7 +106,7 @@ export default class Host extends Worker {
         if (this.moveByPath(path)) return true;
         for (let ext of this.currentCapacitor.extensions) {
             let liveExt = Game.getObjectById(ext);
-            if (liveExt === null || liveExt.store.getFreeCapacity(RESOURCE_ENERGY) === 0) continue;
+            if (liveExt === null || liveExt.store.getFreeCapacity(RESOURCE_ENERGY) === 0 || !liveExt.isActive()) continue;
             this.liveObj.transfer(liveExt, RESOURCE_ENERGY);
             return true;
         }

@@ -507,7 +507,7 @@ export default class Executive {
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
                 ATTACK, ATTACK, ATTACK, ATTACK,
                 RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK,
-                HEAL, HEAL, HEAL
+                HEAL, HEAL, HEAL, MOVE, MOVE, MOVE, MOVE
             ]
         }
         this.getSupervisor().initiate({
