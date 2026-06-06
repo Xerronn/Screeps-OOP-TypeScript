@@ -25,19 +25,6 @@ export default class Executive {
      * Executive logic to run each tick
      */
     run() {
-        let sum = 0;
-        let civitas = this.getSupervisor().civitas;
-        let creepType: keyof typeof civitas
-        for (creepType in civitas) {
-            sum += civitas[creepType].length;
-        }
-        if (Object.keys(Game.creeps).length !== Object.keys(Memory.creeps).length) {
-            this.bug++;
-            if (this.bug > 3) {
-                let message = `${this.getSupervisor().lastdismissal} is last dismissal. ${Game.time} is current time. ${Object.keys(Game.creeps).length}, ${Object.keys(Memory.creeps).length}, ${sum}`;
-                Game.notify(message)
-            }
-        } else this.bug = 0;
         if (Game.time % 30 === 0) {
             let calculation = Informant.calculateGameStage(this.room);
             let current = Chronicler.readGameStage(this.room);

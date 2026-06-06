@@ -34,7 +34,7 @@ import Bastion from 'castrum/Bastion';
 import Market from 'castrum/Market';
 import Capacitor from 'castrum/Capacitor';
 
-// Class registries for dynamic instantiation (replaces eval)
+// Class registries for dynamic instantiation
 const CIVITAS_CLASS_MAP: { [key: string]: new (creep: Creep) => Civitas } = {
     [CIVITAS_TYPES.ARBITER]: Arbiter,
     [CIVITAS_TYPES.CHEMIST]: Chemist,
