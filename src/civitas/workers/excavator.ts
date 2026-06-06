@@ -73,7 +73,7 @@ export default class Excavator extends Civitas {
         //spawn a new excavator when the mineral is regenerated
         if (this.memory.generation !== undefined && this.mineral.mineralAmount == 0 && this.mineral.ticksToRegeneration && this.ticksToLive < this.mineral.ticksToRegeneration) {
             let task = `
-                global.Imperator.administrators[\"` + this.spawnRoom + `\"].supervisor.initiate({
+                global.Imperator.administrators[\"` + this.spawnRoom + `\"].supervisor.queueCreep({
                     'body': objArr[0],
                     'type': objArr[1],
                     'memory': objArr[2]
@@ -110,7 +110,7 @@ export default class Excavator extends Civitas {
      */
     spawnCourier(): boolean {
         if (this.memory.containerId === undefined || this.mineral === undefined) return false;
-        this.supervisor.initiate({
+        this.supervisor.queueCreep({
             'body': [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.COURIER,
             'memory': {

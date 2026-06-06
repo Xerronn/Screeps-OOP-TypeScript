@@ -241,7 +241,7 @@ export default class Worker extends Civitas {
      * Method to replace the creep early
      */
     replace() {
-        this.supervisor.initiate({
+        this.supervisor.queueCreep({
             'body': [...this.body],
             'type': this.memory.type,
             'memory': {...this.memory}

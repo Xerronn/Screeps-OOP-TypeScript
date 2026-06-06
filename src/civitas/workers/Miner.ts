@@ -200,7 +200,7 @@ export default class Miner extends Worker {
         }
 
         for (let i = 0; i < numCouriers; i++) {
-            this.supervisor.initiate({
+            this.supervisor.queueCreep({
                 'body': body,
                 'type': CIVITAS_TYPES.COURIER,
                 'memory': {
@@ -227,7 +227,7 @@ export default class Miner extends Worker {
 
         //basically rebirth but without the dying first
         this.evolve();
-        this.supervisor.initiate({
+        this.supervisor.queueCreep({
             'body': [...this.body],
             'type': this.memory.type,
             'memory': {...this.memory}

@@ -7,16 +7,23 @@
     creeps: {[creepName: string]: CreepMemory};
     gFlags: {[flagName: string]: string | boolean};
     rooms: {[roomName: string]: RoomMemory};
-    directives: {
-        [roomName: string]: {
-            [tick: number]: {
-                [taskId: string]: {
-                    script: string;
-                    objArr: any
-                }
-            }
+    directives: {[roomName: string]: DirectiveMemory};
+}
+
+interface DirectiveMemory {
+    spawning: {
+        [priority: string]: {
+            [taskId: string]: Task
         }
-    };
+    }
+    [tick: number]: {
+        [taskId: string]: Task
+    }
+}
+
+interface Task {
+    script: string;
+    objArr: any;
 }
 
 interface CreepMemory {

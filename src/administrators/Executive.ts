@@ -61,7 +61,7 @@ export default class Executive {
                 }
 
                 if (contractors < numToSpawn) {
-                    this.getSupervisor().initiate({
+                    this.getSupervisor().queueCreep({
                         'body': spawnBody,
                         'type': CIVITAS_TYPES.CONTRACTOR,
                         'memory': { "generation": 0 }
@@ -144,7 +144,7 @@ export default class Executive {
                         this.spawnEngineers(remote);
                         for (let source of sources) {
                             let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
-                            let task = `global.Imperator.administrators["${this.room}"].supervisor.initiate(
+                            let task = `global.Imperator.administrators["${this.room}"].supervisor.queueCreep(
                                 {
                                     'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
                                     'type': '${CIVITAS_TYPES.MINER}', 
@@ -294,7 +294,7 @@ export default class Executive {
                 //Spawn either the number of open spots times 2 or half of numToSpawn, whichever is lower
                 for (var i = 0; i < Math.min(numToSpawn / 2, liveResource.openSpots * 2); i++) {
                     let memory = {"generation": 0, "sourceId": resource, "courierSpawned": false};
-                    this.getSupervisor().initiate({'body' : [WORK, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.ENGINEER, 'memory': memory})
+                    this.getSupervisor().queueCreep({'body' : [WORK, CARRY, MOVE, MOVE], 'type': CIVITAS_TYPES.ENGINEER, 'memory': memory})
                 }
             }
         }
@@ -330,7 +330,7 @@ export default class Executive {
         }
 
         for (let creepToSpawn of creepsToSpawn.reverse()) {
-            this.getSupervisor().initiate(creepToSpawn);
+            this.getSupervisor().queueCreep(creepToSpawn);
         }
     }
 
@@ -338,7 +338,7 @@ export default class Executive {
      * Method that starts phase three, the arbiter creep
      */
     spawnArbiter() {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [
                 CARRY, CARRY, CARRY, CARRY, CARRY, MOVE
             ],
@@ -354,7 +354,7 @@ export default class Executive {
      * Method that spawns a single scout creep
      */
     spawnScout() {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [MOVE],
             'type': CIVITAS_TYPES.SCOUT,
             'memory': {'generation' : 0, 'offRoading': true}
@@ -374,7 +374,7 @@ export default class Executive {
         }
         let memory: any = {'generation': 0, 'task': task, 'assignedRoom': assignedRoom, 'offRoading': true};
         if (task === 'catchup') delete memory['generation'];
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': body,
             'type': CIVITAS_TYPES.EMISSARY,
             'memory': memory
@@ -386,7 +386,7 @@ export default class Executive {
      * @param {String} assignedRoom string representing the room they should move to first
      */
     spawnCurator(assignedRoom: string) {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.CURATOR,
             'memory': {'generation' : 0, 'assignedRoom': assignedRoom}
@@ -404,7 +404,7 @@ export default class Executive {
         let sources = liveRoom.find(FIND_SOURCES);
         for (let source of sources) {
             for (let i = 0; i < 2; i++) {
-                this.getSupervisor().initiate({
+                this.getSupervisor().queueCreep({
                     'body': [
                         WORK, WORK, WORK, WORK, WORK, WORK, 
                         CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
@@ -421,7 +421,7 @@ export default class Executive {
      * Method that spawns the excavator to mine out minerals
      */
     spawnExcavator() {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
@@ -435,7 +435,7 @@ export default class Executive {
      * Method that spawns the chemist to start making boosts
      */
     spawnChemist() {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [
                 CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
@@ -451,7 +451,7 @@ export default class Executive {
      * Method that spawns an executioner to destroy a low level room <7 rcl
      */
     spawnExecutioner(assignedRoom: string, boost=true) {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [
                 TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
                 RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK,
@@ -469,7 +469,7 @@ export default class Executive {
      * Method that spawns a simple harass creep for an enemy's remote mine
      */
     spawnJester(assignedRoom: string) {
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': [
                 ATTACK, MOVE, MOVE
             ],
@@ -497,7 +497,7 @@ export default class Executive {
                 HEAL, HEAL, HEAL
             ]
         }
-        this.getSupervisor().initiate({
+        this.getSupervisor().queueCreep({
             'body': body,
             'type': LEGION_TYPES.GARRISON,
             'memory': {'assignedRoom': assignedRoom}

@@ -8,7 +8,7 @@ export default class Director {
      */
     static schedule(room: string, tick: number, task: string, objArr: any[]) {
         if (!Memory.directives[room]) {
-            Memory.directives[room] = {};
+            Memory.directives[room] = {"spawning": {}};
         }
         if (!Memory.directives[room][tick]) {
             Memory.directives[room][tick] = {};
@@ -21,27 +21,64 @@ export default class Director {
         Memory.directives[room][tick][taskId] = taskObj;
     }
 
+    static scheduleCreep(room: string, priority: number, task: string, objArr: any[]) {
+        if (!Memory.directives[room]) {
+            Memory.directives[room] = {"spawning": {}};
+        }
+        let spawning = Memory.directives[room]["spawning"];
+        if (!spawning[priority]) {
+            spawning[priority] = {};
+        }
+        let taskObj = {
+            script: task,
+            objArr: objArr
+        };
+        let taskId = this.makeId();
+        spawning[priority][taskId] = taskObj;
+    }
+    
+    static execTask(room: string, task: Task): boolean {
+        let objArr = task.objArr;
+        if (objArr) {   //needed because of typescript shenanigans
+            try {
+                return eval(task.script);
+            } catch(taskErr: any) {
+                let errorMessage = `<b style='color:red;'>Room FAILURE during execution of directive ${task.script}</b>`
+                console.log(errorMessage);
+                Director.schedule(room, Game.time + 25, task.script, objArr);
+                return false;
+            }
+        }
+        return false;
+    }
+
     /**
      * Function that executes the schedule
      */
     static run(): void {
         for (let room in Memory.directives) {
+            // normal directives
             for (let tick in Memory.directives[room]) {
                 if (parseInt(tick) <= Game.time) {
                     for (let id in Memory.directives[room][tick]) {
                         let task = Memory.directives[room][tick][id];
-                        let objArr = task.objArr;
-                        if (objArr) {   //needed because of typescript shenanigans
-                            try {
-                                eval(task.script);
-                            } catch(taskErr: any) {
-                                let errorMessage = `<b style='color:red;'>Room FAILURE during execution of directive ${task.script}</b>`
-                                console.log(errorMessage);
-                                Director.schedule(room, Game.time + 25, task.script, objArr);
-                            }
-                        }
+                        this.execTask(room, task);
                     }
                     delete Memory.directives[room][tick];
+                }
+            }
+            // creep spawning directives
+            if (Memory.directives[room]["spawning"]) {
+                let spawning = Memory.directives[room]["spawning"];
+                let priorities = Object.keys(spawning).sort((a, b) => Number(a) - Number(b));
+                for (let priority of priorities) {
+                    let tasks = spawning[Number(priority)];
+                    for (let id in tasks) {
+                        let task = tasks[id];
+                        if (this.execTask(room, task) === true) {
+                            delete tasks[id];
+                        }
+                    }
                 }
             }
         }

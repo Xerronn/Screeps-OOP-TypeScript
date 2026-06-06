@@ -67,14 +67,14 @@ const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
     // Tier 2 - Host / Arbiter
     [CIVITAS_TYPES.HOST]: 2,
     [CIVITAS_TYPES.ARBITER]: 2,
-    // Tier 3 - Miners / Haulers / Emissary / Curator
+    // Tier 3 - Miners / Haulers
     [CIVITAS_TYPES.MINER]: 3,
     [CIVITAS_TYPES.COURIER]: 3,
-    [CIVITAS_TYPES.EMISSARY]: 3,
-    [CIVITAS_TYPES.CURATOR]: 3,
-    // Tier 4 - Builders
+    // Tier 4 - Builders / Emissary / Curator
     [CIVITAS_TYPES.ENGINEER]: 4,
     [CIVITAS_TYPES.CONTRACTOR]: 4,
+    [CIVITAS_TYPES.EMISSARY]: 4,
+    [CIVITAS_TYPES.CURATOR]: 4,
     // Tier 5 - Scout / Excavator / Chemist
     [CIVITAS_TYPES.SCOUT]: 5,
     [CIVITAS_TYPES.EXCAVATOR]: 5,
@@ -207,7 +207,7 @@ export default class Supervisor {
                         "type": creepMem.type,
                         "memory": creepMem
                     };
-                    this.initiate(template);
+                    this.queueCreep(template);
                 }
                 delete Memory.creeps[creepMem.name];
             }
@@ -293,58 +293,50 @@ export default class Supervisor {
      * @param {Object} template An object that contains body, type, and memory
      * @param {boolean} rebirth whether or not this is a rebirth
      */
-    initiate(template: RenewalTemplate, boost=true): void {
-        let foundNexus = false;
-        let generationIncremented = 0;
+    initiate(template: RenewalTemplate, boost=true): boolean {
         if (this.nexusReservation <= Game.time) {
+            //use the body stored in memory if it exists, as it can contain evolutions
+            let newBody = template.memory.body;
+            if (!newBody) {
+                newBody = template.body;
+            }
+
+            if (template.memory.generation !== undefined) {
+                template.memory.generation++;
+            }
+
+            if (boost === true) {
+                //handle if the creep will be boosted when it spawns
+                var boostType = this.calculateBoosts(template.type);
+                if (boostType !== undefined) {
+                    template.memory.boost = boostType;
+                }
+            }
+
             //loop through the spawns until an available one is found
             for (let nexus of this.castrum[CASTRUM_TYPES.NEXUS]) {
                 if (!(nexus instanceof Nexus)) continue;
                 if (!nexus.spawning && !nexus.spawningThisTick) {
-                    foundNexus = true;
-
-                    //use the body stored in memory if it exists, as it can contain evolutions
-                    let newBody = template.memory.body;
-                    if (!newBody) {
-                        newBody = template.body;
-                    }
-
-                    if (template.memory.generation !== undefined) {
-                        template.memory.generation++;
-                        generationIncremented++;
-                    }
-
-                    if (boost === true) {
-                        //handle if the creep will be boosted when it spawns
-                        var boostType = this.calculateBoosts(template.type);
-                        if (boostType !== undefined) {
-                            template.memory.boost = boostType;
-                        }
-                    }
 
                     let success = nexus.spawnCreep(newBody, template.type, { ...template.memory });
 
                     if (success == OK) {
                         //don't try spawning on another spawn
                         if (boost === true && boostType !== undefined) this.prepareBoosts(boostType, newBody);
-                        break;
-                    } else {
-                        //so we can reschedule
-                        foundNexus = false;
+                        return true;
                     }
                 }
             }
         }
 
-        if (!foundNexus) {
-            //decrement it back down
-            if (template.memory.generation !== undefined) {
-                template.memory.generation -= generationIncremented;
-            }
-            //if the request fails, schedule it for 5 ticks in the future
-            let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1]);";
-            Director.schedule(this.room, Game.time + 5, task, [this.room, {...template}]);
-        }
+        template.memory.generation--;
+        return false;
+    }
+
+    queueCreep(template: RenewalTemplate, boost=true): void {
+        let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1], objArr[2]);";
+        let priority = SPAWN_PRIORITY_MAP[template.type] || 10;
+        Director.scheduleCreep(this.room, priority, task, [this.room, {...template}, boost]);
     }
 
     //todo: write wrapStructure so we don't have to wrap all structures whenever one is built
@@ -535,7 +527,7 @@ export default class Supervisor {
      * Call from terminal: global.Imperator.administrators["W8N3"].supervisor.panic()
      */
     panic(): void {
-        this.initiate({
+        this.queueCreep({
             body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE],
             type: CIVITAS_TYPES.HOST,
             memory: {}

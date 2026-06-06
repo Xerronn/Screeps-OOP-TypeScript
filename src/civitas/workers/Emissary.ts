@@ -47,7 +47,7 @@ export default class Emissary extends Worker {
             //basically rebirth but without the dying first
 
             let task = `
-                global.Imperator.administrators[\"` + this.spawnRoom + `\"].supervisor.initiate({
+                global.Imperator.administrators[\"` + this.spawnRoom + `\"].supervisor.queueCreep({
                     'body': objArr[0],
                     'type': objArr[1],
                     'memory': objArr[2]
