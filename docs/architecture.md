@@ -201,18 +201,7 @@ All state lives in `Memory`. Provides read/write accessors for room schematics, 
 
 ### Architect - Room Planner
 
-**`plan(room)`** - The main room planning algorithm:
-1. Cleans enemy structures
-2. Computes **distance transform** (distance from nearest wall per tile, two-pass algorithm)
-3. Calculates centroid of controller + sources
-4. Tries up to 7 positions for the main stamp, scoring by wall distance and centroid proximity
-5. Determines optimal rotation by evaluating corner quality
-6. Builds cost matrix blocking walls, stamp, sources, minerals, paths
-7. Places towers, labs, extensions, spawns in non-overlapping positions using cluster detection
-
-**Stamps:** Predefined rotatable building layouts for main area, extensions, towers, and labs.
-
-**`placeExtensions()`** - Complex cluster-finding: identifies viable 3x3 areas, merges adjacent clusters via mapper reduction, sorts by size then distance from center.
+See [architect.md](architect.md) for detailed documentation.
 
 ### Informant - Room Intelligence
 
