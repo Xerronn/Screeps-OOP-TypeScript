@@ -61,6 +61,31 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
     [CASTRUM_TYPES.WORKSHOP]: Workshop,
 };
 
+const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
+    // Tier 1 - Defense
+    [LEGION_TYPES.GARRISON]: 1,
+    // Tier 2 - Host / Arbiter
+    [CIVITAS_TYPES.HOST]: 2,
+    [CIVITAS_TYPES.ARBITER]: 2,
+    // Tier 3 - Miners / Haulers / Emissary / Curator
+    [CIVITAS_TYPES.MINER]: 3,
+    [CIVITAS_TYPES.COURIER]: 3,
+    [CIVITAS_TYPES.EMISSARY]: 3,
+    [CIVITAS_TYPES.CURATOR]: 3,
+    // Tier 4 - Builders
+    [CIVITAS_TYPES.ENGINEER]: 4,
+    [CIVITAS_TYPES.CONTRACTOR]: 4,
+    // Tier 5 - Scout / Excavator / Chemist
+    [CIVITAS_TYPES.SCOUT]: 5,
+    [CIVITAS_TYPES.EXCAVATOR]: 5,
+    [CIVITAS_TYPES.CHEMIST]: 5,
+    // Tier 6 - Scholars
+    [CIVITAS_TYPES.SCHOLAR]: 6,
+    // Tier 7 - Offense (lowest priority)
+    [LEGION_TYPES.EXECUTIONER]: 7,
+    [LEGION_TYPES.JESTER]: 7,
+};
+
 export default class Supervisor {
     room: string;
     civitas: {
