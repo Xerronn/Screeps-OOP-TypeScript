@@ -4,3 +4,4 @@
 4. make the host and arbiter spots definite no go
 5. energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)
 6. pathing priorities for creeps
+7. make gamestages less rigid around rcl so that if rcls get completed too quickly it does things correctly still

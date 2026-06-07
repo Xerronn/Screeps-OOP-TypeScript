@@ -36,6 +36,10 @@ export default class Executive {
             Architect.buildRoom(this.room, buildRoads)
         }
 
+        if (global.debug) {
+            Architect.drawSchematic(this.room);
+        }
+        
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
         let gameStage = Chronicler.readGameStage(this.room);
         if (gameStage >= 4.1) {

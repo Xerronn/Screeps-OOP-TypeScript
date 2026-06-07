@@ -430,7 +430,6 @@ export default class Architect {
      * One time room setup
      */
     static plan(room: string): RoomSchematic {
-        let viz = new RoomVisual(room);
         let roomObj = Game.rooms[room];
         let controller = roomObj.controller;
 
@@ -523,20 +522,6 @@ export default class Architect {
 
                 let spawnPositions = Architect.placeSpawns(center, costMatrix);
 
-                //visualizations
-                viz.rect(towerStamp.anchor.x - 0.5, towerStamp.anchor.y - 0.5, 3, 3, {'fill':'red'});
-                viz.rect(labStamp.anchor.x - 0.5, labStamp.anchor.y - 0.5, 4, 4, {'fill':'green'});
-                viz.rect(mainStamp.anchor.x - 0.5, mainStamp.anchor.y - 0.5, 3, 3, {'fill':'blue'});
-                for (let p of flatPaths) {
-                    viz.circle(p.x, p.y, {'radius': 0.25});
-                }
-                for (let p of spawnPositions) {
-                    viz.circle(p.x, p.y, {'radius': 0.9, 'fill': 'purple'});
-                }
-                for (let pos of extensionStamps) {
-                    viz.rect(pos.anchor.x-0.4, pos.anchor.y-0.4, 2.9, 2.9, {'fill':'yellow'})
-                }
-
                 let schematic: RoomSchematic = {
                     'main': mainStamp,
                     'extensions': extensionStamps,
@@ -623,6 +608,22 @@ export default class Architect {
                 y: best.y - 1
             },
             'rotations': rotations
+        }
+    }
+
+    static drawSchematic(room: string) {
+        let schema = Chronicler.readSchema(room);
+        let viz = new RoomVisual(room);
+
+        viz.rect(schema.towers.anchor.x - 0.5, schema.towers.anchor.y - 0.5, 3, 3, {'fill':'red'});
+        viz.rect(schema.labs.anchor.x - 0.5, schema.labs.anchor.y - 0.5, 4, 4, {'fill':'green'});
+        viz.rect(schema.main.anchor.x - 0.5, schema.main.anchor.y - 0.5, 3, 3, {'fill':'blue'});
+
+        for (let p of schema.spawns) {
+            viz.circle(p.x, p.y, {'radius': 0.9, 'fill': 'purple'});
+        }
+        for (let pos of schema.extensions) {
+            viz.rect(pos.anchor.x-0.4, pos.anchor.y-0.4, 2.9, 2.9, {'fill':'yellow'})
         }
     }
 

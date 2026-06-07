@@ -6,6 +6,7 @@ declare global {
         interface Global {
             Imperator: Imperator;
             logger: boolean;
+            debug: boolean;
         }
     }
 }
@@ -13,6 +14,7 @@ declare global {
 global.Imperator = new Imperator();             // create a new Imperator instance that manages the whole dominion
 global.Imperator.checkRespawn();                // check if the dominion needs to be initialized after a respawn
 global.Imperator.initialize();                  // wrap all game objects and create room-level administrators
+global.debug = false;                            // global debug flag for visualizations and extra logging
 
 function mainLoop(): void {
     global.Imperator.refresh();
