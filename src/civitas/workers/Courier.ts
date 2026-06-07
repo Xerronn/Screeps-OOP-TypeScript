@@ -6,6 +6,7 @@ import Worker, {WorkerMemory} from './Worker';
 interface CourierMemory extends WorkerMemory {
     resource: ResourceConstant;                 //must be provided by whatever is spawning the courier
     containerId: Id<StructureContainer>;        //must be provided by whatever is spawning the courier
+    containerPos: Position;
     storageId: Id<StructureStorage>;
     terminalId?: Id<StructureTerminal>;
 }
@@ -29,6 +30,21 @@ export default class Courier extends Worker {
         });
 
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
+        if (this.container === undefined) {
+            let assignedRoom = Game.rooms[this.assignedRoom];
+            let structuresAtPos = assignedRoom.lookForAt(LOOK_STRUCTURES, this.memory.containerPos.x, this.memory.containerPos.y);
+            for (let structure of structuresAtPos) {
+                if (structure.structureType === STRUCTURE_CONTAINER) {
+                    this.container = structure as StructureContainer;
+                    this.memory.containerId = structure.id;
+                    break;
+                }
+            }
+            // if container still doesnt exist, create a new one
+            if (this.container === undefined) {
+                assignedRoom.createConstructionSite(this.memory.containerPos.x, this.memory.containerPos.y, STRUCTURE_CONTAINER);
+            }
+        }
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
         if (this.memory.terminalId !== undefined) {
             this.terminal = Game.getObjectById(this.memory.terminalId) || undefined;
@@ -102,10 +118,11 @@ export default class Courier extends Worker {
 
         if (this.store.getUsedCapacity() == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity() > 0)) {
             this.memory.task = "withdraw";
-            //withdraw from tombstone on current tile
-            this.withdrawTomb(this.memory.resource)
             //pickup dropped energy from the current tile
             this.withdrawDropped(this.memory.resource);
+
+            //withdraw from tombstone on current tile
+            this.withdrawTomb(this.memory.resource)
 
             this.moveByPath(this.path);
             this.withdrawContainer(this.memory.resource);

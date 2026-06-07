@@ -110,11 +110,17 @@ export default class Excavator extends Civitas {
      */
     spawnCourier(): boolean {
         if (this.memory.containerId === undefined || this.mineral === undefined) return false;
+        let container = Game.getObjectById(this.memory.containerId);
+        if (container === null) return false;
         this.supervisor.queueCreep({
             'body': [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             'type': CIVITAS_TYPES.COURIER,
             'memory': {
                 'containerId': this.memory.containerId,
+                'containerPos': {
+                    'x': container.pos.x,
+                    'y': container.pos.y
+                },
                 'resource': this.mineral.mineralType
             }
         });
