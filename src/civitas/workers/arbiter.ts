@@ -60,11 +60,11 @@ export default class Arbiter extends Host {
         /**
          * Link Management. Keep the link at zero except when it requests to be filled
          */
-        if ((this.link !== undefined && this.link.store.getUsedCapacity(RESOURCE_ENERGY) != 0) || this.conduit?.needsFilling == true) {
+        if (!this.memory.task?.includes("Mineral") && (this.link !== undefined && this.link.store.getUsedCapacity(RESOURCE_ENERGY) != 0) || this.conduit?.needsFilling == true) {
             if (this.conduit?.needsFilling == true) {
                 if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdrawStorage" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                     this.memory.task = "withdrawStorage";
-                    if (!this.withdrawStorage()) this.withdrawTerminal();
+                    if (!this.withdrawStorage(false, RESOURCE_ENERGY)) this.withdrawTerminal();
                     return true;
                 }
                 this.memory.task = "depositLink";
@@ -86,16 +86,16 @@ export default class Arbiter extends Host {
          * Terminal Management. Puts energy into the terminal until it reaches 20k stored
          */
         let energyTarget = 25000 //global.Vendor.getTarget(RESOURCE_ENERGY);
-        if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < energyTarget) {
+        if (!this.memory.task?.includes("Mineral") && this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < energyTarget) {
             if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                 this.memory.task = "withdraw";
                 let amount = energyTarget - this.terminal.store.getUsedCapacity(RESOURCE_ENERGY);
                 let tripAmount = Math.min(amount, this.store.getFreeCapacity(RESOURCE_ENERGY));
-                this.withdrawStorage(false, tripAmount);
+                this.withdrawStorage(false, RESOURCE_ENERGY, tripAmount);
                 return true;
             } else {
                 this.memory.task = "deposit";
-                this.depositTerminal();
+                this.depositTerminal(RESOURCE_ENERGY);
                 return true;
             }
         } else if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) > energyTarget) {
@@ -111,7 +111,27 @@ export default class Arbiter extends Host {
                 return true;
             }
         }
+        
+        if (this.storage && this.terminal && this.memory.task != "depositMineralTerminal" && this.terminal.store.getFreeCapacity() > 0 && this.storage.store.getUsedCapacity(RESOURCE_ENERGY) < this.storage.store.getUsedCapacity()) {
+            if (this.store.getFreeCapacity() > 0) {
+                this.memory.task = "withdrawMineralStorage";
+                for (let resType in this.storage.store) {
+                    if (resType == RESOURCE_ENERGY) continue;
+                    this.withdrawStorage(false, resType as ResourceConstant);
+                }
+                return true;
+            }
+        }
 
+        if (this.store.getUsedCapacity() > this.store.getUsedCapacity(RESOURCE_ENERGY) && this.terminal && this.terminal.store.getFreeCapacity() > 0) {
+            this.memory.task = "depositMineralTerminal";
+            for (let resType in this.store) {
+                if (resType == RESOURCE_ENERGY) continue;
+                this.depositTerminal(resType as ResourceConstant);
+            }
+            return true;
+        }
+        delete this.memory.task;
         // /**
         //  * Empty stores of energy before dealing with minerals
         //  */
@@ -169,12 +189,12 @@ export default class Arbiter extends Host {
     /**
      * Overloaded withdrawStorage with no moves
      */
-    withdrawStorage(buffer: boolean = false, numEnergy?: number): boolean {
-        if (this.storage === undefined || this.storage.store.getUsedCapacity(RESOURCE_ENERGY) === 0) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.withdraw(this.storage, RESOURCE_ENERGY, numEnergy);
+    withdrawStorage(buffer: boolean = false, resource: ResourceConstant = RESOURCE_ENERGY, amount?: number): boolean {
+        if (this.storage === undefined || this.storage.store.getUsedCapacity(resource) === 0) return false;
+        if (amount !== undefined) {
+            this.liveObj.withdraw(this.storage, resource, amount);
         } else {
-            this.liveObj.withdraw(this.storage, RESOURCE_ENERGY);
+            this.liveObj.withdraw(this.storage, resource);
         }
         return true;
     }
@@ -223,14 +243,14 @@ export default class Arbiter extends Host {
     /**
      * Move to terminal and deposit all stored energy
      */
-    depositTerminal(numEnergy=undefined): boolean {
+    depositTerminal(resource: ResourceConstant, amount=undefined): boolean {
         if (this.terminal === undefined) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.transfer(this.terminal, RESOURCE_ENERGY, numEnergy);
+        if (amount !== undefined) {
+            this.liveObj.transfer(this.terminal, resource, amount);
             //increment balances in the vendor as energy is added
             //global.Vendor.balances[this.room][RESOURCE_ENERGY] += numEnergy;
         } else {
-            this.liveObj.transfer(this.terminal, RESOURCE_ENERGY);
+            this.liveObj.transfer(this.terminal, resource);
             //increment balances in the vendor as energy is added
             //global.Vendor.balances[this.room][RESOURCE_ENERGY] += this.store.getUsedCapacity(RESOURCE_ENERGY);
         }
