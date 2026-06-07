@@ -187,8 +187,13 @@ export default class Host extends Worker {
 
             this.memory.body = newBody;
             this.memory.task = "withdraw";
-            //the runner will never die without it suiciding, so it has to be done
-            this.liveObj.suicide();
+
+            this.supervisor.queueCreep({
+                body: newBody,
+                type: this.memory.type,
+                memory: {...this.memory}
+            });
+            delete this.memory.generation;
             return true;
         }
         return false;
