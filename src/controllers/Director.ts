@@ -69,16 +69,19 @@ export default class Director {
             }
             // creep spawning directives
             if (Memory.directives[room]["spawning"]) {
+                let blocked = false;
                 let spawning = Memory.directives[room]["spawning"];
                 let priorities = Object.keys(spawning).sort((a, b) => Number(a) - Number(b));
                 for (let priority of priorities) {
                     let tasks = spawning[Number(priority)];
                     for (let id in tasks) {
+                        blocked = true;
                         let task = tasks[id];
                         if (this.execTask(room, task) === true) {
                             delete tasks[id];
                         }
                     }
+                    if (blocked) break; //only execute the highest priority tasks with > 0 each tick
                 }
             }
         }
