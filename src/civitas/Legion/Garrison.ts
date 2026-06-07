@@ -22,12 +22,16 @@ export default class Garrison extends Legionnaire {
         }
 
         let target: AnyOwnedStructure | AnyCreep | undefined = Game.rooms[this.room].find(FIND_HOSTILE_CREEPS, {
-            filter: (creep) => creep.getActiveBodyparts(ATTACK) > 0 || creep.getActiveBodyparts(RANGED_ATTACK) > 0
+            filter: (creep) => creep.getActiveBodyparts(ATTACK) > 0 || 
+                creep.getActiveBodyparts(RANGED_ATTACK) > 0 ||
+                creep.getActiveBodyparts(WORK) > 0
         })[0];
         if (target === undefined) {
             target = Game.rooms[this.room].find(FIND_HOSTILE_STRUCTURES)[0];
-        } else if (target.getActiveBodyparts(ATTACK) === 0 && target.getActiveBodyparts(RANGED_ATTACK) === 0) {
-            target = undefined;
+        } else if (target.getActiveBodyparts(ATTACK) === 0 && 
+            target.getActiveBodyparts(RANGED_ATTACK) === 0 &&
+            target.getActiveBodyparts(WORK) == 0) {
+                target = undefined;
         }
         if (target === undefined) {
             this.conclude();
