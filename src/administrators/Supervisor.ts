@@ -329,7 +329,9 @@ export default class Supervisor {
             }
         }
 
-        template.memory.generation--;
+        if (template.memory.generation !== undefined) {
+            template.memory.generation--;
+        }
         return false;
     }
 
