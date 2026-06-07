@@ -63,9 +63,10 @@ export default class Miner extends Worker {
             } else if (this.container !== undefined && this.container.hits < this.container.hitsMax) {
                 this.repairContainer(this.container);
             } else {
-                console.log("here");
-                this.build();   //build either new container or new link
-
+                //build new link/container
+                if (!this.build()) {
+                    this.pos.createConstructionSite(STRUCTURE_CONTAINER);
+                }
             }
 
         } else {
