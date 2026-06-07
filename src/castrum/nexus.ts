@@ -23,6 +23,9 @@ export default class Nexus extends Castrum {
 
     update(): boolean {
         if (!super.update()) return false;          //structure is dead
+        if (this.spawning && !this.liveObj.spawning) {
+            this.supervisor.wrapCreep(this.spawning.name);
+        }
         this.spawning = this.liveObj.spawning;
 
         this.spawningThisTick = false;
@@ -31,9 +34,6 @@ export default class Nexus extends Castrum {
     }
 
     run() {
-        if (this.spawning && this.spawning.remainingTime === 2) {
-            this.supervisor.wrapCreep(this.spawning.name);
-        }
         return true;
     }
 

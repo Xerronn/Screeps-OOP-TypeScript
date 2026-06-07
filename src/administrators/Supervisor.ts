@@ -351,7 +351,7 @@ export default class Supervisor {
     wrapCreep(creepName: string): boolean {
         let creep = Game.creeps[creepName];
         //check if the creep has already been wrapped
-        if (!Informant.getWrapper(creep.id)) {
+        if (creep && !Informant.getWrapper(creep.id)) {
             let type = creep.memory.type;
             const Class = CIVITAS_CLASS_MAP[type];
             if (!Class || !(this.civitas as any)[type]) {
