@@ -327,10 +327,10 @@ export default class Supervisor {
                     }
                 }
             }
-        }
-
-        if (template.memory.generation !== undefined) {
-            template.memory.generation--;
+            //decrement generation if spawning failed
+            if (template.memory.generation !== undefined) {
+                template.memory.generation--;
+            }
         }
         return false;
     }
