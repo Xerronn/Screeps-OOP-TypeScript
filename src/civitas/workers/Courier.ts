@@ -4,11 +4,9 @@ import Traveler from 'thirdParty/Traveler';
 import Worker, {WorkerMemory} from './Worker';
 
 interface CourierMemory extends WorkerMemory {
-    resource: ResourceConstant;                 //must be provided by whatever is spawning the courier
     containerId: Id<StructureContainer>;        //must be provided by whatever is spawning the courier
     containerPos: Position;
     storageId: Id<StructureStorage>;
-    terminalId?: Id<StructureTerminal>;
 }
 
 export default class Courier extends Worker {
@@ -16,8 +14,6 @@ export default class Courier extends Worker {
 
     storage?: StructureStorage;
     container?: StructureContainer;
-    terminal?: StructureTerminal;
-    target?: StructureStorage | StructureTerminal;
 
     path: RoomPosition[];
     reversedPath: RoomPosition[];
@@ -26,7 +22,6 @@ export default class Courier extends Worker {
 
         _.defaults(this.memory, {
             storageId: Game.rooms[this.spawnRoom].storage?.id,
-            terminalId: Game.rooms[this.spawnRoom].terminal?.id
         });
 
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
@@ -46,14 +41,6 @@ export default class Courier extends Worker {
             }
         }
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
-        if (this.memory.terminalId !== undefined) {
-            this.terminal = Game.getObjectById(this.memory.terminalId) || undefined;
-        }
-        if (this.memory.resource === RESOURCE_ENERGY) {
-            this.target = this.storage;
-        } else {
-            this.target = this.terminal;
-        }
     }
 
     update(): boolean {
@@ -64,14 +51,11 @@ export default class Courier extends Worker {
         //attributes that will change tick to tick
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
-        if (this.memory.terminalId !== undefined) {
-            this.terminal = Game.getObjectById(this.memory.terminalId) || undefined;
-        }
 
-        //defined cached path between the target and the container
-        if (this.path === undefined && this.container !== undefined && this.target !== undefined) {
+        //defined cached path between the storage and the container
+        if (this.path === undefined && this.container !== undefined && this.storage !== undefined) {
             this.path = PathFinder.search(
-                this.target.pos,
+                this.storage.pos,
                 {
                     "pos" : this.container.pos,
                     "range" : 1
@@ -119,22 +103,17 @@ export default class Courier extends Worker {
         if (this.store.getUsedCapacity() == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity() > 0)) {
             this.memory.task = "withdraw";
             //pickup dropped energy from the current tile
-            this.withdrawDropped(this.memory.resource);
+            this.withdrawDropped();
 
             //withdraw from tombstone on current tile
-            this.withdrawTomb(this.memory.resource)
+            this.withdrawTomb()
 
             this.moveByPath(this.path);
-            this.withdrawContainer(this.memory.resource);
+            this.withdrawContainer();
         } else {
             this.memory.task = "deposit";
             this.moveByPath(this.reversedPath);
-            //only put energy into storage, the rest goes to terminal
-            if (this.memory.resource == RESOURCE_ENERGY) {
-                this.depositStorage(this.memory.resource);
-            } else {
-                this.depositTerminal(this.memory.resource);
-            }
+            this.depositStorage();
         }
         return true;
     }
@@ -142,16 +121,16 @@ export default class Courier extends Worker {
     /**
      * Move to assigned container and withdraw if the container can fill the creep
      */
-    withdrawContainer(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
+    withdrawContainer(): boolean {
         if (this.container === undefined) return false;
         if (this.pos.inRangeTo(this.container, 1)) {
-            if (this.container.store.getUsedCapacity(resourceType) > this.store.getFreeCapacity(resourceType)) {
-                this.liveObj.withdraw(this.container, resourceType);
+            if (this.container.store.getUsedCapacity() > this.store.getFreeCapacity()) {
+                for (let resType in this.container.store) {
+                    this.liveObj.withdraw(this.container, resType as ResourceConstant);
+                }
             } else if (this.container.pos.lookFor(LOOK_RESOURCES).length > 0){
                 for (let res of this.container.pos.lookFor(LOOK_RESOURCES)) {
-                    if (res.resourceType === resourceType) {
-                        this.liveObj.pickup(res);
-                    }
+                    this.liveObj.pickup(res);
                 }
             }
         }
@@ -159,31 +138,21 @@ export default class Courier extends Worker {
     }
 
     /**
-     * Method to deposit minerals to the terminal
+     * Method to deposit to the storage
      * @param {STRING} resourceType
      */
-    depositTerminal(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
-        if (this.terminal === undefined) return false;
-        if (this.pos.inRangeTo(this.terminal, 1)) {
-            this.liveObj.transfer(this.terminal, resourceType);
-        }
-        return true;
-    }
-
-    /**
-     * Method to deposit minerals to the terminal
-     * @param {STRING} resourceType
-     */
-    depositStorage(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
+    depositStorage(): boolean {
         if (this.storage === undefined) return false;
         if (this.pos.inRangeTo(this.storage, 1)) {
-            this.liveObj.transfer(this.storage, resourceType);
-            if (resourceType === RESOURCE_ENERGY) {
-                let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), this.storage.store.getFreeCapacity(RESOURCE_ENERGY));
-                if (this.remote) {
-                    Chronicler.writeIncrementRemoteStatistic(this.spawnRoom, this.assignedRoom, 'energyDeposited', amount);
-                    Chronicler.writeIncrementStatistic(this.spawnRoom, 'remoteEnergyDeposited', amount);
-                } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyDeposited', amount);
+            for (let resType in this.store) {
+                this.liveObj.transfer(this.storage, resType as ResourceConstant);
+                if (resType === RESOURCE_ENERGY) {
+                    let amount = Math.min(this.store.getUsedCapacity(RESOURCE_ENERGY), this.storage.store.getFreeCapacity(RESOURCE_ENERGY));
+                    if (this.remote) {
+                        Chronicler.writeIncrementRemoteStatistic(this.spawnRoom, this.assignedRoom, 'energyDeposited', amount);
+                        Chronicler.writeIncrementStatistic(this.spawnRoom, 'remoteEnergyDeposited', amount);
+                    } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyDeposited', amount);
+                }
             }
         }
         return true;
@@ -192,15 +161,17 @@ export default class Courier extends Worker {
     /**
      * Method to pull energy from tombstones along the hauler's path
      */
-    withdrawTomb(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
-        if (this.target === undefined) return false;
+    withdrawTomb(): boolean {
+        if (this.storage === undefined) return false;
         let tombs = this.pos.lookFor(LOOK_TOMBSTONES);
         if (tombs) {
             for (let tomb of tombs) {
-                if (tomb.store.getUsedCapacity(resourceType) > 0) {
-                    this.liveObj.withdraw(tomb, resourceType);
-                    let amount = tomb.store.getUsedCapacity(resourceType);
-                    if (amount > this.store.getFreeCapacity(resourceType) / 1.2 || this.pos.getRangeTo(this.target) < 15 && amount > this.store.getFreeCapacity(resourceType) / 3) {
+                if (tomb.store.getUsedCapacity() > 0) {
+                    for (let resType in tomb.store) {
+                        this.liveObj.withdraw(tomb, resType as ResourceConstant);
+                    }
+                    let amount = tomb.store.getUsedCapacity();
+                    if (amount > this.store.getFreeCapacity() / 1.2 || this.pos.getRangeTo(this.storage) < 15 && amount > this.store.getFreeCapacity() / 3) {
                         this.memory.task = "deposit";
                     }
                 }
@@ -212,16 +183,14 @@ export default class Courier extends Worker {
     /**
      * Method to withdraw dropped energy along the hauler's path
      */
-    withdrawDropped(resourceType:ResourceConstant = RESOURCE_ENERGY): boolean {
-        if (this.target === undefined) return false;
+    withdrawDropped(): boolean {
+        if (this.storage === undefined) return false;
         let resources = this.pos.lookFor(LOOK_RESOURCES);
         if (resources) {
             for (let res of resources) {
-                if (res.resourceType == resourceType) {
-                    this.liveObj.pickup(res);
-                    if (res.amount > this.store.getFreeCapacity(resourceType) / 1.2 || this.pos.getRangeTo(this.target) < 15 && res.amount > this.store.getFreeCapacity(resourceType) / 3) {
-                        this.memory.task = "deposit";
-                    }
+                this.liveObj.pickup(res);
+                if (res.amount > this.store.getFreeCapacity(res.resourceType) / 1.2 || this.pos.getRangeTo(this.storage) < 15 && res.amount > this.store.getFreeCapacity(res.resourceType) / 3) {
+                    this.memory.task = "deposit";
                 }
             }
         }

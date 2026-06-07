@@ -213,8 +213,7 @@ export default class Miner extends Worker {
                     'containerPos': {
                         'x': this.pos.x,
                         'y': this.pos.y
-                    },
-                    'resource': RESOURCE_ENERGY
+                    }
                 }
             });
         }

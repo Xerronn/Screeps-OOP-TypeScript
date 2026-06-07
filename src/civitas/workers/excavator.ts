@@ -120,8 +120,7 @@ export default class Excavator extends Civitas {
                 'containerPos': {
                     'x': container.pos.x,
                     'y': container.pos.y
-                },
-                'resource': this.mineral.mineralType
+                }
             }
         });
 
