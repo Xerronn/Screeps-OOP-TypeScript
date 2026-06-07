@@ -115,6 +115,19 @@ export default class Director {
         let schedule = Memory.directives;
     }
 
+    static deleteCreepDirective(room: string, type: string): void {
+        let spawning = Memory.directives[room]["spawning"];
+        for (let priority in spawning) {
+            let tasks = spawning[priority];
+            for (let id in tasks) {
+                let task = tasks[id];
+                if (task.objArr[1]?.type === type) {
+                    delete tasks[id];
+                }
+            }
+        }
+    }
+
     /**
      * Method that generates a unique ID
      * @returns ID
