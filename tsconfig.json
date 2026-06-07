@@ -3,7 +3,8 @@
     "module": "esnext",
     "lib": ["es2018"],
     "target": "es2018",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    "rootDir": "src",
     "outDir": "dist",
     "baseUrl": "src/",
     "sourceMap": true,
@@ -14,7 +15,8 @@
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
-    "types": ["@types/screeps", "node"]
+    "types": ["@types/screeps", "node"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules"]
