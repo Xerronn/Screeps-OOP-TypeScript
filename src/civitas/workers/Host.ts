@@ -8,11 +8,11 @@ export default class Host extends Worker {
     capacitorPaths: {[id: string]: RoomPosition[]};     //lazy cache of paths to each capacitor
     renewSpawnId?: Id<StructureSpawn>;
     currentCapacitor?: Capacitor;
-    evolved: boolean;
+    evolved: number;
 
     constructor(host: Creep) {
         super(host)
-        this.evolved = false;
+        this.evolved = 0;
         this.idleSpot = this.getIdleSpot();
         this.capacitorPaths = {};
     }
@@ -28,6 +28,13 @@ export default class Host extends Worker {
             this.renew();
             return true;
         }
+
+        //check for evolution once every 1500 ticks
+        if (this.evolved < Game.time && this.memory.generation) {
+            this.evolve();
+            this.evolved = Game.time + 1500;
+        }
+
         if (this.store.getUsedCapacity(RESOURCE_ENERGY) < EXTENSION_ENERGY_CAPACITY[Game.rooms[this.room].controller?.level || 7] ||
             (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
                 this.memory.task = "withdraw";
@@ -41,12 +48,6 @@ export default class Host extends Worker {
         } else { //move to idle spot
             this.memory.task = "idle";
             this.returnToIdleSpot();
-
-            //only check once every global reset or after spawning
-            if (this.evolved === false) {
-                this.evolve();
-                this.evolved = true;
-            }
         }
         return true;
     }
@@ -176,9 +177,10 @@ export default class Host extends Worker {
                 carryCount++;
             }
         }
-
+        console.log("evolving")
         //if the carry count is lower than the calculation and there are no construction sites, upgrade body
         if (carryCount != numCarry && Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length == 0) {
+        console.log("success")
             let newBody: BodyPartConstant[] = [];
             for (let i = 0; i < numCarry; i++) {
                 newBody.unshift(CARRY)

@@ -62,10 +62,10 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
 };
 
 const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
-    // Tier 1 - Defense
+    // Tier 1 - Defense / Host
     [LEGION_TYPES.GARRISON]: 1,
-    // Tier 2 - Host / Arbiter
-    [CIVITAS_TYPES.HOST]: 2,
+    [CIVITAS_TYPES.HOST]: 1,
+    // Tier 2 - Arbiter
     [CIVITAS_TYPES.ARBITER]: 2,
     // Tier 3 - Miners / Haulers
     [CIVITAS_TYPES.MINER]: 3,
