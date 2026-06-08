@@ -27,17 +27,20 @@ export default class Courier extends Worker {
         this.container = Game.getObjectById(this.memory.containerId) || undefined;
         if (this.container === undefined) {
             let assignedRoom = Game.rooms[this.assignedRoom];
-            let structuresAtPos = assignedRoom.lookForAt(LOOK_STRUCTURES, this.memory.containerPos.x, this.memory.containerPos.y);
-            for (let structure of structuresAtPos) {
-                if (structure.structureType === STRUCTURE_CONTAINER) {
-                    this.container = structure as StructureContainer;
-                    this.memory.containerId = structure.id;
-                    break;
+            if (assignedRoom) {
+                let structuresAtPos = assignedRoom.lookForAt(LOOK_STRUCTURES, this.memory.containerPos.x, this.memory.containerPos.y);
+                for (let structure of structuresAtPos) {
+                    if (structure.structureType === STRUCTURE_CONTAINER) {
+                        this.container = structure as StructureContainer;
+                        this.memory.containerId = structure.id;
+                        break;
+                    }
                 }
-            }
-            // if container still doesnt exist, create a new one
-            if (this.container === undefined) {
-                assignedRoom.createConstructionSite(this.memory.containerPos.x, this.memory.containerPos.y, STRUCTURE_CONTAINER);
+            
+                // if container still doesnt exist, create a new one
+                if (this.container === undefined) {
+                    assignedRoom.createConstructionSite(this.memory.containerPos.x, this.memory.containerPos.y, STRUCTURE_CONTAINER);
+                }
             }
         }
         this.storage = Game.getObjectById(this.memory.storageId) || undefined;
