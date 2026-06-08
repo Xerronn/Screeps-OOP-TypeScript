@@ -8,3 +8,6 @@
 9. should directives be moved to room memory?
 10. rewrite links so that the miner links can send to upgrader links without passing through main link every time
 11. REWRITE ARBITER
+- have some sort of object make sure if a building is destroyed it gets replaced
+- store more of room planning in memory
+- instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
