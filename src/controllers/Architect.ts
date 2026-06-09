@@ -445,6 +445,7 @@ export default class Architect {
         //try seven different places
         for (let p = 0; p < 7; p++) {
             let mainStamp = Architect.placeMain(centroid, distanceMatrix);
+            let center = new RoomPosition(mainStamp.anchor.x + 1, mainStamp.anchor.y + 1, room);
             try {
                 let bothPaths = Architect.path(roomObj, controller, mainStamp.anchor);
                 let paths = bothPaths[0];
@@ -492,7 +493,6 @@ export default class Architect {
                         }
                     }
                 }
-                let center = new RoomPosition(mainStamp.anchor.x + 1, mainStamp.anchor.y + 1, room);
                 
                 let towerStamp = Architect.placeTowers(center, costMatrix);
                 //add lab stamp onto cost matrix
@@ -697,194 +697,112 @@ export default class Architect {
      * @param paths
      */
     static placeExtensions(center: RoomPosition, costMatrix: CostMatrix): StampPlacement[] {
-        let clonedMatrix = costMatrix.clone();
-        let extensionStamps: StampPlacement[] = [];
-        //find all 3x3 squares that we can fit extensions stamps into, then cluster them by seperations
-        let clusters = [0];
-        for (let x = Math.max(1, center.x - 12); x < Math.min(49, center.x + 12); x++) {
-            for (let y = Math.max(1, center.y - 12); y < Math.min(49, center.y + 12); y++) {
+        let claimed = costMatrix.clone();
+        let viableSpots: StampPlacement[] = [];
+
+        // enumerate every possible 3x3 stamp position and check if it's buildable
+        for (let x = 1; x <= 47; x++) {
+            for (let y = 1; y <= 47; y++) {
                 let viable = true;
-                let isNew = true;
-                let cluster = -1;
-                for (let i = 0; i < 3; i++){
-                    if (!viable) break;
-                    for (let j = 0; j < 3; j++) {
-                        let cost = clonedMatrix.get(x + i, y + j);
-                        if (cost > 10) {
-                            viable = false;
-                            break;
-                        }
-                        if (cost > 0) {
-                            isNew = false;
-                            cluster = cost;
-                        }
+                for (let i = 0; i < 3 && viable; i++) {
+                    for (let j = 0; j < 3 && viable; j++) {
+                        let cost = claimed.get(x + i, y + j);
+                        if (cost < 0 || cost > 10) viable = false;
                     }
                 }
                 if (!viable) continue;
-                if (isNew) {
-                    cluster = clusters[clusters.length - 1] + 1;
-                    clusters.push(cluster);
-                }
-                for (let i = 0; i < 3; i++){
-                    for (let j = 0; j < 3; j++) {
-                        clonedMatrix.set(x + i, y + j, cluster)
+
+                // check that this stamp doesn't overlap any previously claimed stamp
+                for (let i = 0; i < 3 && viable; i++) {
+                    for (let j = 0; j < 3 && viable; j++) {
+                        if (claimed.get(x + i, y + j) === 254) viable = false;
                     }
                 }
+                if (!viable) continue;
+
+                // checkerboard rotation: adjacent stamps (within one grid cell) get opposite rotations
+                let gridX = Math.floor(x / 3);
+                let gridY = Math.floor(y / 3);
+                let rotations = (gridX + gridY) % 2;
+
+                viableSpots.push({
+                    anchor: { x, y },
+                    rotations
+                });
             }
         }
+        // sort by distance from center, then greedily pick non-overlapping stamps
+        viableSpots.sort((a, b) => center.getRangeTo(a.anchor.x, a.anchor.y) - center.getRangeTo(b.anchor.x, b.anchor.y));
 
-        type Mapper = {[cluster: string]: string[]};
-        //final pass to merge any touching clusters
-        let mapper: Mapper = {};
-        for (let x = Math.max(1, center.x - 12); x < Math.min(49, center.x + 12); x++) {
-            for (let y = Math.max(1, center.y - 12); y < Math.min(49, center.y + 12); y++) {
-                let currentValue = clonedMatrix.get(x, y);
-                if (currentValue === 255 || currentValue === 0) continue;
-                let dq = false;
-                let replaceValue;
-                for (let j = -1; j < 2; j++) {
-                    let adjacentValue = clonedMatrix.get(x + 1, y + j);
-                    if (adjacentValue === 255) {
-                        dq = true;
-                    }
-                    if (adjacentValue !== 0 && adjacentValue !== 255 && adjacentValue !== currentValue) {
-                        replaceValue = adjacentValue;
-                    }
-                }
-                if (!dq && replaceValue !== undefined) {
-                    if (mapper[currentValue] == undefined) {
-                        mapper[currentValue] = [];
-                    }
-                    mapper[currentValue].push(String(replaceValue));
-                    mapper[currentValue] = _.uniq(mapper[currentValue])
-                }
-            }
-        }
-
-        function reduceMapper(mapper: Mapper): Mapper {
-            for (let cluster of Object.keys(mapper)) {
-                let mapped = mapper[cluster];
-
-                for (let i in mapped) {
-                    if (mapped[i] in mapper) {
-                        mapped.push(...mapper[mapped[i]]);
-                        delete mapper[mapped[i]]
-                        mapper[cluster] = _.uniq(mapped);
-                        return reduceMapper(mapper);
-                    }
-                }
-            }
-
-            return mapper;
-        }
-
-        mapper = reduceMapper(mapper);
-
-        //clean Architect up ugh
-        let newMapper: {[cluster: string]: number} = {};
-        for (let cluster of Object.keys(mapper)) {
-            let mapped = mapper[cluster];
-
-            for (let i in mapped) {
-                newMapper[mapped[i]] = parseInt(cluster);
-            }
-        }
-
-        let clusterData: {[cluster: number]: {'cluster': number, 'size': number, 'anchor': Position}} = {};
-        for (let x = Math.max(1, center.x - 15); x < Math.min(49, center.x + 15); x++) {
-            for (let y = Math.max(1, center.y - 15); y < Math.min(49, center.y + 15); y++) {
-                let currentValue = clonedMatrix.get(x, y);
-                if (currentValue === 0 || currentValue === 255) continue;
-                if (currentValue in newMapper) {
-                    clonedMatrix.set(x, y, newMapper[currentValue]);
-                }
-                currentValue = clonedMatrix.get(x, y);
-                if (!(currentValue in clusterData)) {
-                    clusterData[currentValue] = {
-                        'cluster': currentValue,
-                        'size': 0,
-                        'anchor': {'x': x, 'y': y}
-                    };
-                }
-                clusterData[currentValue].size++;
-                let colors = ['', 'red', 'orange', 'yellow', 'blue', 'green', 'purple', 'white', 'brown', 'black']
-                new RoomVisual(center.roomName).circle(x, y, {'fill': colors[clonedMatrix.get(x, y)]})
-            }
-        }
-
-        //now we have a clear cut set of clusters we can build extensions in
-        //sort by largest and place extensions until 10 are placed
-
-        let clusterDataArr = Object.values(clusterData);
-        let viableSpots: StampPlacement[]= [];
-        clusterDataArr.sort((a, b) => (a.size < b.size) ? 1 : -1);
-        let tree: StampPlacement[] = [];
-        for (let cluster of clusterDataArr) {
-            let start = {
-                'anchor': cluster.anchor,
-                'rotations': 1
-            };
-
+        let selected: StampPlacement[] = [];
+        for (let stamp of viableSpots) {
+            if (selected.length >= 10) break;
+            let overlaps = false;
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
-                    clonedMatrix.set(start.anchor.x + i, start.anchor.y + j, 254);
+                    if (claimed.get(stamp.anchor.x + i, stamp.anchor.y + j) === 254) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                if (overlaps) break;
+            }
+            if (overlaps) continue;
+            selected.push(stamp);
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    claimed.set(stamp.anchor.x + i, stamp.anchor.y + j, 254);
                 }
             }
+        }
 
-            viableSpots.push(start);
-            tree.push(start);
-            while (tree.length > 0) {
-                let current = tree.shift();
-                if (current === undefined) break;
-                let opposite = 1 - current.rotations;
-                let right = {'anchor': {'x': current.anchor.x + 3, 'y': current.anchor.y}, 'rotations': opposite};
-                let bottom = {'anchor': {'x': current.anchor.x, 'y': current.anchor.y + 3}, 'rotations': opposite};
-                let top = {'anchor': {'x': current.anchor.x, 'y': current.anchor.y - 3}, 'rotations': opposite};
-                let candidates = [top, bottom, right];
-
-                for (let candidate of candidates) {
-                    let dq = false;
-                    for (let i = 0; i < 3; i++) {
-                        for (let j = 0; j < 3; j++) {
-                            let cost = clonedMatrix.get(candidate.anchor.x + i, candidate.anchor.y + j);
-                            if (cost !== cluster.cluster) dq = true;
-                        }
-                    }
-                    if (!dq) {
-                        for (let i = 0; i < 3; i++) {
-                            for (let j = 0; j < 3; j++) {
-                                clonedMatrix.set(candidate.anchor.x + i, candidate.anchor.y + j, 254);
-                            }
-                        }
-                        viableSpots.push(candidate);
-                        tree.push(candidate);
+        // BFS 2-coloring: start from the stamp closest to main stamp, choose optimal rotation for it
+        // then alternate outward to adjacent stamps
+        selected.sort((a, b) => center.getRangeTo(a.anchor.x, a.anchor.y) - center.getRangeTo(b.anchor.x, b.anchor.y));
+        let visited = new Set<number>();
+        for (let i = 0; i < selected.length; i++) {
+            if (visited.has(i)) continue;
+            
+            // choose rotation for the first stamp in each connected component
+            // based on which corner of the stamp is closest to the main stamp center
+            let dx = center.x - (selected[i].anchor.x + 1);
+            let dy = center.y - (selected[i].anchor.y + 1);
+            let absDx = Math.abs(dx);
+            let absDy = Math.abs(dy);
+            // rotation 0: roads at top-right and bottom-left corners
+            // rotation 1: roads at top-left and bottom-right corners
+            // pick rotation whose road corner is closer to the main stamp
+            let rotation0Score = absDx + absDy; // Manhattan distance (higher = worse)
+            // rotation 0 has roads in quadrants: (dx < 0, dy > 0) and (dx > 0, dy < 0)
+            // rotation 1 has roads in quadrants: (dx < 0, dy < 0) and (dx > 0, dy > 0)
+            let rot0Matches = 0;
+            if ((dx < 0 && dy > 0) || (dx > 0 && dy < 0)) rot0Matches++;
+            let rot1Matches = 0;
+            if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) rot1Matches++;
+            selected[i].rotations = rot1Matches >= rot0Matches ? 1 : 0;
+            
+            visited.add(i);
+            let queue: number[] = [i];
+            while (queue.length > 0) {
+                let idx = queue.shift()!;
+                for (let j = 0; j < selected.length; j++) {
+                    if (visited.has(j)) continue;
+                    let gridDx = Math.round(selected[idx].anchor.x / 3) - Math.round(selected[j].anchor.x / 3);
+                    let gridDy = Math.round(selected[idx].anchor.y / 3) - Math.round(selected[j].anchor.y / 3);
+                    if (Math.abs(gridDx) === 1 && gridDy === 0 || gridDx === 0 && Math.abs(gridDy) === 1) {
+                        selected[j].rotations = (selected[idx].rotations + 1) % 2;
+                        visited.add(j);
+                        queue.push(j);
                     }
                 }
             }
         }
 
-        // //take all the stamps in the first cluster
-        // extensionStamps.push(...viableSpots[0]);
-        //sort all the stamps from the second cluster and then add them all
-        viableSpots = viableSpots.sort((a, b) => (center.getRangeTo(a.anchor.x, a.anchor.y) > center.getRangeTo(b.anchor.x, b.anchor.y)) ? 1 : -1);
-        // extensionStamps.push(...viableSpots[1]);
-        extensionStamps = viableSpots.slice(0, 10)
-
-        //sort by closest to center
-        let mainAnchor = {
-            x: center.x - 1,
-            y: center.y - 1
-        }
-        let sortedExtensions = extensionStamps.sort((a, b) => 
-            this.coordinateDistance(a.anchor.x, a.anchor.y, mainAnchor.x, mainAnchor.y) - 
-            this.coordinateDistance(b.anchor.x, b.anchor.y, mainAnchor.x, mainAnchor.y)
-        );
-
-        if (sortedExtensions.length < 9) {
+        if (selected.length < 9) {
             throw new Error("Room is not viable");
         }
 
-        return sortedExtensions;
+        return selected;
     }
 
     /**
