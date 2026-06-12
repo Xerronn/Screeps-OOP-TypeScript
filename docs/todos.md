@@ -13,3 +13,6 @@
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
 - automatic safe mode
 - improve room planning for more dense layouts and optimal extensions placement and rotation
+- more disaster recovery scenarios. What happens if a creep dies but extensions have been killed so it cannot be spawned at full energy but it is necessary? What happens if we lose RCL and things exist but not accessible
+
+-add more flags for gamestage and store them in memory instead of deriving everything from gamestage
