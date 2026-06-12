@@ -962,71 +962,204 @@ export default class Architect {
         return candidates.slice(0, 3);
     }
 
-    /**
-     * Method to smartly place walls around base
-     * @param room 
-     */
-    static placeWalls(room: string) {
-        let distanceMatrix = Architect.distanceTransform(room);
-        let terrainMatrix = Architect.terrainMatrix(room);
-        let schema = Chronicler.readSchema(room);
+   /**
+      * Method to find mincut walls using max-flow.
+      * Finds the minimum set of cells to block that disconnect all exits from the base area.
+      * @param room
+      */
+    static placeWalls(room: string): Array<Position> {
+        let terrain = Game.map.getRoomTerrain(room);
         let liveRoom = Game.rooms[room];
+        let schema = Chronicler.readSchema(room);
 
-        function callback(room: string) {
-            return terrainMatrix;
-        }
-
-        let center = new RoomPosition(schema.main.anchor.x + 1, schema.main.anchor.y + 1, room);
-        let roomExits = [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP];
-        let wallPos: RoomPosition[] = [];
-
-        for (let direction of roomExits) {
-            let allExits = liveRoom.find(direction);
-            let goals = [];
-            for (let exit of allExits) {
-                goals.push({
-                        pos: exit,
-                        range : 1
-                });
-            }
-            //keep searching towards this exit until the path is incomplete
-            for (let i = 0; i<60;i++) {
-                //path find to the current exit
-                let pathToExit = PathFinder.search(
-                    center,
-                    goals, 
-                    {
-                        plainCost: 0,
-                        swampCost: 0,
-                        roomCallback: callback,
-                        maxRooms: 1,
-                        maxCost: 255
+        let baseCenter = schema.main.anchor;
+        let baseCells = new Set<string>();
+        for (let dx = -5; dx <= 5; dx++) {
+            for (let dy = -5; dy <= 5; dy++) {
+                let cx = baseCenter.x + dx;
+                let cy = baseCenter.y + dy;
+                if (cx >= 0 && cx < 50 && cy >= 0 && cy < 50) {
+                    if (terrain.get(cx, cy) !== TERRAIN_MASK_WALL) {
+                        baseCells.add(`${cx},${cy}`);
                     }
-                );
-                if (pathToExit.incomplete) {
-                    console.log(i); 
-                    break;
                 }
-                
-                // let currentBest: {distance: number, pos: RoomPosition} = {distance: 100, pos: pathToExit.path[7]};
-                // for (let pos of pathToExit.path.slice(0, pathToExit.path.length - 3)) {
-                //     let distance = distanceMatrix.get(pos.x, pos.y);
-                //     if (distance < currentBest.distance) {
-                //         currentBest.pos = {x: pos.x, y: pos.y};
-                //         currentBest.distance = distance;
-                //     }
-                // }
-                pathToExit.path.splice(0, 15);
-
-                //push the first pos of the route, then repath
-                if (pathToExit.path.length == 0) continue;
-                wallPos.push(pathToExit.path[0]);
-                terrainMatrix.set(pathToExit.path[0].x, pathToExit.path[0].y, 0xff);
             }
         }
-        for (let pos of wallPos) {
-            new RoomVisual().circle(pos.x, pos.y);
+
+        let exitPositions: RoomPosition[] = [];
+        for (let direction of [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP]) {
+            exitPositions.push(...liveRoom.find(direction));
         }
+
+        // BFS from base to find all reachable cells
+        let fromBase = new Set<string>();
+        let qB: string[] = [];
+        for (let bc of baseCells) { fromBase.add(bc); qB.push(bc); }
+        while (qB.length > 0) {
+            let cur = qB.shift()!;
+            let [cx, cy] = cur.split(',').map(Number);
+            for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
+                if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
+                if (terrain.get(nx, ny) === TERRAIN_MASK_WALL) continue;
+                let key = `${nx},${ny}`;
+                if (fromBase.has(key)) continue;
+                fromBase.add(key);
+                qB.push(key);
+            }
+        }
+
+        // BFS from exits backwards to find all cells that can reach an exit
+        let toExit = new Set<string>();
+        let qE: string[] = [];
+        for (let ep of exitPositions) {
+            let key = `${ep.x},${ep.y}`;
+            if (terrain.get(ep.x, ep.y) !== TERRAIN_MASK_WALL && !toExit.has(key)) {
+                toExit.add(key);
+                qE.push(key);
+            }
+        }
+        while (qE.length > 0) {
+            let cur = qE.shift()!;
+            let [cx, cy] = cur.split(',').map(Number);
+            for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
+                if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
+                if (terrain.get(nx, ny) === TERRAIN_MASK_WALL) continue;
+                let key = `${nx},${ny}`;
+                if (toExit.has(key)) continue;
+                toExit.add(key);
+                qE.push(key);
+            }
+        }
+
+        // Relevant cells: intersection of fromBase and toExit
+        let relevantCells: string[] = [];
+        let cellToIndex = new Map<string, number>();
+        for (let cell of fromBase) {
+            if (toExit.has(cell)) {
+                cellToIndex.set(cell, relevantCells.length);
+                relevantCells.push(cell);
+            }
+        }
+
+        if (relevantCells.length === 0) {
+            return [];
+        }
+
+        let N = relevantCells.length;
+        let NUM_NODES = 2 * N + 2;
+        let SUPER_SOURCE = 2 * N;
+        let SUPER_SINK = 2 * N + 1;
+
+        let adj: {v: number; cap: number; rev: number}[][] = new Array(NUM_NODES);
+        for (let i = 0; i < NUM_NODES; i++) adj[i] = [];
+
+        function addEdge(u: number, v: number, cap: number) {
+            adj[u].push({v, cap, rev: adj[v].length});
+            adj[v].push({v: u, cap: 0, rev: adj[u].length - 1});
+        }
+
+        // Node splitting: i_in -> i_out with capacity 1
+        for (let i = 0; i < N; i++) {
+            addEdge(i, i + N, 1);
+        }
+
+        // Adjacency edges: u_out -> v_in with infinite capacity
+        for (let i = 0; i < N; i++) {
+            let [cx, cy] = relevantCells[i].split(',').map(Number);
+            for (let [dx, dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+                let nx = cx + dx, ny = cy + dy;
+                if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
+                let nKey = `${nx},${ny}`;
+                if (!cellToIndex.has(nKey)) continue;
+                let j = cellToIndex.get(nKey)!;
+                addEdge(i + N, j, 1e9);
+            }
+        }
+
+        // Super source -> base cells' _out
+        for (let bc of baseCells) {
+            if (cellToIndex.has(bc)) {
+                let idx = cellToIndex.get(bc)!;
+                addEdge(SUPER_SOURCE, idx + N, 1e9);
+            }
+        }
+
+        // Exit cells' _in -> super sink
+        for (let ep of exitPositions) {
+            let key = `${ep.x},${ep.y}`;
+            if (cellToIndex.has(key)) {
+                let idx = cellToIndex.get(key)!;
+                addEdge(idx, SUPER_SINK, 1e9);
+            }
+        }
+
+        // Edmonds-Karp max flow
+        function bfs(): number[] {
+            let parent = new Array(NUM_NODES).fill(-1);
+            let visited = new Uint8Array(NUM_NODES);
+            let queue: number[] = [SUPER_SOURCE];
+            visited[SUPER_SOURCE] = 1;
+            while (queue.length > 0) {
+                let u = queue.shift()!;
+                for (let edge of adj[u]) {
+                    if (!visited[edge.v] && edge.cap > 0) {
+                        visited[edge.v] = 1;
+                        parent[edge.v] = u;
+                        if (edge.v === SUPER_SINK) return parent;
+                        queue.push(edge.v);
+                    }
+                }
+            }
+            return parent;
+        }
+
+        let maxFlow = 0;
+        while (true) {
+            let parent = bfs();
+            if (parent[SUPER_SINK] === -1) break;
+            let bottleneck = 1e9;
+            let v = SUPER_SINK;
+            while (v !== SUPER_SOURCE) {
+                let u = parent[v];
+                let edge = adj[u].find(e => e.v === v)!;
+                bottleneck = Math.min(bottleneck, edge.cap);
+                v = u;
+            }
+            v = SUPER_SINK;
+            while (v !== SUPER_SOURCE) {
+                let u = parent[v];
+                let edge = adj[u].find(e => e.v === v)!;
+                let revEdge = adj[v][edge.rev];
+                edge.cap -= bottleneck;
+                revEdge.cap += bottleneck;
+                v = u;
+            }
+            maxFlow += bottleneck;
+        }
+
+        // BFS from super source in residual graph to find reachable nodes
+        let reachable = new Uint8Array(NUM_NODES);
+        let queue: number[] = [SUPER_SOURCE];
+        reachable[SUPER_SOURCE] = 1;
+        while (queue.length > 0) {
+            let u = queue.shift()!;
+            for (let edge of adj[u]) {
+                if (!reachable[edge.v] && edge.cap > 0) {
+                    reachable[edge.v] = 1;
+                    queue.push(edge.v);
+                }
+            }
+        }
+
+        // Min cut nodes: i_in reachable, i_out not reachable
+        let wallPositions: Array<Position> = [];
+        for (let i = 0; i < N; i++) {
+            if (reachable[i] && !reachable[i + N]) {
+                let [cx, cy] = relevantCells[i].split(',').map(Number);
+                wallPositions.push({x: cx, y: cy});
+            }
+        }
+        return wallPositions;
     }
 
     /**
