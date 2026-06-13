@@ -14,5 +14,6 @@
 - automatic safe mode
 - improve room planning for more dense layouts and optimal extensions placement and rotation
 - more disaster recovery scenarios. What happens if a creep dies but extensions have been killed so it cannot be spawned at full energy but it is necessary? What happens if we lose RCL and things exist but not accessible
-
--add more flags for gamestage and store them in memory instead of deriving everything from gamestage
+- add more flags for gamestage and store them in memory instead of deriving everything from gamestage
+- rework boosting and fix chemist which is completely borked
+- make supervisor.initiate more efficient using return codes so that creep spawning doesnt try EVERY creep every tick until it works

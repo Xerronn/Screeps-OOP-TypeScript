@@ -293,7 +293,7 @@ export default class Supervisor {
      * @param {Object} template An object that contains body, type, and memory
      * @param {boolean} rebirth whether or not this is a rebirth
      */
-    initiate(template: RenewalTemplate, boost=true): boolean {
+    initiate(template: RenewalTemplate): boolean {
         if (this.nexusReservation <= Game.time) {
             //use the body stored in memory if it exists, as it can contain evolutions
             let newBody = template.memory.body;
@@ -305,7 +305,7 @@ export default class Supervisor {
                 template.memory.generation++;
             }
 
-            if (boost === true) {
+            if (template.boost === true) {
                 //handle if the creep will be boosted when it spawns
                 var boostType = this.calculateBoosts(template.type);
                 if (boostType !== undefined) {
@@ -322,7 +322,7 @@ export default class Supervisor {
 
                     if (success == OK) {
                         //don't try spawning on another spawn
-                        if (boost === true && boostType !== undefined) this.prepareBoosts(boostType, newBody);
+                        if (template.boost === true && boostType !== undefined) this.prepareBoosts(boostType, newBody);
                         return true;
                     }
                 }
@@ -335,10 +335,13 @@ export default class Supervisor {
         return false;
     }
 
-    queueCreep(template: RenewalTemplate, boost=true): void {
-        let task = "global.Imperator.administrators[objArr[0]].supervisor.initiate(objArr[1], objArr[2]);";
+    queueCreep(template: RenewalTemplate): void {
         let priority = SPAWN_PRIORITY_MAP[template.type] || 10;
-        Director.scheduleCreep(this.room, priority, task, [this.room, {...template}, boost]);
+        let queuedCreep: QueuedCreep = {
+            room: this.room,
+            template: {...template}
+        }
+        Director.scheduleCreep(this.room, priority, queuedCreep);
     }
 
     //todo: write wrapStructure so we don't have to wrap all structures whenever one is built

@@ -21,7 +21,7 @@ export default class Director {
         Memory.directives[room][tick][taskId] = taskObj;
     }
 
-    static scheduleCreep(room: string, priority: number, task: string, objArr: any[]) {
+    static scheduleCreep(room: string, priority: number, queuedCreep: QueuedCreep) {
         if (!Memory.directives[room]) {
             Memory.directives[room] = {"spawning": {}};
         }
@@ -29,12 +29,8 @@ export default class Director {
         if (!spawning[priority]) {
             spawning[priority] = {};
         }
-        let taskObj = {
-            script: task,
-            objArr: objArr
-        };
-        let taskId = this.makeId();
-        spawning[priority][taskId] = taskObj;
+        let creepId = this.makeId();
+        spawning[priority][creepId] = queuedCreep;
     }
     
     static execTask(room: string, task: Task): boolean {
@@ -73,12 +69,12 @@ export default class Director {
                 let spawning = Memory.directives[room]["spawning"];
                 let priorities = Object.keys(spawning).sort((a, b) => Number(a) - Number(b));
                 for (let priority of priorities) {
-                    let tasks = spawning[Number(priority)];
-                    for (let id in tasks) {
+                    let queuedCreeps = spawning[Number(priority)];
+                    for (let id in queuedCreeps) {
                         blocked = true;
-                        let task = tasks[id];
-                        if (this.execTask(room, task) === true) {
-                            delete tasks[id];
+                        let creep = queuedCreeps[id];
+                        if (global.Imperator.administrators[creep.room].supervisor.initiate(creep.template)) {
+                            delete queuedCreeps[id];
                         }
                     }
                     if (blocked) break; //only execute the highest priority tasks with > 0 each tick
@@ -118,14 +114,14 @@ export default class Director {
         let schedule = Memory.directives;
     }
 
-    static deleteCreepDirective(room: string, type: string): void {
+    static deleteCreepDirective(room: string, creepType: string): void {
         let spawning = Memory.directives[room]["spawning"];
         for (let priority in spawning) {
-            let tasks = spawning[priority];
-            for (let id in tasks) {
-                let task = tasks[id];
-                if (task.objArr[1]?.type === type) {
-                    delete tasks[id];
+            let queuedCreeps = spawning[priority];
+            for (let id in queuedCreeps) {
+                let queuedCreep = queuedCreeps[id];
+                if (queuedCreep.template.type === creepType) {
+                    delete queuedCreeps[id];
                 }
             }
         }

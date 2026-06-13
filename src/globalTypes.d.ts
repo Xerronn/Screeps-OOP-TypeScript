@@ -13,7 +13,7 @@ interface Memory {
 interface DirectiveMemory {
     spawning: {
         [priority: string]: {
-            [taskId: string]: Task
+            [taskId: string]: QueuedCreep
         }
     }
     [tick: number]: {
@@ -24,6 +24,11 @@ interface DirectiveMemory {
 interface Task {
     script: string;
     objArr: any;
+}
+
+interface QueuedCreep {
+    room: string;
+    template: RenewalTemplate;
 }
 
 interface CreepMemory {
@@ -123,6 +128,7 @@ interface StampPlacement {
 interface RenewalTemplate {
     body: BodyPartConstant[];
     type: CIVITAS_TYPES | LEGION_TYPES;
+    boost?: boolean;
     memory: CreepMemory | any;
 }
 

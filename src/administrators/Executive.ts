@@ -465,8 +465,9 @@ export default class Executive {
                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
             ],
             'type': LEGION_TYPES.EXECUTIONER,
-            'memory': {'assignedRoom': assignedRoom, 'offRoading': true}
-        }, boost);
+            'memory': {'assignedRoom': assignedRoom, 'offRoading': true},
+            'boost': boost
+        });
     }
 
     /**
