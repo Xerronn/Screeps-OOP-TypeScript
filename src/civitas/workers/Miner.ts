@@ -170,7 +170,7 @@ export default class Miner extends Worker {
         let containers: StructureContainer[];
         if (this.remote) {
             containers = Game.rooms[this.assignedRoom].find(FIND_STRUCTURES, {'filter': {structureType: STRUCTURE_CONTAINER}});
-        } else containers = this.supervisor.containers;
+        } else containers = this.supervisor.castrum[CASTRUM_TYPES.CONTAINER].map(i => i.liveObj);
         let container = this.source.pos.findInRange(containers, 1)[0];
         if (container !== undefined && container.structureType === STRUCTURE_CONTAINER) {
             return container.id;

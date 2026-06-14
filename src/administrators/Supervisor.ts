@@ -33,6 +33,8 @@ import Nexus from 'castrum/Nexus';
 import Bastion from 'castrum/Bastion';
 import Market from 'castrum/Market';
 import Capacitor from 'castrum/Capacitor';
+import Road from 'castrum/Road';
+import Container from 'castrum/Container';
 
 // Class registries for dynamic instantiation
 const CIVITAS_CLASS_MAP: { [key: string]: new (creep: Creep) => Civitas } = {
@@ -59,6 +61,8 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
     [CASTRUM_TYPES.MARKET]: Market,
     [CASTRUM_TYPES.NEXUS]: Nexus,
     [CASTRUM_TYPES.WORKSHOP]: Workshop,
+    [CASTRUM_TYPES.ROAD]: Road,
+    [CASTRUM_TYPES.CONTAINER]: Container
 };
 
 const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
@@ -113,16 +117,10 @@ export default class Supervisor {
         [CASTRUM_TYPES.MARKET]: Market[],
         [CASTRUM_TYPES.NEXUS]: Nexus[],
         [CASTRUM_TYPES.WORKSHOP]: Workshop[],
-        [CASTRUM_TYPES.CAPACITOR]: Capacitor[]
+        [CASTRUM_TYPES.CAPACITOR]: Capacitor[],
+        [CASTRUM_TYPES.ROAD]: Road[],
+        [CASTRUM_TYPES.CONTAINER]: Container[]
     };
-    primitives: {                                           //castrum that I don't need full logic wrappers for
-        [CASTRUM_TYPES.CONTAINER]: Id<StructureContainer>[],
-        [CASTRUM_TYPES.ROAD]: Id<StructureRoad>[]
-    };
-    _primitives: {                                          //the current tick live game objects
-        [CASTRUM_TYPES.CONTAINER]: StructureContainer[],
-        [CASTRUM_TYPES.ROAD]: StructureRoad[]
-    }
 
     nexusReservation: number;
     workshopReservation: number;
@@ -142,8 +140,6 @@ export default class Supervisor {
 
         this.castrum = this.emptyCastrum;
         this.civitas = this.emptyCivitas;
-        this.primitives = this.emptyPrimitives;
-        this._primitives = this.emptyPrimitives;
 
         this.nexusReservation = 0;
         this.workshopReservation = 0;
@@ -164,21 +160,16 @@ export default class Supervisor {
         let thisRoom = Game.rooms[this.room];
         //initialize all structures in the room with their respective wrappers
         this.castrum = this.emptyCastrum;
-        this.primitives = this.emptyPrimitives;
-        this._primitives = this.emptyPrimitives;
         this.reagentWorkshops = [];
         this.productWorkshops = [];
         for (var structure of thisRoom.find(FIND_STRUCTURES)) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
-            if (castrumType !== CASTRUM_TYPES.UNDEFINED && castrumType !== CASTRUM_TYPES.CONTAINER && castrumType !== CASTRUM_TYPES.ROAD) {
+            if (castrumType !== CASTRUM_TYPES.UNDEFINED) {
                 if ((structure as OwnedStructure).my === false) continue;
                 const Class = CASTRUM_CLASS_MAP[castrumType];
                 if (Class) {
                     (this.castrum as any)[castrumType].push(new Class(structure));
                 }
-            } else if (castrumType !== CASTRUM_TYPES.UNDEFINED) {
-                //cache for basic structures like roads and containers
-                this.primitives[castrumType].push(structure.id as any);
             }
         }
 
@@ -218,8 +209,6 @@ export default class Supervisor {
      * Function that runs all objects in the room
      */
     run() {
-        //first delete last tick's cache of primitives and extensions
-        this._primitives = this.emptyPrimitives;
         this._extensionOrder = [];
         var errInfo = '';
         //first all creeps
@@ -283,7 +272,15 @@ export default class Supervisor {
         let cType: keyof typeof castrum;
         for (cType in this.castrum) {
             for (let struc of [...castrum[cType]]) {
-                struc.update();
+                if (!struc.update() && !(struc instanceof Capacitor)) {
+                    //structure has died, lets replace it.
+                    //if we need to destroy a structure call decomission first then delete it
+                    Game.rooms[this.room].createConstructionSite(
+                        struc.pos.x, 
+                        struc.pos.y, 
+                        struc.structureType
+                    );
+                }
             }
         }
     }
@@ -384,12 +381,21 @@ export default class Supervisor {
      */
     decommission(castrumType: Castrum): void {
         let type = castrumType.type;
-        if (type === CASTRUM_TYPES.CONTAINER || type === CASTRUM_TYPES.ROAD || type === CASTRUM_TYPES.UNDEFINED) {
-            throw Error('Primitive types cannot be decommissioned')
+        if (type === CASTRUM_TYPES.UNDEFINED) {
+            throw Error('undefined castrum type cannot be decommissioned')
         }
         let origArr = this.castrum[type];
         let index = origArr.indexOf(castrumType as any);
         if (index >= 0) origArr.splice(index, 1);
+    }
+
+    requestRepair(target: Road | Container): void {
+        for (let bastion of this.castrum[CASTRUM_TYPES.BASTION]) {
+            if (!bastion.repairTarget) {
+                bastion.repairTarget = target;
+                break;
+            }
+        }
     }
 
     /**
@@ -516,14 +522,9 @@ export default class Supervisor {
             [CASTRUM_TYPES.MARKET]: [],
             [CASTRUM_TYPES.NEXUS]: [],
             [CASTRUM_TYPES.WORKSHOP]: [],
-            [CASTRUM_TYPES.CAPACITOR]: []
-        }
-    }
-
-    get emptyPrimitives() {
-        return {
-            [CASTRUM_TYPES.CONTAINER]: [],
-            [CASTRUM_TYPES.ROAD]: []
+            [CASTRUM_TYPES.CAPACITOR]: [],
+            [CASTRUM_TYPES.ROAD]: [],
+            [CASTRUM_TYPES.CONTAINER]: []
         }
     }
 
@@ -557,29 +558,5 @@ export default class Supervisor {
             this._extensionOrder = extensions;
         }
         return this._extensionOrder;
-    }
-
-    get containers(): StructureContainer[] {
-        if (this._primitives[CASTRUM_TYPES.CONTAINER].length === 0) {
-            let containers: StructureContainer[] = [];
-            this.primitives[CASTRUM_TYPES.CONTAINER].forEach(function(s) {
-                let liveObj = Game.getObjectById(s) || undefined;
-                if (liveObj !== undefined) containers.push(liveObj);
-            })
-            this._primitives[CASTRUM_TYPES.CONTAINER] = containers;
-        }
-        return this._primitives[CASTRUM_TYPES.CONTAINER];
-    }
-
-    get roads(): StructureRoad[] {
-        if (this._primitives[CASTRUM_TYPES.ROAD].length === 0) {
-            let roads: StructureRoad[] = [];
-            this.primitives[CASTRUM_TYPES.ROAD].forEach(function(s) {
-                let liveObj = Game.getObjectById(s) || undefined;
-                if (liveObj !== undefined) roads.push(liveObj);
-            })
-            this._primitives[CASTRUM_TYPES.ROAD] = roads;
-        }
-        return this._primitives[CASTRUM_TYPES.ROAD];
     }
 }

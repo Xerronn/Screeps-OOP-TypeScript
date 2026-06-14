@@ -47,7 +47,7 @@ export default class Excavator extends Civitas {
         if (this.memory.containerId) {
             this.container = Game.getObjectById(this.memory.containerId) || undefined;
         } else if (!this.memory.containerId && this.mineral) {
-            let allContainers = this.supervisor.containers;
+            let allContainers = this.supervisor.castrum[CASTRUM_TYPES.CONTAINER].map(i => i.liveObj);
             this.container = this.mineral.pos.findInRange(allContainers, 1)[0] || undefined;
             this.memory.containerId = this.container.id;
         }

@@ -195,8 +195,6 @@ export default class Informant {
                 return CASTRUM_TYPES.WORKSHOP;
             case STRUCTURE_TERMINAL:
                 return CASTRUM_TYPES.MARKET;
-
-            //structures that are stored in a list an updated on demand
             case STRUCTURE_CONTAINER:
                 return CASTRUM_TYPES.CONTAINER
             case STRUCTURE_ROAD:

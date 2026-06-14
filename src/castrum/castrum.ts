@@ -14,13 +14,15 @@ export default abstract class Castrum extends GameObj {
 
     //basic structure attributes
     type: CASTRUM_TYPES;
+    structureType: BuildableStructureConstant;
 
     constructor(structure: Structure) {
         super();
-        this.liveObj = Game.structures[structure.id];
+        this.liveObj = Game.getObjectById(structure.id) as Structure;
 
         this.id = structure.id;
         this.type = Informant.mapGameToClass(structure.structureType);
+        this.structureType = this.liveObj.structureType as BuildableStructureConstant;
         this.pos = structure.pos;
         this.room = structure.room.name;
 
@@ -30,9 +32,8 @@ export default abstract class Castrum extends GameObj {
     }
 
     update(): boolean {
-        this.liveObj = Game.structures[this.id];
-
-        if (this.liveObj === null) {
+        this.liveObj = Game.getObjectById(this.id) as Structure;
+        if (!this.liveObj) {
             this.supervisor.decommission(this);
             return false //structure is dead
         }

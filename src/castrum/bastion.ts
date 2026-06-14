@@ -1,5 +1,7 @@
 import Chronicler from 'controllers/Chronicler';
 import Castrum from './Castrum';
+import Road from './Road';
+import Container from './Container';
 
 export default class Bastion extends Castrum {
     id: Id<StructureTower>;
@@ -7,7 +9,7 @@ export default class Bastion extends Castrum {
     store: Store<RESOURCE_ENERGY, false>;
 
     attacking: boolean;
-    repairTargets: Id<StructureRoad | StructureContainer>[];
+    repairTarget?: Road | Container;
 
     constructor(bastion: StructureTower) {
         super(bastion);
@@ -15,9 +17,6 @@ export default class Bastion extends Castrum {
         this.liveObj = bastion;
         this.store = this.liveObj.store;
         this.attacking = false;
-
-        this.repairTargets = [];
-        this.findRepairTargets();
     }
 
     update(): boolean {
@@ -34,10 +33,6 @@ export default class Bastion extends Castrum {
         //set tower filled flag
         if (this.store.getFreeCapacity(RESOURCE_ENERGY) > this.store.getCapacity(RESOURCE_ENERGY) / 4) {
             Chronicler.writeBastionsFilled(this.room, false);
-        }
-        // find new repair targets every 100 ticks
-        if (Game.time % 100 === 0) {
-            this.findRepairTargets();
         }
         if (!this.simpleAttack()) {     //todo: better attack implementation
             this.attacking = false;
@@ -60,38 +55,14 @@ export default class Bastion extends Castrum {
         return false;
     }
 
-    findRepairTargets() {
-        //erase old repairTargets
-        this.repairTargets = [];
-
-        let roads = this.supervisor.roads;
-        let containers = this.supervisor.containers;
-        let repairables = roads.concat(containers as any);
-
-        let sortedRepairables = _.sortBy(repairables, (struc) => struc.hits/struc.hitsMax).map(obj => obj.id);
-        this.repairTargets = sortedRepairables;
-    }
-
     repair() {
-        let target = undefined;
-        let tempTargets = [...this.repairTargets];
-
-        let index = 0;
-        for (let id of tempTargets) {
-            let liveObj = Game.getObjectById(id)
-            if (!liveObj) continue;
-            if (liveObj.hits < liveObj.hitsMax) {
-                target = liveObj;
-                break;
-            } else {
-                this.repairTargets.splice(index, 1);
-                index++;
+        if (this.repairTarget) {
+            if (this.repairTarget.hits < this.repairTarget.hitsMax) {
+                this.liveObj.repair(this.repairTarget.liveObj);
+                return;
             }
-        }
-
-        if (target && this.store.getUsedCapacity(RESOURCE_ENERGY) > 250) {
-            this.liveObj.repair(target);
-        }
+            this.repairTarget = undefined;
+        } 
     }
 
     /**
