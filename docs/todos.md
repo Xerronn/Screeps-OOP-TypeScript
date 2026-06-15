@@ -1,14 +1,12 @@
 - fix remote bug where containers are not getting created
 - arbiter not spawning automatically
+- links not activating until global reset
 - make the host and arbiter spots definite no go
 - energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)
 - pathing priorities for creeps
 - make gamestages less rigid around rcl so that if rcls get completed too quickly it does things correctly still
-- creepqueue directives can be simplified
-- should directives be moved to room memory?
 - rewrite links so that the miner links can send to upgrader links without passing through main link every time
 - REWRITE ARBITER
-- have some sort of object make sure if a building is destroyed it gets replaced
 - store more of room planning in memory
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
 - automatic safe mode
@@ -17,3 +15,5 @@
 - add more flags for gamestage and store them in memory instead of deriving everything from gamestage
 - rework boosting and fix chemist which is completely borked
 - make supervisor.initiate more efficient using return codes so that creep spawning doesnt try EVERY creep every tick until it works
+- make supervisor aware of buildings in remote room
+- make sure upgraders dont exceed link throughput, also consider moving both links to the room controller instead of having one in tower block
