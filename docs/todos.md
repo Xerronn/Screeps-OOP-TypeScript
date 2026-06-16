@@ -5,8 +5,6 @@
 - energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)
 - pathing priorities for creeps
 - make gamestages less rigid around rcl so that if rcls get completed too quickly it does things correctly still
-- rewrite links so that the miner links can send to upgrader links without passing through main link every time
-- REWRITE ARBITER
 - store more of room planning in memory
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
 - automatic safe mode
@@ -17,3 +15,5 @@
 - make supervisor.initiate more efficient using return codes so that creep spawning doesnt try EVERY creep every tick until it works
 - make supervisor aware of buildings in remote room
 - make sure upgraders dont exceed link throughput, also consider moving both links to the room controller instead of having one in tower block
+- NO MAGIC NUMBERS(arbiter and also terminal are real bad)
+- Potential for misclassification of links if a link is within 2 distance from both a container and a controller etc

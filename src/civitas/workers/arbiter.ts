@@ -3,6 +3,8 @@ import { WorkerMemory } from './Worker';
 import Host from './Host';
 import Chronicler from 'controllers/Chronicler';
 
+const TERMINAL_ENERGY_TARGET = 25000;
+
 interface ArbiterMemory extends WorkerMemory {
     linkId?: Id<StructureLink>,
     storageId?: Id<StructureStorage>,
@@ -12,8 +14,8 @@ export default class Arbiter extends Host {
     memory: ArbiterMemory;
 
     station: Position;
-    conduit?: Conduit;
-    link?: StructureLink;
+    storageConduit?: Conduit;
+    controllerConduit?: Conduit;
     storage?: StructureStorage;
     terminal?: StructureTerminal;
 
@@ -22,7 +24,8 @@ export default class Arbiter extends Host {
 
         let mainAnchor = Chronicler.readSchema(this.room).main.anchor;
         this.station = {x: mainAnchor.x + 1, y: mainAnchor.y + 1};
-        this.conduit = this.supervisor.controllerLink;
+        this.storageConduit = this.supervisor.storageLink;
+        this.controllerConduit = this.supervisor.controllerLink;
         this.storage = Game.rooms[this.room].storage;
         this.terminal = Game.rooms[this.room].terminal;
     }
@@ -37,8 +40,8 @@ export default class Arbiter extends Host {
         this.terminal = Game.rooms[this.room].terminal;
 
         //supervisor makes a new wrapper whenever a construction site is finished
-        this.conduit = this.supervisor.storageLink;
-        this.link = this.conduit?.liveObj;
+        this.storageConduit = this.supervisor.storageLink;
+        this.controllerConduit = this.supervisor.controllerLink;
 
         return true;
     }
@@ -47,116 +50,54 @@ export default class Arbiter extends Host {
         if (this.ticksToLive < 2) this.evolve();
 
         if (!this.position()) return true;
-
-        // /**
-        //  * Empty stores of minerals before dealing with minerals
-        //  */
-        // for (let res in this.store) {
-        //     if (res !== RESOURCE_ENERGY && this.store[res] > 0) {
-        //         this.liveObj.transfer(this.storage, res);
-        //     }
-        // }
-
         /**
-         * Link Management. Keep the link at zero except when it requests to be filled
+         * Fill stores
          */
-        if (!this.memory.task?.includes("Mineral") && (this.link !== undefined && this.link.store.getUsedCapacity(RESOURCE_ENERGY) != 0) || this.conduit?.needsFilling == true) {
-            if (this.conduit?.needsFilling == true) {
-                if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdrawStorage" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
-                    this.memory.task = "withdrawStorage";
-                    if (!this.withdrawStorage(false, RESOURCE_ENERGY)) this.withdrawTerminal();
-                    return true;
-                }
-                this.memory.task = "depositLink";
-                this.depositLink();
-                return true;
-            } else {
-                if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdrawLink" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
-                    this.memory.task = "withdrawLink";
-                    this.withdrawLink();
-                    return true;
-                }
-                this.memory.task = "depositStorage";
-                this.depositStorage();
-                return true;
+        if (this.store.getUsedCapacity() === 0) {
+            if (this.controllerConduit?.shouldFill === 0) {
+                return this.withdrawLink();
             }
-        }
-
-        /**
-         * Terminal Management. Puts energy into the terminal until it reaches 20k stored
-         */
-        let energyTarget = 25000 //global.Vendor.getTarget(RESOURCE_ENERGY);
-        if (!this.memory.task?.includes("Mineral") && this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < energyTarget) {
-            if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
-                this.memory.task = "withdraw";
-                let amount = energyTarget - this.terminal.store.getUsedCapacity(RESOURCE_ENERGY);
-                let tripAmount = Math.min(amount, this.store.getFreeCapacity(RESOURCE_ENERGY));
-                this.withdrawStorage(false, RESOURCE_ENERGY, tripAmount);
-                return true;
-            } else {
-                this.memory.task = "deposit";
-                this.depositTerminal(RESOURCE_ENERGY);
-                return true;
+            if ((this.controllerConduit?.shouldFill || 0) > 10 && (this.storageConduit?.shouldFill || 0) > 0 ) {
+                return this.withdrawStorage();
             }
-        } else if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) > energyTarget) {
-            if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
-                this.memory.task = "withdraw";
-                let amount = this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) - energyTarget;
-                let tripAmount = Math.min(amount, this.store.getFreeCapacity(RESOURCE_ENERGY));
-                this.withdrawTerminal(tripAmount);
-                return true;
-            } else {
-                this.memory.task = "deposit";
-                this.depositStorage();
-                return true;
+            if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_TARGET) {
+                let withdrawAmount = this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) - TERMINAL_ENERGY_TARGET;
+                return this.withdrawStorage(false, RESOURCE_ENERGY, withdrawAmount);
             }
-        }
-        
-        if (this.storage && this.terminal && this.memory.task != "depositMineralTerminal" && this.terminal.store.getFreeCapacity() > 0 && this.storage.store.getUsedCapacity(RESOURCE_ENERGY) < this.storage.store.getUsedCapacity()) {
-            if (this.store.getFreeCapacity() > 0) {
-                this.memory.task = "withdrawMineralStorage";
+            if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) > TERMINAL_ENERGY_TARGET) {
+                return this.withdrawTerminal(this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) - TERMINAL_ENERGY_TARGET);
+            }
+            if (this.storage && this.terminal && this.terminal.store.getFreeCapacity() > 0 && this.storage.store.getUsedCapacity(RESOURCE_ENERGY) < this.storage.store.getUsedCapacity()) {
                 for (let resType in this.storage.store) {
                     if (resType == RESOURCE_ENERGY) continue;
-                    this.withdrawStorage(false, resType as ResourceConstant);
+                    return this.withdrawStorage(false, resType as ResourceConstant);
                 }
-                return true;
             }
         }
 
-        if (this.store.getUsedCapacity() > this.store.getUsedCapacity(RESOURCE_ENERGY) && this.terminal && this.terminal.store.getFreeCapacity() > 0) {
-            this.memory.task = "depositMineralTerminal";
-            for (let resType in this.store) {
-                if (resType == RESOURCE_ENERGY) continue;
-                this.depositTerminal(resType as ResourceConstant);
+        /**
+         * Empty stores
+         */
+        for (let resType in this.store) {
+            if (resType == RESOURCE_ENERGY) {
+                //deposit into link if needed
+                if ((this.controllerConduit?.shouldFill || 0) > 10 && (this.storageConduit?.shouldFill || 0) > 0 ) {
+                    return this.depositLink();
+                }
+                if (this.terminal && this.terminal.store.getUsedCapacity(RESOURCE_ENERGY) < TERMINAL_ENERGY_TARGET) {
+                    this.depositTerminal(RESOURCE_ENERGY, TERMINAL_ENERGY_TARGET - this.terminal.store.getUsedCapacity(RESOURCE_ENERGY));
+                    return true;
+                }
+                if (this.storage) {
+                    this.depositStorage();
+                    return true;
+                }
+                continue;
             }
+            this.depositTerminal(resType as ResourceConstant);
             return true;
         }
-        delete this.memory.task;
-        // /**
-        //  * Empty stores of energy before dealing with minerals
-        //  */
-        // if (this.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-        //     this.depositStorage();
-        // }
-
-        // /**
-        //  * Keep terminal full of minerals only
-        //  */
-        // if (this.terminal && Object.keys(this.terminal.store).length > global.Vendor.resources.length) {
-        //     for (let res in this.terminal.store) {
-        //         if (!global.Vendor.resources.includes(res)) {
-        //             if (this.store.getUsedCapacity(res) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(res) > 0)) {
-        //                 this.memory.task = "withdraw";
-        //                 this.liveObj.withdraw(this.terminal, res);
-        //                 return;
-        //             } else {
-        //                 this.memory.task = "deposit";
-        //                 this.liveObj.transfer(this.storage, res);
-        //                 return;
-        //             }
-        //         }
-        //     }
-        // }
+        
         return false;
     }
 
@@ -176,13 +117,9 @@ export default class Arbiter extends Host {
     /**
      * Method that takes energy from link
      */
-    withdrawLink(numEnergy?: number): boolean {
-        if (this.link === undefined) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.withdraw(this.link, RESOURCE_ENERGY, numEnergy);
-        } else {
-            this.liveObj.withdraw(this.link, RESOURCE_ENERGY);
-        }
+    withdrawLink(): boolean {
+        if (!this.storageConduit || !this.storageConduit.liveObj) return false;
+        this.liveObj.withdraw(this.storageConduit.liveObj, RESOURCE_ENERGY);
         return true;
     }
 
@@ -202,10 +139,11 @@ export default class Arbiter extends Host {
     /**
      * Withdraw energy from terminal
      */
-    withdrawTerminal(numEnergy?: number): boolean {
+    withdrawTerminal(amount?: number): boolean {
         if (this.terminal === undefined) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.withdraw(this.terminal, RESOURCE_ENERGY, numEnergy);
+        if (amount !== undefined) {
+            let adjustedAmount = Math.min(amount, this.store.getFreeCapacity(RESOURCE_ENERGY))
+            this.liveObj.withdraw(this.terminal, RESOURCE_ENERGY, adjustedAmount);
             //global.Vendor.balances[this.room][RESOURCE_ENERGY] -= numEnergy;
         } else {
             this.liveObj.withdraw(this.terminal, RESOURCE_ENERGY);
@@ -217,36 +155,29 @@ export default class Arbiter extends Host {
     /**
      * Method that gives energy to link
      */
-    depositLink(numEnergy?: number): boolean {
-        if (this.link === undefined) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.transfer(this.link, RESOURCE_ENERGY, numEnergy);
-        } else {
-            this.liveObj.transfer(this.link, RESOURCE_ENERGY);
-        }
+    depositLink(): boolean {
+        if (!this.storageConduit || !this.storageConduit.liveObj) return false;
+        this.liveObj.transfer(this.storageConduit.liveObj, RESOURCE_ENERGY);
         return true;
     }
 
     /**
      * Move to storage and deposit all stored energy
      */
-    depositStorage(numEnergy=undefined): boolean {
+    depositStorage(): boolean {
         if (this.storage === undefined) return false;
-        if (numEnergy !== undefined) {
-            this.liveObj.transfer(this.storage, RESOURCE_ENERGY, numEnergy);
-        } else {
-            this.liveObj.transfer(this.storage, RESOURCE_ENERGY);
-        }
+        this.liveObj.transfer(this.storage, RESOURCE_ENERGY);
         return true;
     }
 
     /**
-     * Move to terminal and deposit all stored energy
+     * Deposit resources into terminal
      */
-    depositTerminal(resource: ResourceConstant, amount=undefined): boolean {
+    depositTerminal(resource: ResourceConstant, amount?: number): boolean {
         if (this.terminal === undefined) return false;
         if (amount !== undefined) {
-            this.liveObj.transfer(this.terminal, resource, amount);
+            let adjustedAmount = Math.min(amount, this.store.getUsedCapacity(resource));
+            this.liveObj.transfer(this.terminal, resource, adjustedAmount);
             //increment balances in the vendor as energy is added
             //global.Vendor.balances[this.room][RESOURCE_ENERGY] += numEnergy;
         } else {

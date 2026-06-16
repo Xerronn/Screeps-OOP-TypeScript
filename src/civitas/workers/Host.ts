@@ -177,10 +177,8 @@ export default class Host extends Worker {
                 carryCount++;
             }
         }
-        console.log("evolving")
         //if the carry count is lower than the calculation and there are no construction sites, upgrade body
         if (carryCount != numCarry && Game.rooms[this.room].find(FIND_MY_CONSTRUCTION_SITES).length == 0) {
-        console.log("success")
             let newBody: BodyPartConstant[] = [];
             for (let i = 0; i < numCarry; i++) {
                 newBody.unshift(CARRY)
