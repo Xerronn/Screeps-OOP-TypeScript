@@ -17,3 +17,8 @@
 - make sure upgraders dont exceed link throughput, also consider moving both links to the room controller instead of having one in tower block
 - NO MAGIC NUMBERS(arbiter and also terminal are real bad)
 - Potential for misclassification of links if a link is within 2 distance from both a container and a controller etc
+- observer support
+- power mining
+- power creeps
+- factory and commodities
+- full boosting support
