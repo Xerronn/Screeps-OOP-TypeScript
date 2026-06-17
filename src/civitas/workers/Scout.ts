@@ -1,5 +1,5 @@
 import Chronicler from 'controllers/Chronicler';
-import Worker from './worker';
+import Worker from './Worker';
 
 interface ScoutMemory extends CreepMemory {
     targetRooms: string[];

@@ -5,6 +5,7 @@
 - energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)
 - pathing priorities for creeps
 - make gamestages less rigid around rcl so that if rcls get completed too quickly it does things correctly still
+- finish wall placement algorithm to shield structures too close to the walls and alternate wall/rampart. make curator spawn in and upgrade them all
 - store more of room planning in memory
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
 - automatic safe mode
