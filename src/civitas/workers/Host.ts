@@ -215,24 +215,12 @@ export default class Host extends Worker {
     getIdleSpot() {
         let schema = Chronicler.readSchema(this.room).main;
         let rotations = schema.rotations;
-        let offsets = [1, 0];
-        switch(rotations) {
-            case 1:
-                offsets = [1, 0];
-                break;
-            case 2:
-                offsets = [2, 1];
-                break;
-            case 3:
-                offsets = [1, 2];
-                break;
-            case 4:
-                offsets = [0, 1];
-                break;
-        }
+        let offsets = [[1, 0], [2, 1], [1, 2], [0, 1]];
+        let offset = offsets[rotations % 4];
+
         return new RoomPosition(
-            schema.anchor.x + offsets[0],
-            schema.anchor.y + offsets[1],
+            schema.anchor.x + offset[0],
+            schema.anchor.y + offset[1],
             this.room
         );
     }
