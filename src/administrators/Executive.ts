@@ -38,6 +38,7 @@ export default class Executive {
 
         if (global.debug) {
             Architect.drawSchematic(this.room);
+            Architect.plan(this.room);
         }
         
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
@@ -142,20 +143,23 @@ export default class Executive {
                         //get last road tile leading into the remote room
                         let exit = Game.rooms[this.room].findExitTo(remote);
                         if (exit === -2 || exit === -10) throw Error("Room does not have exit to remote");
-                        Architect.buildRemotePaths(this.room, remote, exit);
-                        Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
-                        let sources = liveRemote.find(FIND_SOURCES);
-                        this.spawnEngineers(remote);
-                        for (let source of sources) {
-                            let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
-                            let task = `global.Imperator.administrators["${this.room}"].supervisor.queueCreep(
-                                {
-                                    'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
-                                    'type': '${CIVITAS_TYPES.MINER}', 
-                                    'memory': objArr[0]
-                                });
-                            `;
-                            Director.schedule(this.room, Game.time + 3000, task, [memory]);            
+                        let remoteSchematic = Architect.buildRemotePaths(this.room, remote, exit);
+                        if (remoteSchematic) {
+                            Chronicler.writeRemoteRoadsBuilt(this.room, remote, true);
+                            Chronicler.writeRemoteSchema(this.room, remote, remoteSchematic);
+                            let sources = liveRemote.find(FIND_SOURCES);
+                            this.spawnEngineers(remote);
+                            for (let source of sources) {
+                                let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
+                                let task = `global.Imperator.administrators["${this.room}"].supervisor.queueCreep(
+                                    {
+                                        'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
+                                        'type': '${CIVITAS_TYPES.MINER}', 
+                                        'memory': objArr[0]
+                                    });
+                                `;
+                                Director.schedule(this.room, Game.time + 3000, task, [memory]);            
+                            }
                         }
                     }
                 }
@@ -218,6 +222,7 @@ export default class Executive {
             case 5.1:
                 //links are built
                 this.spawnArbiter();
+                Architect.buildWalls(this.room);
                 break;
             case 6:
                 //just turned rcl 6

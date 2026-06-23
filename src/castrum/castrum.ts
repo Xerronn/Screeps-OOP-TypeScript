@@ -8,13 +8,15 @@ export default abstract class Castrum extends GameObj {
     pos: RoomPosition;
     room: string;
 
-    //attributes that update ever tick
+    //attributes that update every tick
     hits: number;
     hitsMax: number;
 
     //basic structure attributes
     type: CASTRUM_TYPES;
     structureType: BuildableStructureConstant;
+
+    hasVision: boolean;
 
     constructor(structure: Structure) {
         super();
@@ -29,20 +31,32 @@ export default abstract class Castrum extends GameObj {
         //attributes that change tick to tick
         this.hits = structure.hits;
         this.hitsMax = structure.hitsMax;
+        this.hasVision = true;
     }
 
     update(): boolean {
         this.liveObj = Game.getObjectById(this.id) as Structure;
         if (!this.liveObj) {
-            this.supervisor.decommission(this);
+            if (!Game.rooms[this.room]) {
+                //no vision
+                this.hasVision = false;
+                return true;
+            }
             return false //structure is dead
         }
+        this.hasVision = true;
         this.hits = this.liveObj.hits;
         this.hitsMax = this.liveObj.hitsMax;
         return true;
     }
 
     run() {
+        return;
+    }
+
+    decommission() {
+        this.supervisor.decommission(this);
+        this.liveObj.destroy();
         return;
     }
 }

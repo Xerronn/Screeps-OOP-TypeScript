@@ -1,23 +1,26 @@
 import Chronicler from 'controllers/Chronicler';
 import Worker, {WorkerMemory} from './Worker';
+import Container from 'castrum/Container';
+import Conduit from 'castrum/Conduit';
 
 export interface MinerMemory extends WorkerMemory {
     sourceId: Id<Source>;
-    containerId?: Id<StructureContainer>;
-    linkId?: Id<StructureLink>;
     courierSpawned: boolean;
 }
 
 export default class Miner extends Worker {
     memory: MinerMemory;
 
+    miningSpot: Position;
     source?: Source;
-    container?: StructureContainer;
-    link?: StructureLink;
+    container?: Container;
+    conduit?: Conduit;
+
 
     constructor(miner: Creep) {
         super(miner);
 
+        this.initialize();
     }
 
     update(): boolean {
@@ -26,11 +29,10 @@ export default class Miner extends Worker {
             return false;
         }
 
-        let liveSource = Game.getObjectById(this.memory.sourceId) || undefined;      //in some cases we might not have vision of the source
-        if (liveSource !== undefined) {
-            this.source = liveSource;
-            //check every tick for a new container/link to use
-            this.assignStore();
+        //in some cases we might not have vision of the source
+        this.source = Game.getObjectById(this.memory.sourceId) || undefined;
+        if (!this.container && !this.conduit) {
+            this.initialize();
         }
 
         return true;
@@ -57,23 +59,21 @@ export default class Miner extends Worker {
             this.spawnCourier(this.memory.travelTime - (CREEP_SPAWN_TIME * this.body.length));
         }
 
-        if (this.link === undefined) {
+        if (this.conduit === undefined) {
             if (this.container !== undefined && this.container.hits === this.container.hitsMax || this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 this.harvest();
             } else if (this.container !== undefined && this.container.hits < this.container.hitsMax) {
-                this.repairContainer(this.container);
+                this.repairContainer(this.container.liveObj);
             } else {
                 //build new link/container
-                if (!this.build()) {
-                    this.pos.createConstructionSite(STRUCTURE_CONTAINER);
-                }
+                this.build();
             }
 
         } else {
             if (this.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
                 this.harvest();
             } else {
-                this.depositLink(this.link);
+                this.depositLink(this.conduit.liveObj);
             }
         }
 
@@ -84,17 +84,9 @@ export default class Miner extends Worker {
      * Overridden harvest method that moves to container instead of to source
      */
     harvest(): boolean {
-        let target: RoomObject | undefined;
-        let targetRange: number;
-        if (this.container !== undefined) {
-            target = this.container;
-            targetRange = 0;
-        } else {
-            target = this.source;
-            targetRange = 1;
-        }
-        if (target === undefined || this.source === undefined) return false;
-        if (this.pos.inRangeTo(target, targetRange)) {
+        let targetPos = new RoomPosition(this.miningSpot.x, this.miningSpot.y, this.assignedRoom);
+        if (this.source === undefined || targetPos === undefined) return false;
+        if (this.pos.inRangeTo(targetPos, 0)) {
             if (this.memory.travelTime === undefined && this.ticksToLive > 1400) {
                 this.memory.travelTime = Game.time - this.spawnTime;
             }
@@ -106,7 +98,7 @@ export default class Miner extends Worker {
                 } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyMined', amount);
             }
         } else {
-            this.liveObj.travelTo(target, {allowSwap: true});
+            this.liveObj.travelTo(targetPos, {allowSwap: true});
         }
         return true;
     }
@@ -135,29 +127,36 @@ export default class Miner extends Worker {
     /**
      * Method to assign a container or link to the miner
      */
-    assignStore() {
-        //container assignment
-        if (this.memory.containerId !== undefined && this.memory.linkId === undefined) {
-            let unkContainer = Game.getObjectById(this.memory.containerId);
-
-            if (unkContainer !== null) {
-                this.container = unkContainer;
-            } else {
-                this.memory.containerId = undefined;
-            }
-        } else this.memory.containerId = this.getContainer();
-
+    initialize() {
+        let containerPos: Position;
+        let linkPos: Position;
         if (!this.remote) {
-            //link assignment
-            if (this.memory.linkId !== undefined) {
-                let unkLink = Game.getObjectById(this.memory.linkId);
+            let schema = Chronicler.readSchema(this.spawnRoom);
+            containerPos = schema.resources.sources[this.memory.sourceId]?.containerPos;
+            linkPos = schema.resources.sources[this.memory.sourceId]?.linkPos;
+            this.miningSpot = containerPos;
 
-                if (unkLink !== null) {
-                    this.link = unkLink;
-                } else {
-                    this.memory.linkId = undefined;
+            let conduits = this.supervisor.castrum[CASTRUM_TYPES.CONDUIT];
+            for (let conduit of conduits) {
+                if (conduit.pos.x == linkPos.x && conduit.pos.y == linkPos.y){
+                    this.conduit = conduit;
                 }
-            } else this.memory.linkId = this.getLink();
+            }
+            if (this.conduit) {
+                return;
+            }
+        } else {
+            let schema = Chronicler.readRemoteSchema(this.spawnRoom, this.assignedRoom);
+            if (!schema) return;
+            containerPos = schema.sources[this.memory.sourceId]?.containerPos;
+            this.miningSpot = containerPos;
+        }
+
+        let containers = this.supervisor.castrum[CASTRUM_TYPES.CONTAINER];
+        for (let container of containers) {
+            if (container.pos.x == containerPos.x && container.pos.y == containerPos.y) {
+                this.container = container;
+            }
         }
     }
 
@@ -209,10 +208,9 @@ export default class Miner extends Worker {
                     'generation' : 0,
                     'assignedRoom': this.assignedRoom,
                     'offRoading': false,
-                    'containerId': this.memory.containerId,
                     'containerPos': {
-                        'x': this.pos.x,
-                        'y': this.pos.y
+                        'x': this.miningSpot.x,
+                        'y': this.miningSpot.y
                     }
                 }
             });
@@ -225,11 +223,6 @@ export default class Miner extends Worker {
      * Method to replace the miner 
      */
      replace() {
-        //evolve the creep if it has a link
-        if (this.link !== undefined) {
-            this.evolve();
-        }
-
         //basically rebirth but without the dying first
         this.evolve();
         this.supervisor.queueCreep({
@@ -246,7 +239,7 @@ export default class Miner extends Worker {
      * Method to evolve the body after getting a link
      */
      evolve() {
-        if (this.link) {
+        if (this.conduit) {
             this.memory.body = [
                 WORK, WORK, WORK, WORK, WORK, WORK, WORK,
                 CARRY, CARRY, CARRY, CARRY, CARRY,

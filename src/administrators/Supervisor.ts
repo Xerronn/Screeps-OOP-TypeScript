@@ -162,7 +162,16 @@ export default class Supervisor {
         this.castrum = this.emptyCastrum;
         this.reagentWorkshops = [];
         this.productWorkshops = [];
-        for (var structure of thisRoom.find(FIND_STRUCTURES)) {
+        let ownedStructures = thisRoom.find(FIND_STRUCTURES);
+        let roomRemotes = Chronicler.readRemotes(this.room);
+        for (let remote in roomRemotes) {
+            let remoteData = roomRemotes[remote];
+            if (remoteData.status !== REMOTE_STATUSES.CLAIMED && remoteData.status !== REMOTE_STATUSES.INVADED) continue;
+            let liveRemote = Game.rooms[remote];
+            if (!liveRemote) continue;
+            ownedStructures = ownedStructures.concat(liveRemote.find(FIND_STRUCTURES));
+        }
+        for (var structure of ownedStructures) {
             let castrumType = Informant.mapGameToClass(structure.structureType);
             if (castrumType !== CASTRUM_TYPES.UNDEFINED) {
                 if ((structure as OwnedStructure).my === false) continue;

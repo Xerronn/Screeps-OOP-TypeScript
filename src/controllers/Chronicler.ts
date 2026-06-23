@@ -144,6 +144,28 @@ export default class Chronicler {
     }
 
     /**
+     * Reads the remote room schematic
+     * @param room 
+     * @param remote 
+     * @returns 
+     */
+    static readRemoteSchema(room: string, remote: string): RemoteSchematic | undefined {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        return Memory.rooms[room].schematic.remotes[remote];
+    }
+
+    /**
+     * Write the remote room schematic
+     * @param room 
+     * @param remote 
+     * @param remoteSchema 
+     */
+    static writeRemoteSchema(room: string, remote: string, remoteSchema: RemoteSchematic) {
+        if (!Chronicler.readRoomActive(room)) throw new Error("Room is not active or not registered");
+        Memory.rooms[room].schematic.remotes[remote] = remoteSchema;
+    }
+
+    /**
      * Reads the stamp locations for a room
      * @param room 
      * @returns roomSchematic

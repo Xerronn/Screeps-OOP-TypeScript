@@ -3,7 +3,6 @@ import Castrum from './Castrum';
 export default class Container extends Castrum {
     id: Id<StructureContainer>;
     liveObj: StructureContainer;
-    hasVision: boolean;
 
     constructor(container: StructureContainer) {
         super(container);
@@ -12,14 +11,10 @@ export default class Container extends Castrum {
 
     update(): boolean {
         if (!super.update()) {
-            if (!Game.rooms[this.room]) {
-                //no vision
-                this.hasVision = false;
-                return true;
-            }
             //structure got killed
             return false;
         }
+        if (!this.hasVision) return true;
         this.liveObj = Game.getObjectById(this.id) as StructureContainer;
         return true;
     }

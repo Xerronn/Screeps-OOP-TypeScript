@@ -320,6 +320,22 @@ export default class Architect {
             liveRoom.createConstructionSite(linkPos.x, linkPos.y, STRUCTURE_LINK);
         }
     }
+    /**
+     * Method to build all walls and ramparts
+     * @param room 
+     */
+    static buildWalls(room: string) {
+        let schema = Chronicler.readSchema(room);
+        let liveRoom = Game.rooms[room];
+        let controller = liveRoom.controller;
+        if (controller === undefined) throw Error("Room has no controller!");
+        for (let pos of schema.walls) {
+            liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_WALL);
+        }
+        for (let pos of schema.ramparts) {
+            liveRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_RAMPART);
+        }
+    }
 
     /**
      * Method to build the extractor and path back to main
@@ -363,7 +379,7 @@ export default class Architect {
      * Method to build roads in remote room from entrance to sources. Also builds the container
      * @param room
      */
-    static buildRemotePaths(room:string, remote: string, exit: ExitConstant) {
+    static buildRemotePaths(room:string, remote: string, exit: ExitConstant): RemoteSchematic | undefined {
         let remotePath = Chronicler.readSchema(room).paths.exits[exit];
         let lastPath = remotePath[remotePath.length - 1];
         let startCoords: Position
@@ -396,22 +412,28 @@ export default class Architect {
         }
         let liveStart = new RoomPosition(startCoords.x, startCoords.y, remote);
         let liveRemote = Game.rooms[remote];
-        let paths = []
 
+        if (!liveRemote || !liveStart) return;
+
+        let schema: RemoteSchematic = {paths: [], sources: {}};
         let sources = liveRemote.find(FIND_SOURCES);
-        for (let source of sources) {
-            paths.push(liveRemote.findPath(liveStart, source.pos, {'range': 1}))
-        }
         liveStart.createConstructionSite(STRUCTURE_ROAD)
-        for (let path of paths) {
-            for (let i in path) {
-                if (parseInt(i) === path.length - 1) {
-                    liveRemote.createConstructionSite(path[i].x, path[i].y, STRUCTURE_CONTAINER);
-                    continue;
-                }
-                liveRemote.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD);
+        for (let source of sources) {
+            let path = liveRemote.findPath(liveStart, source.pos, {'range': 1});
+            for (let step of path) {
+                schema.paths.push({x: step.x, y: step.y})
+                liveRemote.createConstructionSite(step.x, step.y, STRUCTURE_ROAD);
             }
+            let lastStep = path[path.length - 1];
+            schema.sources[source.id] = {
+                containerPos: {
+                    x: lastStep.x, 
+                    y: lastStep.y
+                }
+            };
+            liveRemote.createConstructionSite(lastStep.x, lastStep.y, STRUCTURE_CONTAINER);
         }
+        return schema;
     }
 
     /**
@@ -539,7 +561,8 @@ export default class Architect {
                     'walls': wallPositions.walls,
                     'ramparts': wallPositions.ramparts,
                     'resources': resourcePlan,
-                    'controllerLink': clPos
+                    'controllerLink': clPos,
+                    'remotes': {}
                 }
                 return schematic;
             } catch (e) {

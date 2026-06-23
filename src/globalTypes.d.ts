@@ -110,6 +110,32 @@ interface RoomSchematic {
     towers: StampPlacement;
     spawns: Position[];
     labs: StampPlacement;
+    resources: ResourcePlan;
+    walls: Position[];
+    ramparts: Position[];
+    remotes: {[room: string] : RemoteSchematic};
+    controllerLink: Position;
+}
+
+interface RemoteSchematic {
+    paths: Position[]
+    sources: {
+        [id: Id<Source>] : {
+            containerPos: Position
+        }
+    }
+}
+
+interface ResourcePlan {
+    sources: {
+        [id: Id<Source>] : {
+            containerPos: Position,
+            linkPos: Position
+        }
+    }
+    mineral: {
+        containerPos: Position
+    }
 }
 
 interface RoomPaths {

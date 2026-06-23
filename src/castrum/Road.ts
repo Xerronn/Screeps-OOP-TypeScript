@@ -3,7 +3,6 @@ import Castrum from './Castrum';
 export default class Road extends Castrum {
     id: Id<StructureRoad>;
     liveObj: StructureRoad;
-    hasVision: boolean;
 
     constructor(road: StructureRoad) {
         super(road);
@@ -12,14 +11,10 @@ export default class Road extends Castrum {
 
     update(): boolean {
         if (!super.update()) {
-            if (!Game.rooms[this.room]) {
-                //no vision
-                this.hasVision = false;
-                return true;
-            }
             //structure got killed
             return false;
         }
+        if (!this.hasVision) return true;
         this.liveObj = Game.getObjectById(this.id) as StructureRoad;
         return true;
     }

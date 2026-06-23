@@ -7,7 +7,7 @@ export default class Engineer extends Miner {
     constructor(engineer: Creep) {
         super(engineer);
         
-        this.bootstrap = Game.rooms[this.assignedRoom].controller?.my || false;
+        this.bootstrap = Game.rooms[this.assignedRoom]?.controller?.my || false;
     }
 
     run() {
