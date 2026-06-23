@@ -2,6 +2,7 @@ import Chronicler from 'controllers/Chronicler';
 import Castrum from './Castrum';
 import Road from './Road';
 import Container from './Container';
+import type Supervisor from 'administrators/Supervisor';
 
 export default class Bastion extends Castrum {
     id: Id<StructureTower>;
@@ -11,8 +12,8 @@ export default class Bastion extends Castrum {
     attacking: boolean;
     repairTarget?: Road | Container;
 
-    constructor(bastion: StructureTower) {
-        super(bastion);
+    constructor(supervisor: Supervisor, bastion: StructureTower) {
+        super(supervisor, bastion);
         this.id = bastion.id;
         this.liveObj = bastion;
         this.store = this.liveObj.store;

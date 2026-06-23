@@ -1,6 +1,9 @@
 import Informant from 'controllers/Informant';
 import GameObj from '../GameObj';
 
+import type Supervisor from 'administrators/Supervisor';
+import type Executive from 'administrators/Executive';
+
 export default abstract class Castrum extends GameObj {
     //default gameObj attributes
     id: Id<Structure>;
@@ -17,9 +20,11 @@ export default abstract class Castrum extends GameObj {
     structureType: BuildableStructureConstant;
 
     hasVision: boolean;
+    supervisor: Supervisor;
 
-    constructor(structure: Structure) {
+    constructor(supervisor: Supervisor, structure: Structure) {
         super();
+        this.supervisor = supervisor;
         this.liveObj = Game.getObjectById(structure.id) as Structure;
 
         this.id = structure.id;

@@ -1,11 +1,13 @@
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 export default class Road extends Castrum {
     id: Id<StructureRoad>;
     liveObj: StructureRoad;
 
-    constructor(road: StructureRoad) {
-        super(road);
+    constructor(supervisor: Supervisor, road: StructureRoad) {
+        super(supervisor, road);
 
     }
 

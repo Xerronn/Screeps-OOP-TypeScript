@@ -1,11 +1,13 @@
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 export default class Container extends Castrum {
     id: Id<StructureContainer>;
     liveObj: StructureContainer;
 
-    constructor(container: StructureContainer) {
-        super(container);
+    constructor(supervisor: Supervisor, container: StructureContainer) {
+        super(supervisor, container);
 
     }
 

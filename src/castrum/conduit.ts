@@ -1,6 +1,8 @@
 import Chronicler from 'controllers/Chronicler';
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 export default class Conduit extends Castrum {
     id: Id<StructureLink>;
     liveObj: StructureLink;
@@ -11,8 +13,8 @@ export default class Conduit extends Castrum {
     shouldFill: number;
     store: Store<RESOURCE_ENERGY, false>
 
-    constructor(link: StructureLink) {
-        super(link);
+    constructor(supervisor: Supervisor, link: StructureLink) {
+        super(supervisor, link);
 
         //if the controller link needs energy
         this.shouldFill = 0;

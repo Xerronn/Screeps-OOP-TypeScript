@@ -1,5 +1,7 @@
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 export default class Market extends Castrum {
     liveObj: StructureTerminal;
 
@@ -7,8 +9,8 @@ export default class Market extends Castrum {
     cooldown: number;
     nativeMineral: MineralConstant;
 
-    constructor(market: StructureTerminal) {
-        super(market);
+    constructor(supervisor: Supervisor, market: StructureTerminal) {
+        super(supervisor, market);
 
         this.store = market.store;
         this.cooldown = market.cooldown;

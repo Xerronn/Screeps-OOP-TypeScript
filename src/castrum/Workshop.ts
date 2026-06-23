@@ -1,6 +1,8 @@
 import Chronicler from 'controllers/Chronicler';
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 export default class Workshop extends Castrum {
     liveObj: StructureLab;
 
@@ -12,8 +14,8 @@ export default class Workshop extends Castrum {
     resourceCount: number;
     boosting: boolean;
 
-    constructor(workshop: StructureLab) {
-        super(workshop);
+    constructor(supervisor: Supervisor, workshop: StructureLab) {
+        super(supervisor, workshop);
 
         this.store = this.liveObj.store;
         this.cooldown = this.liveObj.cooldown;

@@ -15,12 +15,4 @@ export default abstract class GameObj {
     info() {
         return `${this.constructor.name} with ID ${this.id}`;
     }
-
-    get supervisor(): Supervisor {
-        return global.Imperator.administrators[this.room].supervisor;
-    }
-
-    get executive(): Executive {
-        return global.Imperator.administrators[this.room].executive;
-    }
 }

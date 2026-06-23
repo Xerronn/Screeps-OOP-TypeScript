@@ -2,6 +2,8 @@ import Chronicler from 'controllers/Chronicler';
 import Informant from 'controllers/Informant';
 import Castrum from './Castrum';
 
+import type Supervisor from 'administrators/Supervisor';
+
 //spawn structure definition
 export default class Nexus extends Castrum {
     liveObj: StructureSpawn;
@@ -12,8 +14,8 @@ export default class Nexus extends Castrum {
     spawningThisTick: boolean;      //if the nexus has already return OK to spawn something this tick
     reservedTick: number;           //if the nexus is currently reserved by a renewing creep
 
-    constructor(nexus: StructureSpawn) {
-        super(nexus);
+    constructor(supervisor: Supervisor, nexus: StructureSpawn) {
+        super(supervisor, nexus);
 
         this.id = nexus.id;
         this.name = nexus.name;

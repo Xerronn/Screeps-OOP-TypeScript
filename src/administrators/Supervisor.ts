@@ -177,7 +177,7 @@ export default class Supervisor {
                 if ((structure as OwnedStructure).my === false) continue;
                 const Class = CASTRUM_CLASS_MAP[castrumType];
                 if (Class) {
-                    (this.castrum as any)[castrumType].push(new Class(structure));
+                    (this.castrum as any)[castrumType].push(new Class(this, structure));
                 }
             }
         }
