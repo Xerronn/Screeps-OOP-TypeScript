@@ -23,3 +23,14 @@
 - power creeps
 - factory and commodities
 - full boosting support
+- creep to pick up remains of invaders from grave?
+- make statistics better. Add more, make sure they track everything
+- add more debug support for logging and such
+- add room visualizations both debug and not
+- add map visualizations
+- nuke protection
+- rampart all structures at rcl 8 maybe
+- more than one remote support(do math and maybe support all 8 surrounding rooms depending on distance)
+- use wrappers in wrappers more often instead of storing references to game objects store their wrappers
+- how to decom wrappers when there are a bunch of references to that object not just supervisor
+- fix miner links, they are not being built at all now lol
