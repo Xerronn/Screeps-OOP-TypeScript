@@ -14,7 +14,7 @@ export default class Scout extends Worker {
         
 
         if (this.memory.targetRooms === undefined) {
-            const exits = Game.map.describeExits(this.room);
+            const exits = Game.map.describeExits(this.spawnRoom);
             let options = exits ? Object.values(exits) : [];
             let currentRemotes = Chronicler.readRemotes(this.spawnRoom);
             let visited: string[];
