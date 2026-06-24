@@ -2,6 +2,8 @@ import Chronicler from 'controllers/Chronicler';
 import Castrum from './Castrum';
 import Road from './Road';
 import Container from './Container';
+import Rampart from './Rampart';
+
 import type Supervisor from 'administrators/Supervisor';
 
 export default class Bastion extends Castrum {
@@ -10,7 +12,7 @@ export default class Bastion extends Castrum {
     store: Store<RESOURCE_ENERGY, false>;
 
     attacking: boolean;
-    repairTarget?: Road | Container;
+    repairTarget?: Road | Container | Rampart;
 
     constructor(supervisor: Supervisor, bastion: StructureTower) {
         super(supervisor, bastion);
@@ -58,7 +60,12 @@ export default class Bastion extends Castrum {
 
     repair() {
         if (this.repairTarget) {
-            if (this.repairTarget.hits < this.repairTarget.hitsMax) {
+            if (this.repairTarget.structureType === STRUCTURE_RAMPART) {
+                if (this.repairTarget.hits < 1000) {
+                    this.liveObj.repair(this.repairTarget.liveObj);
+                    return;
+                }
+            } else if (this.repairTarget.hits < this.repairTarget.hitsMax) {
                 this.liveObj.repair(this.repairTarget.liveObj);
                 return;
             }

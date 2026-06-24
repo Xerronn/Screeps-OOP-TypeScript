@@ -35,6 +35,7 @@ import Market from 'castrum/Market';
 import Capacitor from 'castrum/Capacitor';
 import Road from 'castrum/Road';
 import Container from 'castrum/Container';
+import Rampart from 'castrum/Rampart';
 
 // Class registries for dynamic instantiation
 const CIVITAS_CLASS_MAP: { [key: string]: new (creep: Creep) => Civitas } = {
@@ -62,7 +63,8 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
     [CASTRUM_TYPES.NEXUS]: Nexus,
     [CASTRUM_TYPES.WORKSHOP]: Workshop,
     [CASTRUM_TYPES.ROAD]: Road,
-    [CASTRUM_TYPES.CONTAINER]: Container
+    [CASTRUM_TYPES.CONTAINER]: Container,
+    [CASTRUM_TYPES.RAMPART]: Rampart
 };
 
 const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
@@ -119,7 +121,8 @@ export default class Supervisor {
         [CASTRUM_TYPES.WORKSHOP]: Workshop[],
         [CASTRUM_TYPES.CAPACITOR]: Capacitor[],
         [CASTRUM_TYPES.ROAD]: Road[],
-        [CASTRUM_TYPES.CONTAINER]: Container[]
+        [CASTRUM_TYPES.CONTAINER]: Container[],
+        [CASTRUM_TYPES.RAMPART]: Rampart[]
     };
 
     nexusReservation: number;
@@ -398,7 +401,7 @@ export default class Supervisor {
         if (index >= 0) origArr.splice(index, 1);
     }
 
-    requestRepair(target: Road | Container): void {
+    requestRepair(target: Road | Container | Rampart): void {
         for (let bastion of this.castrum[CASTRUM_TYPES.BASTION]) {
             if (!bastion.repairTarget) {
                 bastion.repairTarget = target;
@@ -533,7 +536,8 @@ export default class Supervisor {
             [CASTRUM_TYPES.WORKSHOP]: [],
             [CASTRUM_TYPES.CAPACITOR]: [],
             [CASTRUM_TYPES.ROAD]: [],
-            [CASTRUM_TYPES.CONTAINER]: []
+            [CASTRUM_TYPES.CONTAINER]: [],
+            [CASTRUM_TYPES.RAMPART]: []
         }
     }
 

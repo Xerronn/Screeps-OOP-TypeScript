@@ -196,9 +196,11 @@ export default class Informant {
             case STRUCTURE_TERMINAL:
                 return CASTRUM_TYPES.MARKET;
             case STRUCTURE_CONTAINER:
-                return CASTRUM_TYPES.CONTAINER
+                return CASTRUM_TYPES.CONTAINER;
             case STRUCTURE_ROAD:
-                return CASTRUM_TYPES.ROAD
+                return CASTRUM_TYPES.ROAD;
+            case STRUCTURE_RAMPART:
+                return CASTRUM_TYPES.RAMPART;
 
             //things I don't care about
             default:
@@ -326,6 +328,7 @@ declare global {
         //primitives
         CONTAINER = 'container',
         ROAD = 'road',
+        RAMPART = 'rampart',
 
         //everything else
         UNDEFINED = 'undefined'

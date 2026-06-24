@@ -1,5 +1,5 @@
 import Chronicler from 'controllers/Chronicler';
-import Worker, {WorkerMemory} from './worker'
+import Worker, {WorkerMemory} from './Worker'
 
 interface CuratorMemory extends WorkerMemory {
     closestRoad: Id<StructureRoad>;
@@ -8,6 +8,9 @@ interface CuratorMemory extends WorkerMemory {
 
 export default class Curator extends Worker {
     memory: CuratorMemory;
+
+    targetWall: Id<StructureWall | StructureRampart>;
+    targetWallProgress: number;
     
     constructor(curator: Creep) {
         super(curator);
@@ -15,33 +18,73 @@ export default class Curator extends Worker {
 
     run() {
         //march to room and flee if enemies
-        if (this.fleeing === true) {
-            return this.march(this.spawnRoom, true);
-        }
-        
-        if (this.arrived === false) {
-            return this.march(this.assignedRoom);
+        if (this.remote) {
+            if (this.fleeing === true) {
+                return this.march(this.spawnRoom, true);
+            }
+            
+            if (this.arrived === false) {
+                return this.march(this.assignedRoom);
+            }
+
+            //steal from one of the two containers
+            if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
+                this.memory.task = "withdraw";
+                return this.withdrawContainer();
+            } else {
+                if (Game.rooms[this.assignedRoom].find(FIND_CONSTRUCTION_SITES).length > 0) {
+                    this.memory.task = "build";
+                    return this.build();
+                } else {
+                    this.memory.task = "repair"
+                    return this.repairRoads();
+                }   
+            }
         }
 
-        //steal from one of the two containers
-        if (this.store.getUsedCapacity(RESOURCE_ENERGY) == 0 || (this.memory.task == "withdraw" && this.store.getFreeCapacity(RESOURCE_ENERGY) > 0)) {
-            this.memory.task = "withdraw";
-            this.withdrawContainer();
-        } else {
-            if (Game.rooms[this.assignedRoom].find(FIND_CONSTRUCTION_SITES).length > 0) {
-                this.memory.task = "build";
-                this.build();
-            } else {
-                this.memory.task = "repair"
-                this.repairRoads();
-            }   
+        if (this.store.getUsedCapacity() > 0) {
+            return this.repairWalls();
         }
-        return;
+        return this.withdrawStorage();
+    }
+
+    repairWalls(): boolean {
+        let liveObj: StructureWall | StructureRampart | undefined;
+        if (this.targetWall !== undefined) {
+            let tmpObj = Game.getObjectById(this.targetWall) || undefined;
+            if (tmpObj !== undefined) liveObj = tmpObj;
+        }
+
+        if (liveObj === undefined || liveObj.hits === liveObj.hitsMax || this.targetWallProgress > 100) {
+            let repairableWalls = Game.rooms[this.room].find(
+                FIND_STRUCTURES, 
+                {
+                    filter: (struc) => (struc.structureType === STRUCTURE_WALL || 
+                        struc.structureType === STRUCTURE_RAMPART) && 
+                        struc.hits < struc.hitsMax
+                }
+            ) as Array<StructureRampart | StructureWall>;
+
+            liveObj = repairableWalls.sort((a, b) => (a.hits > b.hits) ? 1 : -1)[0];
+
+            if (liveObj === undefined) {
+                return false;
+            }
+            this.targetWallProgress = 0;
+            this.targetWall = liveObj.id;
+        }
+
+        if (this.pos.inRangeTo(liveObj, 2)) {
+            this.liveObj.repair(liveObj);
+            this.targetWallProgress += 1;
+        } else this.liveObj.travelTo(liveObj);
+
+        return true;
     }
 
 
     /**
-     * Function that repairs all structures in a room
+     * Function that repairs all roads in a room
      */
     repairRoads(): boolean {
         let liveObj: StructureRoad | undefined;

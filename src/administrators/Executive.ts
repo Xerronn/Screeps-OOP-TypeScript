@@ -38,7 +38,8 @@ export default class Executive {
 
         if (global.debug) {
             Architect.drawSchematic(this.room);
-            Architect.plan(this.room);
+            Architect.buildWalls(this.room);
+            
         }
         
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
@@ -223,6 +224,7 @@ export default class Executive {
                 //links are built
                 this.spawnArbiter();
                 Architect.buildWalls(this.room);
+                this.spawnCurator(this.room);
                 break;
             case 6:
                 //just turned rcl 6
