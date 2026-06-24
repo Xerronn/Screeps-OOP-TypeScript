@@ -9,11 +9,11 @@ export default class Executive {
     room: string;
 
     architect: Architect;
-    bug: number;
+    dangerLevel: number;
     
     constructor(room: string) {
         this.room = room;
-        this.bug = 0;
+        this.dangerLevel = 0;
         if (!Chronicler.readRoomRegistered(this.room)) {
             let schematic = Architect.plan(this.room);
             let resources = Informant.prospect(this.room);
@@ -41,6 +41,28 @@ export default class Executive {
             Architect.buildWalls(this.room);
             
         }
+        
+        //automatic safe mode activation
+        let hostileCreeps = Game.rooms[this.room].find(FIND_HOSTILE_CREEPS);
+        if (hostileCreeps.length > 0) {
+            let mainPos = Chronicler.readSchema(this.room).main.anchor;
+            let mainPosR = new RoomPosition(mainPos.x, mainPos.y, this.room);
+            let threatScore = 0;
+            for (let creep of hostileCreeps) {
+                let numAttack = creep.getActiveBodyparts(ATTACK) + creep.getActiveBodyparts(RANGED_ATTACK);
+                let closeness = mainPosR.getRangeTo(creep);
+                if (numAttack > 7 || closeness < 25) {
+                    threatScore += 1;
+                    if (closeness < 15) threatScore += 4;
+                }
+            }
+            this.dangerLevel += threatScore;
+
+            if (this.dangerLevel > 20) {
+                Game.rooms[this.room].controller?.activateSafeMode();
+                Game.notify(`Safe mode activated in room ${this.room}`)
+            }
+        } else this.dangerLevel = 0;
         
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
         let gameStage = Chronicler.readGameStage(this.room);

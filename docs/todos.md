@@ -34,3 +34,6 @@
 - use wrappers in wrappers more often instead of storing references to game objects store their wrappers
 - how to decom wrappers when there are a bunch of references to that object not just supervisor
 - fix miner links, they are not being built at all now lol
+- replace old logic related to roads and containers with new logic referencing wrappers. (curator)
+- replace every memory id we can with a wrapper attribute
+- improve wall building
