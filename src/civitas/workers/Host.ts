@@ -206,7 +206,7 @@ export default class Host extends Worker {
     returnToIdleSpot(): boolean {
         if (this.pos.x != this.idleSpot.x || this.pos.y != this.idleSpot.y) {
             let roomPosIdle = new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.room);
-            this.liveObj.travelTo(roomPosIdle, {'allowSwap': true});
+            this.liveObj.travelTo(roomPosIdle);
             return true;
         }
         return false;

@@ -67,7 +67,7 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
     [CASTRUM_TYPES.RAMPART]: Rampart
 };
 
-const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
+export const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
     // Tier 1 - Defense / Host
     [LEGION_TYPES.GARRISON]: 1,
     [CIVITAS_TYPES.HOST]: 1,

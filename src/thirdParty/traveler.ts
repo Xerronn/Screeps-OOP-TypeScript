@@ -2,6 +2,7 @@
  * To start using Traveler, require it in main.js:
  * Example: var Traveler = require('Traveler.js');
  */
+import {SPAWN_PRIORITY_MAP} from "../administrators/Supervisor";
 
  export default class Traveler {
 
@@ -19,15 +20,6 @@
      */
 
     public static travelTo(creep: Creep, destination: HasPos|RoomPosition, options: TravelToOptions = {}): number {
-
-        if (options.allowSwap === undefined) {
-            options.allowSwap = true;
-            if (['executioner'].includes(creep.memory.type)) {
-                options.allowSwap = false;
-            }
-        }
-        // uncomment if you would like to register hostile rooms entered
-        // this.updateRoomStatus(creep.room);
 
         if (!destination) {
             return ERR_INVALID_ARGS;
@@ -147,12 +139,16 @@
 
         //swap places with blocking creep
         let nextDirection: DirectionConstant = parseInt(travelData.path[0], 10) as DirectionConstant;
-        if (options.allowSwap && nextDirection && state.stuckCount > 0) {
+        if (nextDirection && state.stuckCount > 0) {
             let nextPos = Traveler.positionAtDirection(creep.pos, nextDirection);
             if (nextPos) {
                 let blockingCreeps = creep.room.lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
-                if (blockingCreeps.length > 0 && blockingCreeps[0].my && blockingCreeps[0].memory.type !== creep.memory.type) {
-                    blockingCreeps[0].move(this.reverseDirection(nextDirection));
+                if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
+                    let myPriority = SPAWN_PRIORITY_MAP[creep.memory.type];
+                    let theirPriority = SPAWN_PRIORITY_MAP[blockingCreeps[0].memory.type]
+                    if (myPriority <= theirPriority) {
+                        blockingCreeps[0].move(this.reverseDirection(nextDirection));
+                    }
                 }
             }
         }

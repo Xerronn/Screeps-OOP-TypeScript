@@ -16,7 +16,6 @@ interface TravelToReturnData {
 }
 
 interface TravelToOptions {
-    allowSwap?: boolean;
     ignoreRoads?: boolean;
     ignoreCreeps?: boolean;
     ignoreStructures?: boolean;
