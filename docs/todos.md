@@ -8,7 +8,6 @@
 - finish wall placement algorithm to shield structures too close to the walls and alternate wall/rampart. make curator spawn in and upgrade them all
 - store more of room planning in memory
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
-- automatic safe mode
 - improve room planning for more dense layouts and optimal extensions placement and rotation
 - more disaster recovery scenarios. What happens if a creep dies but extensions have been killed so it cannot be spawned at full energy but it is necessary? What happens if we lose RCL and things exist but not accessible
 - add more flags for gamestage and store them in memory instead of deriving everything from gamestage
@@ -37,3 +36,4 @@
 - replace old logic related to roads and containers with new logic referencing wrappers. (curator)
 - replace every memory id we can with a wrapper attribute
 - improve wall building
+- full rewrite of traveler to use wrappers as a base along with priority based creep swapping and impassible areas for certain creeps

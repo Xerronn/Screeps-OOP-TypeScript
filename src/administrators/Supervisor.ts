@@ -136,6 +136,9 @@ export default class Supervisor {
     extensionOrder: Id<StructureExtension | StructureSpawn>[];      //What order extensions should be drawn from for optimal filling.
     _extensionOrder: Array<StructureExtension | StructureSpawn>;
 
+    hostSpot: RoomPosition;
+    arbiterSpot: RoomPosition;
+
     lastdismissal: number;
 
     constructor(room: string) {
@@ -154,6 +157,9 @@ export default class Supervisor {
         this._extensionOrder = [];
 
         this.lastdismissal = 0;
+
+        this.hostSpot = this.getHostSpot();
+        this.arbiterSpot = this.getArbiterSpot();
     }
 
     /**
@@ -571,5 +577,28 @@ export default class Supervisor {
             this._extensionOrder = extensions;
         }
         return this._extensionOrder;
+    }
+
+    getArbiterSpot(): RoomPosition {
+        let schema = Chronicler.readSchema(this.room).main;
+
+        return new RoomPosition(
+            schema.anchor.x + 1,
+            schema.anchor.y + 1,
+            this.room
+        );
+    }
+
+    getHostSpot(): RoomPosition {
+        let schema = Chronicler.readSchema(this.room).main;
+        let rotations = schema.rotations;
+        let offsets = [[1, 0], [2, 1], [1, 2], [0, 1]];
+        let offset = offsets[rotations % 4];
+
+        return new RoomPosition(
+            schema.anchor.x + offset[0],
+            schema.anchor.y + offset[1],
+            this.room
+        );
     }
 }

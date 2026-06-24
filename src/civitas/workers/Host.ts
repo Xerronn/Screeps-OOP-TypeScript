@@ -13,7 +13,7 @@ export default class Host extends Worker {
     constructor(host: Creep) {
         super(host)
         this.evolved = 0;
-        this.idleSpot = this.getIdleSpot();
+        this.idleSpot = this.supervisor.hostSpot;
         this.capacitorPaths = {};
     }
     
@@ -206,22 +206,9 @@ export default class Host extends Worker {
     returnToIdleSpot(): boolean {
         if (this.pos.x != this.idleSpot.x || this.pos.y != this.idleSpot.y) {
             let roomPosIdle = new RoomPosition(this.idleSpot.x, this.idleSpot.y, this.room);
-            this.liveObj.travelTo(roomPosIdle);
+            this.liveObj.travelTo(roomPosIdle, {'allowSwap': true});
             return true;
         }
         return false;
-    }
-
-    getIdleSpot() {
-        let schema = Chronicler.readSchema(this.room).main;
-        let rotations = schema.rotations;
-        let offsets = [[1, 0], [2, 1], [1, 2], [0, 1]];
-        let offset = offsets[rotations % 4];
-
-        return new RoomPosition(
-            schema.anchor.x + offset[0],
-            schema.anchor.y + offset[1],
-            this.room
-        );
     }
 }

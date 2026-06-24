@@ -13,7 +13,6 @@ interface ArbiterMemory extends WorkerMemory {
 export default class Arbiter extends Host {
     memory: ArbiterMemory;
 
-    station: Position;
     storageConduit?: Conduit;
     controllerConduit?: Conduit;
     storage?: StructureStorage;
@@ -22,8 +21,7 @@ export default class Arbiter extends Host {
     constructor(arbiter: Creep) {
         super(arbiter);
 
-        let mainAnchor = Chronicler.readSchema(this.room).main.anchor;
-        this.station = {x: mainAnchor.x + 1, y: mainAnchor.y + 1};
+        this.idleSpot = this.supervisor.arbiterSpot;
         this.storageConduit = this.supervisor.storageLink;
         this.controllerConduit = this.supervisor.controllerLink;
         this.storage = Game.rooms[this.room].storage;
@@ -49,7 +47,7 @@ export default class Arbiter extends Host {
     run(): boolean {
         if (this.ticksToLive < 2) this.evolve();
 
-        if (!this.position()) return true;
+        if (!this.returnToIdleSpot()) return true;
         /**
          * Fill stores
          */
@@ -99,19 +97,6 @@ export default class Arbiter extends Host {
         }
         
         return false;
-    }
-
-    /**
-     * Move arbiter to its position in the main stamp
-     */
-    position(): boolean {
-        if (this.pos.x !== this.station.x || this.pos.y !== this.station.y) {
-            let position = new RoomPosition(this.station.x, this.station.y, this.room);
-            this.liveObj.travelTo(position);
-            return false
-        }
-
-        return true
     }
 
     /**
