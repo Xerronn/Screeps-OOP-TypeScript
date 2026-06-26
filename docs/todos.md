@@ -1,3 +1,4 @@
+- rework parent/child classes into object composition
 - fix remote bug where containers are not getting created
 - links not activating until global reset
 - energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)

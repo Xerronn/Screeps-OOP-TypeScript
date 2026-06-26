@@ -98,7 +98,7 @@ export default class Miner extends Worker {
                 } else Chronicler.writeIncrementStatistic(this.spawnRoom, 'energyMined', amount);
             }
         } else {
-            this.liveObj.travelTo(targetPos, {allowSwap: true});
+            this.liveObj.travelTo(targetPos);
         }
         return true;
     }

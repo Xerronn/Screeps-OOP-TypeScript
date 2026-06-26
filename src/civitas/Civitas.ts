@@ -6,6 +6,8 @@ import Informant from 'controllers/Informant';
 import Traveler from 'thirdParty/Traveler';
 import GameObj from '../GameObj';
 
+import {SPAWN_PRIORITY_MAP} from "../administrators/Supervisor";
+
 export default abstract class Civitas extends GameObj {
     //gameObj attributes
     id: Id<Creep>;
@@ -191,7 +193,11 @@ export default abstract class Civitas extends GameObj {
                 if (this.stuckTick > 0) {
                     let blockingCreeps = Game.rooms[this.room].lookForAt(LOOK_CREEPS, nextPos.x, nextPos.y);
                     if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
-                        blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
+                        let myPriority = SPAWN_PRIORITY_MAP[this.memory.type];
+                        let theirPriority = SPAWN_PRIORITY_MAP[blockingCreeps[0].memory.type]
+                        if (myPriority < theirPriority) {
+                            blockingCreeps[0].move(Traveler.reverseDirection(nextDirection));
+                        }
                     }
                 }
                 this.liveObj.move(nextDirection);

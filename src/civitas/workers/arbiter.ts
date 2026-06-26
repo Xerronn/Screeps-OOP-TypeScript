@@ -47,7 +47,7 @@ export default class Arbiter extends Host {
     run(): boolean {
         if (this.ticksToLive < 2) this.evolve();
 
-        if (!this.returnToIdleSpot()) return true;
+        if (this.returnToIdleSpot()) return true;
         /**
          * Fill stores
          */

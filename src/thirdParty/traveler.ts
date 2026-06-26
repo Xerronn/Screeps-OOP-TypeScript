@@ -146,7 +146,7 @@ import {SPAWN_PRIORITY_MAP} from "../administrators/Supervisor";
                 if (blockingCreeps.length > 0 && blockingCreeps[0].my) {
                     let myPriority = SPAWN_PRIORITY_MAP[creep.memory.type];
                     let theirPriority = SPAWN_PRIORITY_MAP[blockingCreeps[0].memory.type]
-                    if (myPriority <= theirPriority) {
+                    if (myPriority < theirPriority) {
                         blockingCreeps[0].move(this.reverseDirection(nextDirection));
                     }
                 }

@@ -71,10 +71,10 @@ export const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
     // Tier 1 - Defense / Host
     [LEGION_TYPES.GARRISON]: 1,
     [CIVITAS_TYPES.HOST]: 1,
-    // Tier 2 - Arbiter
+    // Tier 2 - Arbiter / Miners
     [CIVITAS_TYPES.ARBITER]: 2,
-    // Tier 3 - Miners / Haulers
-    [CIVITAS_TYPES.MINER]: 3,
+    [CIVITAS_TYPES.MINER]: 2,
+    // Tier 3 - Haulers
     [CIVITAS_TYPES.COURIER]: 3,
     // Tier 4 - Builders / Emissary / Curator
     [CIVITAS_TYPES.ENGINEER]: 4,
@@ -227,6 +227,11 @@ export default class Supervisor {
      * Function that runs all objects in the room
      */
     run() {
+        if (!this.hostSpot || !this.arbiterSpot) {
+            this.hostSpot = this.getHostSpot();
+            this.arbiterSpot = this.getArbiterSpot();
+        }
+
         this._extensionOrder = [];
         var errInfo = '';
         //first all creeps
