@@ -75,9 +75,9 @@ export default class Architect {
 
     /**
      * Function to build extensions based on the stamp locations
-     * @param room 
-     * @param buildRoads 
-     * @returns 
+     * @param room
+     * @param buildRoads
+     * @returns
      */
     static buildExtensions(room: string, buildRoads: boolean) {
         let schema = Chronicler.readSchema(room);
@@ -107,9 +107,9 @@ export default class Architect {
 
     /**
      * Method to build bastions based on the stamp locations
-     * @param room 
-     * @param buildRoads 
-     * @returns 
+     * @param room
+     * @param buildRoads
+     * @returns
      */
     static buildBastions(room: string, buildRoads: boolean) {
         let schema = Chronicler.readSchema(room);
@@ -139,8 +139,8 @@ export default class Architect {
 
     /**
      * Method to build and repair main stamp
-     * @param room 
-     * @param buildRoads 
+     * @param room
+     * @param buildRoads
      */
     static buildMain(room: string, buildRoads: boolean) {
         let schema = Chronicler.readSchema(room);
@@ -177,7 +177,7 @@ export default class Architect {
 
     /**
      * Method to build and repair workshops
-     * @param room 
+     * @param room
      */
     static buildWorkshops(room: string) {
         let schema = Chronicler.readSchema(room);
@@ -203,7 +203,7 @@ export default class Architect {
         }
         //sort by distance to chosenCorner
         positions = positions.sort((a,b) => a.getRangeTo(chosenCorner) - b.getRangeTo(chosenCorner));
-        
+
         for (let pos of positions) {
             let building = rotated[pos.x-stamp.anchor.x][pos.y-stamp.anchor.y];
             pos.createConstructionSite(building);
@@ -212,7 +212,7 @@ export default class Architect {
 
     /**
      * Method to build and repair workshops
-     * @param room 
+     * @param room
      */
      static buildNexus(room: string) {
         let schema = Chronicler.readSchema(room);
@@ -280,7 +280,7 @@ export default class Architect {
 
     /**
      * Method to build a link for sources
-     * @param room 
+     * @param room
      */
     static buildSourceLink(room: string) {
         //get anchor
@@ -322,7 +322,7 @@ export default class Architect {
     }
     /**
      * Method to build all walls and ramparts
-     * @param room 
+     * @param room
      */
     static buildWalls(room: string) {
         let schema = Chronicler.readSchema(room);
@@ -339,7 +339,7 @@ export default class Architect {
 
     /**
      * Method to build the extractor and path back to main
-     * @param room 
+     * @param room
      */
     static buildExtractor(room: string) {
         let schema = Chronicler.readSchema(room);
@@ -355,7 +355,7 @@ export default class Architect {
         }
         let mineralPos = liveRoom.find(FIND_MINERALS)[0].pos;
         liveRoom.createConstructionSite(mineralPos.x, mineralPos.y, STRUCTURE_EXTRACTOR);
-        
+
     }
 
     /**
@@ -427,7 +427,7 @@ export default class Architect {
             let lastStep = path[path.length - 1];
             schema.sources[source.id] = {
                 containerPos: {
-                    x: lastStep.x, 
+                    x: lastStep.x,
                     y: lastStep.y
                 }
             };
@@ -520,7 +520,7 @@ export default class Architect {
                     costMatrix.set(p.x, p.y, 50);
                     break;
                 }
-                
+
                 let towerStamp = Architect.placeTowers(center, costMatrix);
                 //add lab stamp onto cost matrix
                 for (let i = 0; i < 4; i++) {
@@ -797,7 +797,7 @@ export default class Architect {
         let visited = new Set<number>();
         for (let i = 0; i < selected.length; i++) {
             if (visited.has(i)) continue;
-            
+
             // choose rotation for the first stamp in each connected component
             // based on which corner of the stamp is closest to the main stamp center
             let dx = center.x - (selected[i].anchor.x + 1);
@@ -815,7 +815,7 @@ export default class Architect {
             let rot1Matches = 0;
             if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) rot1Matches++;
             selected[i].rotations = rot1Matches >= rot0Matches ? 1 : 0;
-            
+
             visited.add(i);
             let queue: number[] = [i];
             while (queue.length > 0) {
@@ -1008,7 +1008,7 @@ export default class Architect {
     for (let x = 0; x < 50; x++) {
         for (let y = 0; y < 50; y++) {
             if (x <= 1 || x >= 48 || y <= 1 || y >= 48) continue;
-            
+
             let cost = costMatrix.get(x, y);
             // Catch explicit blocking structures (200) and the core 11x11 layout anchor
             if (cost === 200 || (Math.abs(x - center.x) <= 5 && Math.abs(y - center.y) <= 5)) {
@@ -1029,7 +1029,7 @@ export default class Architect {
         for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
             if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
             if (costMatrix.get(nx, ny) === 255) continue; // Blocked by natural walls
-            
+
             let key = `${nx},${ny}`;
             if (fromBase.has(key)) continue;
             fromBase.add(key);
@@ -1057,7 +1057,7 @@ export default class Architect {
         for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
             if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
             if (costMatrix.get(nx, ny) === 255) continue;
-            
+
             let key = `${nx},${ny}`;
             if (toExit.has(key)) continue;
             toExit.add(key);
@@ -1098,13 +1098,34 @@ export default class Architect {
     }
 
     // Node splitting: Map internal tile entry capacities based on protection profile
+    // Structures (cost 200) and their 2-tile safety zone are uncuttable.
+    // A creep attacks 3 tiles away, so keeping walls 2+ tiles from structures
+    // ensures a friendly creep can always interpose between wall and structure.
     for (let i = 0; i < N; i++) {
         let [cx, cy] = relevantCells[i].split(',').map(Number);
         let cost = costMatrix.get(cx, cy);
-        
+
         let weight = 1; // Default plain/swamp tile weight
         if (cost === 200) {
-            weight = 1e9; // Make your core layout structures uncuttable
+            weight = 1e9; // Core layout structures are uncuttable
+        } else {
+            // Check if this cell is within 2 tiles of any structure
+            let nearStructure = false;
+            for (let dx = -2; dx <= 2; dx++) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    let nx = cx + dx, ny = cy + dy;
+                    if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50) {
+                        if (costMatrix.get(nx, ny) === 200) {
+                            nearStructure = true;
+                            break;
+                        }
+                    }
+                }
+                if (nearStructure) break;
+            }
+            if (nearStructure) {
+                weight = 1e9; // Protect the 2-tile safety zone around structures
+            }
         }
         addEdge(i, i + N, weight);
     }
@@ -1113,15 +1134,15 @@ export default class Architect {
     // UPDATED: Now checks all 8 directions to prevent diagonal sneaking!
     for (let i = 0; i < N; i++) {
         let [cx, cy] = relevantCells[i].split(',').map(Number);
-        
+
         // 8-directional neighbor scan
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 if (dx === 0 && dy === 0) continue; // Skip myself
-                
+
                 let nx = cx + dx, ny = cy + dy;
                 if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
-                
+
                 let nKey = `${nx},${ny}`;
                 if (cellToIndex.has(nKey)) {
                     let j = cellToIndex.get(nKey)!;
@@ -1216,55 +1237,18 @@ export default class Architect {
             rawWallPositions.push({x: cx, y: cy});
         }
     }
-    
+
     let walls: Array<Position> = [];
     let ramparts: Array<Position> = [];
 
-    const adjacentOffsets = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1],  [1, 0],  [1, 1]
-    ];
-
-    let consecutiveWalls = 0;
-
     for (let wallPos of rawWallPositions) {
         let cost = costMatrix.get(wallPos.x, wallPos.y);
-        
-        // Track infrastructure intersections (roads or non-blocking structural layouts)
-        if (cost > 0 && cost < 200) { 
+        if (cost === 50) {
+            // Road/path cell — rampart so creeps can still pass through
             ramparts.push(wallPos);
-            consecutiveWalls = 0; 
-            continue;
-        }
-
-        // Validate direct asset vulnerability profiles
-        let adjacentToBuilding = false;
-        for (let [dx, dy] of adjacentOffsets) {
-            let nx = wallPos.x + dx;
-            let ny = wallPos.y + dy;
-
-            if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50) {
-                if (costMatrix.get(nx, ny) === 200) {
-                    adjacentToBuilding = true;
-                    break;
-                }
-            }
-        }
-
-        if (adjacentToBuilding) {
-            ramparts.push(wallPos);
-            consecutiveWalls = 0;
-            continue;
-        }
-
-        // Allocate local tactical repair bunker segments safely spaced apart
-        if (consecutiveWalls >= 2) {
-            ramparts.push(wallPos);
-            consecutiveWalls = 0;
         } else {
+            // Clear terrain — solid wall
             walls.push(wallPos);
-            consecutiveWalls++;
         }
     }
 
@@ -1277,8 +1261,8 @@ export default class Architect {
      */
     static cleanup(roomObj: Room) {
         let enemyBuildings = roomObj.find(FIND_STRUCTURES, {
-            filter: (struc) => {return struc.structureType !== STRUCTURE_STORAGE && 
-                struc.structureType !== STRUCTURE_TERMINAL && 
+            filter: (struc) => {return struc.structureType !== STRUCTURE_STORAGE &&
+                struc.structureType !== STRUCTURE_TERMINAL &&
                 struc.structureType !== STRUCTURE_NUKER}
         }) as OwnedStructure[];
         for (let struct of enemyBuildings) {

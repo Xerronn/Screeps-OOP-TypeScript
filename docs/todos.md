@@ -33,3 +33,4 @@
 - replace old logic related to roads and containers with new logic referencing wrappers. (curator)
 - replace every memory id we can with a wrapper attribute
 - improve wall building
+- source paths should not path through another source
