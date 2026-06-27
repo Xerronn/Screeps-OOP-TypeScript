@@ -9,9 +9,9 @@ interface CuratorMemory extends WorkerMemory {
 export default class Curator extends Worker {
     memory: CuratorMemory;
 
-    targetWall: Id<StructureWall | StructureRampart>;
+    targetWall: Id<StructureWall | StructureRampart> | undefined;
     targetWallProgress: number;
-    
+
     constructor(curator: Creep) {
         super(curator);
     }
@@ -22,7 +22,7 @@ export default class Curator extends Worker {
             if (this.fleeing === true) {
                 return this.march(this.spawnRoom, true);
             }
-            
+
             if (this.arrived === false) {
                 return this.march(this.assignedRoom);
             }
@@ -38,12 +38,16 @@ export default class Curator extends Worker {
                 } else {
                     this.memory.task = "repair"
                     return this.repairRoads();
-                }   
+                }
             }
         }
 
         if (this.store.getUsedCapacity() > 0) {
             return this.repairWalls();
+        }
+        // only change targets when empty to avoid a short trip
+        if (this.targetWallProgress > 100) {
+            this.targetWall = undefined;
         }
         return this.withdrawStorage();
     }
@@ -55,12 +59,12 @@ export default class Curator extends Worker {
             if (tmpObj !== undefined) liveObj = tmpObj;
         }
 
-        if (liveObj === undefined || liveObj.hits === liveObj.hitsMax || this.targetWallProgress > 100) {
+        if (liveObj === undefined || liveObj.hits === liveObj.hitsMax) {
             let repairableWalls = Game.rooms[this.room].find(
-                FIND_STRUCTURES, 
+                FIND_STRUCTURES,
                 {
-                    filter: (struc) => (struc.structureType === STRUCTURE_WALL || 
-                        struc.structureType === STRUCTURE_RAMPART) && 
+                    filter: (struc) => (struc.structureType === STRUCTURE_WALL ||
+                        struc.structureType === STRUCTURE_RAMPART) &&
                         struc.hits < struc.hitsMax
                 }
             ) as Array<StructureRampart | StructureWall>;
@@ -95,7 +99,7 @@ export default class Curator extends Worker {
 
         if (liveObj === undefined || liveObj.hits === liveObj.hitsMax) {
             let repairableRoads = Game.rooms[this.room].find(
-                FIND_STRUCTURES, 
+                FIND_STRUCTURES,
                 {filter: (struc) => struc.structureType == STRUCTURE_ROAD && struc.hits < struc.hitsMax / (25/23)}
             ) as StructureRoad[];
 
@@ -145,7 +149,7 @@ export default class Curator extends Worker {
 
         if (liveObj === undefined || liveObj.hits === liveObj.hitsMax) {
             let containers = Game.rooms[this.room].find(
-                FIND_STRUCTURES, 
+                FIND_STRUCTURES,
                 {filter: {structureType: STRUCTURE_CONTAINER}}
             ) as StructureContainer[];
 
