@@ -516,7 +516,12 @@ export default class Architect {
                 resourcePlan.mineral.containerPos = containerPos;
 
                 //add paths to cost matrix
+                let viz = new RoomVisual(room);
+
                 for (let p of flatPaths) {
+                    console.log(`${p.x},${p.y}`)
+                    viz.circle(p.x, p.y, {'radius': 0.9, 'fill': 'purple'});
+
                     costMatrix.set(p.x, p.y, 50);
                     break;
                 }
@@ -549,7 +554,7 @@ export default class Architect {
 
                 let spawnPositions = Architect.placeSpawns(center, costMatrix);
 
-                let wallPositions = Architect.placeWalls(center, costMatrix);
+               let wallPositions = Architect.placeWalls(center, costMatrix, room);
 
                 let schematic: RoomSchematic = {
                     'main': mainStamp,
@@ -650,15 +655,64 @@ export default class Architect {
         let schema = Chronicler.readSchema(room);
         let viz = new RoomVisual(room);
 
+        // Stamps
         viz.rect(schema.towers.anchor.x - 0.5, schema.towers.anchor.y - 0.5, 3, 3, {'fill':'red'});
         viz.rect(schema.labs.anchor.x - 0.5, schema.labs.anchor.y - 0.5, 4, 4, {'fill':'green'});
         viz.rect(schema.main.anchor.x - 0.5, schema.main.anchor.y - 0.5, 3, 3, {'fill':'blue'});
 
+        // Spawns
         for (let p of schema.spawns) {
             viz.circle(p.x, p.y, {'radius': 0.9, 'fill': 'purple'});
         }
+
+        // Extension stamps
         for (let pos of schema.extensions) {
-            viz.rect(pos.anchor.x-0.4, pos.anchor.y-0.4, 2.9, 2.9, {'fill':'yellow'})
+            viz.rect(pos.anchor.x-0.4, pos.anchor.y-0.4, 2.9, 2.9, {'fill':'yellow'});
+        }
+
+        // Walls and ramparts
+        for (let pos of schema.walls) {
+            viz.rect(pos.x - 0.5, pos.y - 0.5, 1, 1, {'fill':'white', 'stroke':'orange'});
+        }
+        for (let pos of schema.ramparts) {
+            viz.rect(pos.x - 0.5, pos.y - 0.5, 1, 1, {'fill':'white', 'stroke':'cyan'});
+        }
+
+        // Source containers and links
+        for (let sourceId in schema.resources.sources) {
+            let src = schema.resources.sources[sourceId as Id<Source>];
+            viz.circle(src.containerPos.x, src.containerPos.y, {'radius': 0.4, 'fill': 'orange'});
+            viz.circle(src.linkPos.x, src.linkPos.y, {'radius': 0.3, 'fill': 'magenta'});
+        }
+
+        // Mineral container
+        if (schema.resources.mineral.containerPos) {
+            viz.circle(schema.resources.mineral.containerPos.x, schema.resources.mineral.containerPos.y, {'radius': 0.4, 'fill': 'lime'});
+        }
+
+        // Controller link
+        if (schema.controllerLink) {
+            viz.circle(schema.controllerLink.x, schema.controllerLink.y, {'radius': 0.3, 'fill': 'gold'});
+        }
+
+        // Paths (sources, controller, exits, mineral)
+        // Draw each path as a series of line segments between consecutive points
+        let drawPath = (positions: Position[], color: string) => {
+            let rps = positions.map(p => new RoomPosition(p.x, p.y, room));
+            for (let i = 0; i < rps.length - 1; i++) {
+                viz.line(rps[i], rps[i + 1], {'color': color});
+            }
+        };
+
+        drawPath(schema.paths.controller, 'white');
+        for (let sourceId in schema.paths.sources) {
+            drawPath(schema.paths.sources[sourceId as Id<Source>], 'orange');
+        }
+        for (let exitKey in schema.paths.exits) {
+            drawPath(schema.paths.exits[exitKey as unknown as ExitConstant], 'cyan');
+        }
+        if (schema.paths.mineral.length > 0) {
+            drawPath(schema.paths.mineral, 'lime');
         }
     }
 
@@ -677,21 +731,28 @@ export default class Architect {
         let mainRP = new RoomPosition(mainStampLocation.x, mainStampLocation.y, roomObj.name);
 
         let sources = roomObj.find(FIND_SOURCES);
+        let avoidPos: RoomPosition[] = [];
         for (let s of sources) {
-            let sPath = roomObj.findPath(mainRP, s.pos, {'range': 1});
+            let sPath = roomObj.findPath(mainRP, s.pos, {'range': 1, 'avoid': avoidPos});
             let sArray = [];
             for (let p of sPath) {
                 sArray.push({'x': p.x, 'y': p.y});
             }
+            let lastStep = sPath[sPath.length - 1]
+            let lastPos = new RoomPosition(lastStep.x, lastStep.y, roomObj.name);
+            avoidPos.push(lastPos);
             flatPaths.push(...sArray);
             pathPositions['sources'][s.id] = sArray;
         }
 
-        let cPath = roomObj.findPath(mainRP, controller.pos, {'range': 1});
+        let cPath = roomObj.findPath(mainRP, controller.pos, {'range': 1, 'avoid': avoidPos});
         let cArray = [];
         for (let p of cPath) {
             cArray.push({'x': p.x, 'y': p.y});
         }
+        let lastStep = cPath[cPath.length - 1]
+        let lastPos = new RoomPosition(lastStep.x, lastStep.y, roomObj.name);
+        avoidPos.push(lastPos);
         flatPaths.push(...cArray);
         pathPositions['controller'] = cArray;
 
@@ -701,7 +762,7 @@ export default class Architect {
             let exitPos = roomObj.find(exit);
             if (exitPos.length == 0) continue;
             let middle = exitPos[Math.floor((exitPos.length - 1) / 2)];
-            let ePath = roomObj.findPath(mainRP, middle, {'range': 1});
+            let ePath = roomObj.findPath(mainRP, middle, {'range': 1, 'avoid': avoidPos});
             let eArray = [];
             for (let p of ePath) {
                 eArray.push({'x': p.x, 'y': p.y});
@@ -712,7 +773,7 @@ export default class Architect {
         }
 
         let mineralPos = roomObj.find(FIND_MINERALS);
-        let mPath = roomObj.findPath(mainRP, mineralPos[0].pos, {'range': 1});
+        let mPath = roomObj.findPath(mainRP, mineralPos[0].pos, {'range': 1, 'avoid': avoidPos});
         let mArray = [];
         for (let p of mPath) {
             mArray.push({'x': p.x, 'y': p.y});
@@ -1002,253 +1063,201 @@ export default class Architect {
       * Finds the minimum set of cells to block that disconnect all exits from the base area.
       * @param room
       */
-    static placeWalls(center: RoomPosition, costMatrix: CostMatrix): {walls: Array<Position>, ramparts: Array<Position>} {
-    // Collect base seeds strictly away from the 2-tile exit rule zone
-    let baseCells = new Set<string>();
-    for (let x = 0; x < 50; x++) {
-        for (let y = 0; y < 50; y++) {
-            if (x <= 1 || x >= 48 || y <= 1 || y >= 48) continue;
+    static placeWalls(center: RoomPosition, costMatrix: CostMatrix, roomName: string): {walls: Array<Position>, ramparts: Array<Position>} {
+    // ── Step 1: Define source (core layout) and sink (real exits) ──
 
-            let cost = costMatrix.get(x, y);
-            // Catch explicit blocking structures (200) and the core 11x11 layout anchor
-            if (cost === 200 || (Math.abs(x - center.x) <= 5 && Math.abs(y - center.y) <= 5)) {
-                if (cost !== 255) {
-                    baseCells.add(`${x},${y}`);
+    // Base cells: the 11x11 core area around center + structure tiles (cost 200)
+    let baseCells: string[] = [];
+    for (let x = Math.max(2, center.x - 5); x <= Math.min(47, center.x + 5); x++) {
+        for (let y = Math.max(2, center.y - 5); y <= Math.min(47, center.y + 5); y++) {
+            if (costMatrix.get(x, y) !== 255) {
+                baseCells.push(`${x},${y}`);
+            }
+        }
+    }
+    // Also include structure tiles (cost 200) as base seeds
+    for (let x = 2; x < 48; x++) {
+        for (let y = 2; y < 48; y++) {
+            if (costMatrix.get(x, y) === 200) {
+                baseCells.push(`${x},${y}`);
+            }
+        }
+    }
+
+    // Exit zone: cells within 1 tile of any actual exit tile
+    let exitZone = new Set<string>();
+    let roomObj = Game.rooms[roomName];
+    if (roomObj) {
+        const exits = [FIND_EXIT_TOP, FIND_EXIT_RIGHT, FIND_EXIT_BOTTOM, FIND_EXIT_LEFT] as const;
+        for (const exitType of exits) {
+            for (const tile of roomObj.find(exitType)) {
+                const tx = (tile as RoomPosition).x;
+                const ty = (tile as RoomPosition).y;
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const nx = tx + dx, ny = ty + dy;
+                        if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50) {
+                            exitZone.add(`${nx},${ny}`);
+                        }
+                    }
                 }
             }
         }
     }
 
-    // BFS from base outward across the entire playable room map
-    let fromBase = new Set<string>();
-    let qB: string[] = [];
-    for (let bc of baseCells) { fromBase.add(bc); qB.push(bc); }
-    while (qB.length > 0) {
-        let cur = qB.shift()!;
-        let [cx, cy] = cur.split(',').map(Number);
-        for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
-            if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
-            if (costMatrix.get(nx, ny) === 255) continue; // Blocked by natural walls
-
-            let key = `${nx},${ny}`;
-            if (fromBase.has(key)) continue;
-            fromBase.add(key);
-            qB.push(key);
-        }
-    }
-
-    // BFS from the 2-tile exit outer perimeter inward across the room
-    let toExit = new Set<string>();
-    let qE: string[] = [];
-    for (let x = 0; x < 50; x++) {
-        for (let y = 0; y < 50; y++) {
-            if (x <= 1 || x >= 48 || y <= 1 || y >= 48) {
-                if (costMatrix.get(x, y) !== 255) {
-                    let key = `${x},${y}`;
-                    toExit.add(key);
-                    qE.push(key);
+    // ── Step 2: BFS from base (8-dir) and from exits (8-dir) ──
+    function bfs8(seeds: string[]): Set<string> {
+        let visited = new Set<string>();
+        let q: string[] = [];
+        for (const s of seeds) { visited.add(s); q.push(s); }
+        while (q.length > 0) {
+            const [cx, cy] = q.shift()!.split(',').map(Number);
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (!dx && !dy) continue;
+                    const nx = cx + dx, ny = cy + dy;
+                    if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
+                    if (costMatrix.get(nx, ny) === 255) continue;
+                    const key = `${nx},${ny}`;
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    q.push(key);
                 }
             }
         }
-    }
-    while (qE.length > 0) {
-        let cur = qE.shift()!;
-        let [cx, cy] = cur.split(',').map(Number);
-        for (let [nx, ny] of [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]]) {
-            if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
-            if (costMatrix.get(nx, ny) === 255) continue;
-
-            let key = `${nx},${ny}`;
-            if (toExit.has(key)) continue;
-            toExit.add(key);
-            qE.push(key);
-        }
+        return visited;
     }
 
-    // Relevant cells: Find the intersection where paths collide outside natural walls
+    let fromBase = bfs8(baseCells);
+    let fromExit = bfs8(Array.from(exitZone));
+
+    // ── Step 3: Relevant cells = intersection, excluding border ──
     let relevantCells: string[] = [];
     let cellToIndex = new Map<string, number>();
-    for (let cell of fromBase) {
-        if (toExit.has(cell)) {
-            // CRITICAL PROTECTION: A tile within the 2-tile boundary CANNOT be cut or used as a node.
-            let [cx, cy] = cell.split(',').map(Number);
+    for (const cell of fromBase) {
+        if (fromExit.has(cell)) {
+            const [cx, cy] = cell.split(',').map(Number);
             if (cx <= 1 || cx >= 48 || cy <= 1 || cy >= 48) continue;
-
             cellToIndex.set(cell, relevantCells.length);
             relevantCells.push(cell);
         }
     }
-
-    if (relevantCells.length === 0) {
-        console.log(`[Min-Cut Error] No intersection cells found between base and exits!`);
-        return {walls: [], ramparts: []};
-    }
+    if (relevantCells.length === 0) return { walls: [], ramparts: [] };
 
     let N = relevantCells.length;
+    let SRC = 2 * N, SNK = 2 * N + 1;
     let NUM_NODES = 2 * N + 2;
-    let SUPER_SOURCE = 2 * N;
-    let SUPER_SINK = 2 * N + 1;
-
-    // Direct interface map to locate residual tracking details securely
     let adj: {v: number; cap: number; rev: number}[][] = Array.from({length: NUM_NODES}, () => []);
-
     function addEdge(u: number, v: number, cap: number) {
         adj[u].push({v, cap, rev: adj[v].length});
         adj[v].push({v: u, cap: 0, rev: adj[u].length - 1});
     }
 
-    // Node splitting: Map internal tile entry capacities based on protection profile
-    // Structures (cost 200) and their 2-tile safety zone are uncuttable.
-    // A creep attacks 3 tiles away, so keeping walls 2+ tiles from structures
-    // ensures a friendly creep can always interpose between wall and structure.
+    // ── Step 4: Node splitting (entry capacity) ──
     for (let i = 0; i < N; i++) {
-        let [cx, cy] = relevantCells[i].split(',').map(Number);
-        let cost = costMatrix.get(cx, cy);
-
-        let weight = 1; // Default plain/swamp tile weight
-        if (cost === 200) {
-            weight = 1e9; // Core layout structures are uncuttable
-        } else {
-            // Check if this cell is within 2 tiles of any structure
-            let nearStructure = false;
-            for (let dx = -2; dx <= 2; dx++) {
+        const [cx, cy] = relevantCells[i].split(',').map(Number);
+        // Weight 1e9 for structure tiles or cells near structures (2-tile safety zone)
+        let nearStructure = costMatrix.get(cx, cy) === 200;
+        if (!nearStructure) {
+            for (let dx = -2; dx <= 2 && !nearStructure; dx++) {
                 for (let dy = -2; dy <= 2; dy++) {
-                    let nx = cx + dx, ny = cy + dy;
-                    if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50) {
-                        if (costMatrix.get(nx, ny) === 200) {
-                            nearStructure = true;
-                            break;
-                        }
+                    const nx = cx + dx, ny = cy + dy;
+                    if (nx >= 0 && nx < 50 && ny >= 0 && ny < 50 && costMatrix.get(nx, ny) === 200) {
+                        nearStructure = true;
                     }
                 }
-                if (nearStructure) break;
-            }
-            if (nearStructure) {
-                weight = 1e9; // Protect the 2-tile safety zone around structures
             }
         }
-        addEdge(i, i + N, weight);
+        addEdge(i, i + N, nearStructure ? 1e9 : 1);
     }
 
-    // Adjacency edges: u_out -> v_in with infinite capacity
-    // UPDATED: Now checks all 8 directions to prevent diagonal sneaking!
+    // ── Step 5: Adjacency edges (8-dir, infinite capacity) + sink connections ──
     for (let i = 0; i < N; i++) {
-        let [cx, cy] = relevantCells[i].split(',').map(Number);
-
-        // 8-directional neighbor scan
+        const [cx, cy] = relevantCells[i].split(',').map(Number);
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
-                if (dx === 0 && dy === 0) continue; // Skip myself
-
-                let nx = cx + dx, ny = cy + dy;
+                if (!dx && !dy) continue;
+                const nx = cx + dx, ny = cy + dy;
                 if (nx < 0 || nx >= 50 || ny < 0 || ny >= 50) continue;
-
-                let nKey = `${nx},${ny}`;
+                const nKey = `${nx},${ny}`;
                 if (cellToIndex.has(nKey)) {
-                    let j = cellToIndex.get(nKey)!;
-                    addEdge(i + N, j, 1e9);
-                } else if (nx <= 1 || nx >= 48 || ny <= 1 || ny >= 48) {
-                    // If the neighbor hits the 2-tile exit zone, lock it to the Sink
-                    if (costMatrix.get(nx, ny) !== 255) {
-                        addEdge(i + N, SUPER_SINK, 1e9);
-                    }
+                    addEdge(i + N, cellToIndex.get(nKey)!, 1e9);
+                } else if (exitZone.has(nKey)) {
+                    addEdge(i + N, SNK, 1e9);
                 }
             }
         }
     }
 
-    // Seed the Super Source exclusively using isolated core boundary cells
-    for (let bc of baseCells) {
+    // ── Step 6: Super-source edges ──
+    for (const bc of baseCells) {
         if (cellToIndex.has(bc)) {
-            let idx = cellToIndex.get(bc)!;
-            addEdge(SUPER_SOURCE, idx, 1e9);
+            addEdge(SRC, cellToIndex.get(bc)!, 1e9);
         }
     }
 
-    // Edmonds-Karp Max-Flow Execution
-    function bfsFlow(): { parent: number[], edgeIdx: number[] } {
-        let parent = new Array(NUM_NODES).fill(-1);
-        let edgeIdx = new Array(NUM_NODES).fill(-1);
-        let visited = new Uint8Array(NUM_NODES);
-        let queue: number[] = [SUPER_SOURCE];
-        visited[SUPER_SOURCE] = 1;
-
-        while (queue.length > 0) {
-            let u = queue.shift()!;
+    // ── Step 7: Edmonds-Karp max-flow ──
+    let maxFlow = 0;
+    while (true) {
+        const parent = new Array(NUM_NODES).fill(-1);
+        const edgeIdx = new Array(NUM_NODES).fill(-1);
+        const visited = new Uint8Array(NUM_NODES);
+        const q = [SRC];
+        visited[SRC] = 1;
+        let found = false;
+        while (q.length > 0) {
+            const u = q.shift()!;
             for (let e = 0; e < adj[u].length; e++) {
-                let edge = adj[u][e];
+                const edge = adj[u][e];
                 if (!visited[edge.v] && edge.cap > 0) {
                     visited[edge.v] = 1;
                     parent[edge.v] = u;
                     edgeIdx[edge.v] = e;
-                    if (edge.v === SUPER_SINK) return { parent, edgeIdx };
-                    queue.push(edge.v);
+                    if (edge.v === SNK) { found = true; break; }
+                    q.push(edge.v);
                 }
             }
+            if (found) break;
         }
-        return { parent, edgeIdx };
-    }
-
-    let maxFlow = 0;
-    while (true) {
-        let { parent, edgeIdx } = bfsFlow();
-        if (parent[SUPER_SINK] === -1) break;
+        if (parent[SNK] === -1) break;
 
         let bottleneck = 1e9;
-        let v = SUPER_SINK;
-        while (v !== SUPER_SOURCE) {
-            let u = parent[v];
-            let e = edgeIdx[v];
-            bottleneck = Math.min(bottleneck, adj[u][e].cap);
-            v = u;
+        for (let v = SNK; v !== SRC; v = parent[v]!) {
+            bottleneck = Math.min(bottleneck, adj[parent[v]]![edgeIdx[v]]!.cap);
         }
-
-        v = SUPER_SINK;
-        while (v !== SUPER_SOURCE) {
-            let u = parent[v];
-            let e = edgeIdx[v];
-            let revIdx = adj[u][e].rev;
+        for (let v = SNK; v !== SRC; v = parent[v]!) {
+            const u = parent[v]!, e = edgeIdx[v]!;
             adj[u][e].cap -= bottleneck;
-            adj[v][revIdx].cap += bottleneck;
-            v = u;
+            adj[v][adj[u][e].rev].cap += bottleneck;
         }
         maxFlow += bottleneck;
     }
 
-    // Track residual paths from source to identify cut partitions
-    let reachable = new Uint8Array(NUM_NODES);
-    let queue: number[] = [SUPER_SOURCE];
-    reachable[SUPER_SOURCE] = 1;
-    while (queue.length > 0) {
-        let u = queue.shift()!;
-        for (let edge of adj[u]) {
+    // ── Step 8: Min-cut = reachable nodes in residual graph ──
+    const reachable = new Uint8Array(NUM_NODES);
+    const q = [SRC];
+    reachable[SRC] = 1;
+    while (q.length > 0) {
+        const u = q.shift()!;
+        for (const edge of adj[u]) {
             if (!reachable[edge.v] && edge.cap > 0) {
                 reachable[edge.v] = 1;
-                queue.push(edge.v);
+                q.push(edge.v);
             }
         }
     }
 
-    // Process nodes broken along flow boundary cuts
-    let rawWallPositions: Array<Position> = [];
+    let walls: Position[] = [];
+    let ramparts: Position[] = [];
     for (let i = 0; i < N; i++) {
         if (reachable[i] && !reachable[i + N]) {
-            let [cx, cy] = relevantCells[i].split(',').map(Number);
-            rawWallPositions.push({x: cx, y: cy});
-        }
-    }
-
-    let walls: Array<Position> = [];
-    let ramparts: Array<Position> = [];
-
-    for (let wallPos of rawWallPositions) {
-        let cost = costMatrix.get(wallPos.x, wallPos.y);
-        if (cost === 50) {
-            // Road/path cell — rampart so creeps can still pass through
-            ramparts.push(wallPos);
-        } else {
-            // Clear terrain — solid wall
-            walls.push(wallPos);
+            const [cx, cy] = relevantCells[i].split(',').map(Number);
+            // Road/path cells (cost 50) become ramparts; everything else becomes walls
+            if (costMatrix.get(cx, cy) === 50) {
+                ramparts.push({x: cx, y: cy});
+            } else {
+                walls.push({x: cx, y: cy});
+            }
         }
     }
 
