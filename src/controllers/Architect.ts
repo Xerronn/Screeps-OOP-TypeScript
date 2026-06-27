@@ -457,11 +457,6 @@ export default class Architect {
             let mainStamp = Architect.placeMain(centroid, distanceMatrix);
             let center = new RoomPosition(mainStamp.anchor.x + 1, mainStamp.anchor.y + 1, room);
             try {
-                let bothPaths = Architect.path(roomObj, controller, mainStamp.anchor);
-                let paths = bothPaths[0];
-                let flatPaths = bothPaths[1];
-                let sources = roomObj.find(FIND_SOURCES);
-                let resourcePlan: ResourcePlan = {sources:{}, mineral: {containerPos: {x:0,y:0}}};
                 // Create a cost matrix to hold the locations of things we don't want to build over
                 let costMatrix = new PathFinder.CostMatrix();
                 for (let x = 0; x < 50; x++) {
@@ -474,6 +469,11 @@ export default class Architect {
                     }
                 }
 
+                let bothPaths = Architect.path(roomObj, controller, mainStamp.anchor, costMatrix);
+                let paths = bothPaths[0];
+                let flatPaths = bothPaths[1];
+                let resourcePlan: ResourcePlan = {sources:{}, mineral: {containerPos: {x:0,y:0}}};
+
                 //add main stamp onto cost matrix
                 for (let i = -1; i < 4; i++) {
                     for (let j = -1; j < 4; j++) {
@@ -485,7 +485,8 @@ export default class Architect {
                 let clPath = paths.controller;
                 let clPos = clPath[clPath.length - 1];
 
-                //add source links and container
+                //add source link
+                let sources = roomObj.find(FIND_SOURCES);
                 for (let s of sources) {
                     let sPath = paths.sources[s.id]
                     let containerPos = sPath[sPath.length - 1];
@@ -493,7 +494,7 @@ export default class Architect {
                     let linkPos: Position | undefined;
                     for (let i = -1; i < 2; i++) {
                         for (let j = -1; j < 2; j++) {
-                            if (costMatrix.get(containerPos.x + i, containerPos.x + j) < 50) {
+                            if (costMatrix.get(containerPos.x + i, containerPos.y + j) < 50) {
                                 linkPos = {x: containerPos.x + i, y: containerPos.y + j};
                             }
                         }
@@ -510,20 +511,9 @@ export default class Architect {
                     }
                 }
 
-                //set mineral containerpos
-                let mPath = paths.mineral;
-                let containerPos = mPath[mPath.length - 1];
-                resourcePlan.mineral.containerPos = containerPos;
-
                 //add paths to cost matrix
-                let viz = new RoomVisual(room);
-
                 for (let p of flatPaths) {
-                    console.log(`${p.x},${p.y}`)
-                    viz.circle(p.x, p.y, {'radius': 0.9, 'fill': 'purple'});
-
                     costMatrix.set(p.x, p.y, 50);
-                    break;
                 }
 
                 let towerStamp = Architect.placeTowers(center, costMatrix);
@@ -720,69 +710,67 @@ export default class Architect {
      * Function to path to important positions in the room to ensure that no key element is blocked off
      * @param mainStampLocation
      */
-    static path(roomObj: Room, controller: StructureController, mainStampLocation: Position): [RoomPaths, Position[]] {
+    static path(roomObj: Room, controller: StructureController, mainStampLocation: Position, costMatrix: CostMatrix): [RoomPaths, Position[]] {
         let pathPositions: RoomPaths = {
             'sources': {},
             'controller': [],
             'exits': {},
             'mineral': []
         }
-        let flatPaths = []
+        let flatPaths: Position[] = []
         let mainRP = new RoomPosition(mainStampLocation.x, mainStampLocation.y, roomObj.name);
 
+        // Incrementally mark path endpoints (container positions) as 50 on the shared costMatrix
+        // so subsequent paths avoid them while remaining buildable for links
         let sources = roomObj.find(FIND_SOURCES);
-        let avoidPos: RoomPosition[] = [];
         for (let s of sources) {
-            let sPath = roomObj.findPath(mainRP, s.pos, {'range': 1, 'avoid': avoidPos});
-            let sArray = [];
+            let sPath = roomObj.findPath(mainRP, s.pos, {'range': 1, costCallback: () => costMatrix});
+            let sArray: Position[] = [];
             for (let p of sPath) {
-                sArray.push({'x': p.x, 'y': p.y});
+                sArray.push({x: p.x, y: p.y});
             }
-            let lastStep = sPath[sPath.length - 1]
-            let lastPos = new RoomPosition(lastStep.x, lastStep.y, roomObj.name);
-            avoidPos.push(lastPos);
+            let lastStep = sPath[sPath.length - 1];
+            costMatrix.set(lastStep.x, lastStep.y, 50);
             flatPaths.push(...sArray);
             pathPositions['sources'][s.id] = sArray;
         }
 
-        let cPath = roomObj.findPath(mainRP, controller.pos, {'range': 1, 'avoid': avoidPos});
-        let cArray = [];
+        let cPath = roomObj.findPath(mainRP, controller.pos, {'range': 1, costCallback: () => costMatrix});
+        let cArray: Position[] = [];
         for (let p of cPath) {
-            cArray.push({'x': p.x, 'y': p.y});
+            cArray.push({x: p.x, y: p.y});
         }
-        let lastStep = cPath[cPath.length - 1]
-        let lastPos = new RoomPosition(lastStep.x, lastStep.y, roomObj.name);
-        avoidPos.push(lastPos);
+        let lastStep = cPath[cPath.length - 1];
+        costMatrix.set(lastStep.x, lastStep.y, 50);
         flatPaths.push(...cArray);
         pathPositions['controller'] = cArray;
 
-        let exits = [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP]
-
+        let exits = [FIND_EXIT_BOTTOM, FIND_EXIT_LEFT, FIND_EXIT_RIGHT, FIND_EXIT_TOP];
         for (let exit of exits) {
             let exitPos = roomObj.find(exit);
             if (exitPos.length == 0) continue;
             let middle = exitPos[Math.floor((exitPos.length - 1) / 2)];
-            let ePath = roomObj.findPath(mainRP, middle, {'range': 1, 'avoid': avoidPos});
-            let eArray = [];
+            let ePath = roomObj.findPath(mainRP, middle, {'range': 1, costCallback: () => costMatrix});
+            let eArray: Position[] = [];
             for (let p of ePath) {
-                eArray.push({'x': p.x, 'y': p.y});
+                eArray.push({x: p.x, y: p.y});
             }
             pathPositions['exits'][exit] = eArray;
             flatPaths.push(...eArray);
-
         }
 
         let mineralPos = roomObj.find(FIND_MINERALS);
-        let mPath = roomObj.findPath(mainRP, mineralPos[0].pos, {'range': 1, 'avoid': avoidPos});
-        let mArray = [];
+        let mPath = roomObj.findPath(mainRP, mineralPos[0].pos, {'range': 1, costCallback: () => costMatrix});
+        let mArray: Position[] = [];
         for (let p of mPath) {
-            mArray.push({'x': p.x, 'y': p.y});
+            mArray.push({x: p.x, y: p.y});
         }
+        let mLastStep = mPath[mPath.length - 1];
+        costMatrix.set(mLastStep.x, mLastStep.y, 50);
         pathPositions['mineral'] = mArray;
         flatPaths.push(...mArray);
 
         return [pathPositions, flatPaths];
-
     }
 
     /**
@@ -1253,7 +1241,7 @@ export default class Architect {
         if (reachable[i] && !reachable[i + N]) {
             const [cx, cy] = relevantCells[i].split(',').map(Number);
             // Road/path cells (cost 50) become ramparts; everything else becomes walls
-            if (costMatrix.get(cx, cy) === 50) {
+            if (costMatrix.get(cx, cy) >= 50) {
                 ramparts.push({x: cx, y: cy});
             } else {
                 walls.push({x: cx, y: cy});

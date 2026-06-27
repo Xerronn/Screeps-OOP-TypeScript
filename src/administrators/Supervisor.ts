@@ -107,7 +107,7 @@ export default class Supervisor {
         [CIVITAS_TYPES.MINER]: Miner[],
         [CIVITAS_TYPES.SCHOLAR]: Scholar[],
         [CIVITAS_TYPES.SCOUT]: Scout[],
-        
+
         [LEGION_TYPES.EXECUTIONER]: Executioner[],
         [LEGION_TYPES.GARRISON]: Garrison[],
         [LEGION_TYPES.JESTER]: Jester[]
@@ -157,9 +157,6 @@ export default class Supervisor {
         this._extensionOrder = [];
 
         this.lastdismissal = 0;
-
-        this.hostSpot = this.getHostSpot();
-        this.arbiterSpot = this.getArbiterSpot();
     }
 
     /**
@@ -227,7 +224,7 @@ export default class Supervisor {
      * Function that runs all objects in the room
      */
     run() {
-        if (!this.hostSpot || !this.arbiterSpot) {
+        if (this.hostSpot === undefined || this.arbiterSpot === undefined) {
             this.hostSpot = this.getHostSpot();
             this.arbiterSpot = this.getArbiterSpot();
         }
@@ -299,8 +296,8 @@ export default class Supervisor {
                     //structure has died, lets replace it.
                     //if we need to destroy a structure call decomission first then delete it
                     Game.rooms[this.room].createConstructionSite(
-                        struc.pos.x, 
-                        struc.pos.y, 
+                        struc.pos.x,
+                        struc.pos.y,
                         struc.structureType
                     );
                 }
@@ -535,7 +532,7 @@ export default class Supervisor {
             [LEGION_TYPES.EXECUTIONER]: [],
             [LEGION_TYPES.GARRISON]: [],
             [LEGION_TYPES.JESTER]: []
-        }   
+        }
     }
 
     get emptyCastrum() {

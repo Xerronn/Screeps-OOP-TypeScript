@@ -10,7 +10,7 @@ export default class Executive {
 
     architect: Architect;
     dangerLevel: number;
-    
+
     constructor(room: string) {
         this.room = room;
         this.dangerLevel = 0;
@@ -38,10 +38,8 @@ export default class Executive {
 
         if (global.debug) {
             Architect.drawSchematic(this.room);
-            Architect.buildWalls(this.room);
-            
         }
-        
+
         //automatic safe mode activation
         let hostileCreeps = Game.rooms[this.room].find(FIND_HOSTILE_CREEPS);
         if (hostileCreeps.length > 0) {
@@ -63,7 +61,7 @@ export default class Executive {
                 Game.notify(`Safe mode activated in room ${this.room}`)
             }
         } else this.dangerLevel = 0;
-        
+
         //once gamestage 5 is active, phasetwo is in effect and dedicated builders should be spawned
         let gameStage = Chronicler.readGameStage(this.room);
         if (gameStage >= 4.1) {
@@ -105,7 +103,7 @@ export default class Executive {
             let remotes = Chronicler.readRemotes(this.room);
             for (let remote in remotes) {
                 let remoteData = remotes[remote];
-                
+
                 if (remoteData.status === REMOTE_STATUSES.CLAIMED || remoteData.status === REMOTE_STATUSES.INVADED) {
                     //we own this remote room, so do some logic
                     let liveRemote = Game.rooms[remote];
@@ -132,9 +130,9 @@ export default class Executive {
                             Chronicler.writeRemoteStatus(this.room, remote, REMOTE_STATUSES.CLAIMED);
                         }
 
-                        
+
                     }
-                    
+
                     //don't proceed with any more logic if the room is currently invaded
                     if (status === REMOTE_STATUSES.INVADED) continue;
 
@@ -176,12 +174,12 @@ export default class Executive {
                                 let memory = { 'generation': 0, 'assignedRoom': remote, 'sourceId': source.id, 'courierSpawned': false};
                                 let task = `global.Imperator.administrators["${this.room}"].supervisor.queueCreep(
                                     {
-                                        'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], 
-                                        'type': '${CIVITAS_TYPES.MINER}', 
+                                        'body' : [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+                                        'type': '${CIVITAS_TYPES.MINER}',
                                         'memory': objArr[0]
                                     });
                                 `;
-                                Director.schedule(this.room, Game.time + 3000, task, [memory]);            
+                                Director.schedule(this.room, Game.time + 3000, task, [memory]);
                             }
                         }
                     }
@@ -332,7 +330,7 @@ export default class Executive {
             }
         }
 
-        
+
     }
 
     /**
@@ -439,7 +437,7 @@ export default class Executive {
             for (let i = 0; i < 2; i++) {
                 this.getSupervisor().queueCreep({
                     'body': [
-                        WORK, WORK, WORK, WORK, WORK, WORK, 
+                        WORK, WORK, WORK, WORK, WORK, WORK,
                         CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
                         MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE
                     ],
@@ -581,6 +579,6 @@ export default class Executive {
                 assignedContainers[container as Id<StructureContainer>][1].evolve(true);
             }
         }
-        
+
     }
 }
