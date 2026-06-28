@@ -56,7 +56,7 @@ export default class Executive {
             }
             this.dangerLevel += threatScore;
 
-            if (this.dangerLevel > 20) {
+            if (this.dangerLevel > 50) {
                 Game.rooms[this.room].controller?.activateSafeMode();
                 Game.notify(`Safe mode activated in room ${this.room}`)
             }
