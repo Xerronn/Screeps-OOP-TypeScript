@@ -718,7 +718,7 @@ export default class Architect {
             'mineral': []
         }
         let flatPaths: Position[] = []
-        let mainRP = new RoomPosition(mainStampLocation.x, mainStampLocation.y, roomObj.name);
+        let mainRP = new RoomPosition(mainStampLocation.x + 1, mainStampLocation.y + 1, roomObj.name);
 
         // Incrementally mark path endpoints (container positions) as 50 on the shared costMatrix
         // so subsequent paths avoid them while remaining buildable for links
