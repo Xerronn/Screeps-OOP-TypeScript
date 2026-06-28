@@ -492,13 +492,19 @@ export default class Architect {
                     let containerPos = sPath[sPath.length - 1];
 
                     let linkPos: Position | undefined;
+                    let possiblePos: RoomPosition[] = [];
                     for (let i = -1; i < 2; i++) {
                         for (let j = -1; j < 2; j++) {
                             if (costMatrix.get(containerPos.x + i, containerPos.y + j) < 50) {
-                                linkPos = {x: containerPos.x + i, y: containerPos.y + j};
+                                possiblePos.push(new RoomPosition(containerPos.x + i, containerPos.y + j, room))
                             }
                         }
                     }
+                    let bestPos = center.findClosestByPath(possiblePos);
+                    if (bestPos) {
+                        linkPos = {x: bestPos.x, y: bestPos.y};
+                    }
+
 
                     if (linkPos === undefined) {
                         //if a position satisfying the above requirements is not found, build it on the path
