@@ -1,9 +1,7 @@
 - rework parent/child classes into object composition
-- fix remote bug where containers are not getting created
 - links not activating until global reset
 - energy usage priorities (maybe dont even spawn those creeps when room priority isnt right)
 - make gamestages less rigid around rcl so that if rcls get completed too quickly it does things correctly still
-- finish wall placement algorithm to shield structures too close to the walls and alternate wall/rampart. make curator spawn in and upgrade them all
 - store more of room planning in memory
 - instead of storing sensitive ids that can change in creep memory store it in the schematic or something and have the creep look it up so we can easily change the source of truth if the id changes
 - improve room planning for more dense layouts and optimal extensions placement and rotation
@@ -29,8 +27,5 @@
 - more than one remote support(do math and maybe support all 8 surrounding rooms depending on distance)
 - use wrappers in wrappers more often instead of storing references to game objects store their wrappers
 - how to decom wrappers when there are a bunch of references to that object not just supervisor
-- fix miner links, they are not being built at all now lol
 - replace old logic related to roads and containers with new logic referencing wrappers. (curator)
 - replace every memory id we can with a wrapper attribute
-- improve wall building
-- source paths should not path through another source
