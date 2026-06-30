@@ -3,6 +3,7 @@ import Informant from 'controllers/Informant';
 import Director from 'controllers/Director';
 import Executive from './Executive';
 import Chronicler from 'controllers/Chronicler';
+import { SPAWN_PRIORITY_MAP } from 'controllers/Informant';
 
 //worker imports
 import Civitas from 'civitas/Civitas';
@@ -65,31 +66,6 @@ const CASTRUM_CLASS_MAP: { [key: string]: new (...args: any[]) => Castrum } = {
     [CASTRUM_TYPES.ROAD]: Road,
     [CASTRUM_TYPES.CONTAINER]: Container,
     [CASTRUM_TYPES.RAMPART]: Rampart
-};
-
-export const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
-    // Tier 1 - Defense / Host
-    [LEGION_TYPES.GARRISON]: 1,
-    [CIVITAS_TYPES.HOST]: 1,
-    // Tier 2 - Arbiter / Miners
-    [CIVITAS_TYPES.ARBITER]: 2,
-    [CIVITAS_TYPES.MINER]: 2,
-    // Tier 3 - Haulers
-    [CIVITAS_TYPES.COURIER]: 3,
-    // Tier 4 - Builders / Emissary / Curator
-    [CIVITAS_TYPES.ENGINEER]: 4,
-    [CIVITAS_TYPES.CONTRACTOR]: 4,
-    [CIVITAS_TYPES.EMISSARY]: 4,
-    [CIVITAS_TYPES.CURATOR]: 4,
-    // Tier 5 - Scout / Excavator / Chemist
-    [CIVITAS_TYPES.SCOUT]: 5,
-    [CIVITAS_TYPES.EXCAVATOR]: 5,
-    [CIVITAS_TYPES.CHEMIST]: 5,
-    // Tier 6 - Scholars
-    [CIVITAS_TYPES.SCHOLAR]: 6,
-    // Tier 7 - Offense (lowest priority)
-    [LEGION_TYPES.EXECUTIONER]: 7,
-    [LEGION_TYPES.JESTER]: 7,
 };
 
 export default class Supervisor {

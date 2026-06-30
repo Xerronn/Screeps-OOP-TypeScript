@@ -2,6 +2,42 @@ import Castrum from "castrum/Castrum";
 import Civitas from "civitas/Civitas";
 import Chronicler from "./Chronicler";
 
+export const SPAWN_PRIORITY_MAP: { [key: string]: number } = {
+    // Tier 1 - Defense / Host
+    [LEGION_TYPES.GARRISON]: 1,
+    [CIVITAS_TYPES.HOST]: 1,
+    // Tier 2 - Arbiter / Miners
+    [CIVITAS_TYPES.ARBITER]: 2,
+    [CIVITAS_TYPES.MINER]: 2,
+    // Tier 3 - Haulers
+    [CIVITAS_TYPES.COURIER]: 3,
+    // Tier 4 - Builders / Emissary / Curator
+    [CIVITAS_TYPES.ENGINEER]: 4,
+    [CIVITAS_TYPES.CONTRACTOR]: 4,
+    [CIVITAS_TYPES.EMISSARY]: 4,
+    [CIVITAS_TYPES.CURATOR]: 4,
+    // Tier 5 - Scout / Excavator / Chemist
+    [CIVITAS_TYPES.SCOUT]: 5,
+    [CIVITAS_TYPES.EXCAVATOR]: 5,
+    [CIVITAS_TYPES.CHEMIST]: 5,
+    // Tier 6 - Scholars
+    [CIVITAS_TYPES.SCHOLAR]: 6,
+    // Tier 7 - Offense (lowest priority)
+    [LEGION_TYPES.EXECUTIONER]: 7,
+    [LEGION_TYPES.JESTER]: 7,
+};
+
+export const RCL_WALL_HITS: {[rcl: number]: number} = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 100000,
+    6: 250000,
+    7: 1000000,
+    8: 10000000
+}
+
 export default class Informant {
 
     /**
@@ -47,8 +83,8 @@ export default class Informant {
 
     /**
      * Get information about sources from a room
-     * @param room 
-     * @returns 
+     * @param room
+     * @returns
      */
     static prospect(room: string): RoomResources {
         let resources: RoomResources = {};
@@ -274,7 +310,7 @@ export default class Informant {
     /**
      * Method that returns all supported recipies.
      * TODO: support all chemicals
-     * @returns 
+     * @returns
      */
     static getChemicalRecipes(chemical: RESOURCE_CATALYZED_GHODIUM_ACID | RESOURCE_GHODIUM_ACID | RESOURCE_HYDROXIDE | RESOURCE_GHODIUM_HYDRIDE | RESOURCE_GHODIUM | RESOURCE_ZYNTHIUM_KEANITE | RESOURCE_UTRIUM_LEMERGITE): Array<MineralCompoundConstant | MineralConstant> {
         let reactions = {
@@ -288,7 +324,7 @@ export default class Informant {
         }
         return reactions[chemical];
     }
-    
+
     /**
      * Method to get the steps of making a chemical
      * TODO: support all chemicals

@@ -2,11 +2,9 @@ import Executive from 'administrators/Executive';
 import Supervisor from 'administrators/Supervisor';
 import Workshop from 'castrum/Workshop';
 import Chronicler from 'controllers/Chronicler';
-import Informant from 'controllers/Informant';
+import Informant, { SPAWN_PRIORITY_MAP } from 'controllers/Informant';
 import Traveler from 'thirdParty/Traveler';
 import GameObj from '../GameObj';
-
-import {SPAWN_PRIORITY_MAP} from "../administrators/Supervisor";
 
 export default abstract class Civitas extends GameObj {
     //gameObj attributes
@@ -75,7 +73,7 @@ export default abstract class Civitas extends GameObj {
                 delete this.memory.generation;
             }
             this.supervisor.dismiss(this);
-            
+
             return false; //creep is dead
         }
 
@@ -114,15 +112,15 @@ export default abstract class Civitas extends GameObj {
 
     /**
      * Method to march to a specific room
-     * @param room 
-     * @returns 
+     * @param room
+     * @returns
      */
     march(room: string, deep=false): boolean {
         if (this.pos.x === 50 || this.pos.x === 0 || this.pos.y === 0 || this.pos.y === 50) {
             this.liveObj.travelTo(new RoomPosition(25, 25, this.room));
             return true;
         }
-        
+
         if (this.room !== room || (deep && !this.pos.inRangeTo(25, 25, 15))) {
             this.liveObj.travelTo(new RoomPosition(25, 25, room), {'preferHighway': true});
             return true;
@@ -160,7 +158,7 @@ export default abstract class Civitas extends GameObj {
 
     /**
      * Custom moveByPath implementation with creep swapping
-     * @param path 
+     * @param path
      * @returns boolean on whether it is still moving
      */
      moveByPath(path: RoomPosition[]): boolean {

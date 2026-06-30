@@ -1,5 +1,6 @@
 import Chronicler from 'controllers/Chronicler';
 import Worker, {WorkerMemory} from './Worker'
+import { RCL_WALL_HITS } from 'controllers/Informant';
 
 interface CuratorMemory extends WorkerMemory {
     closestRoad: Id<StructureRoad>;
@@ -11,9 +12,13 @@ export default class Curator extends Worker {
 
     targetWall: Id<StructureWall | StructureRampart> | undefined;
     targetWallProgress: number;
+    targetHits: number;
 
     constructor(curator: Creep) {
         super(curator);
+
+        let liveRoomRCL = Game.rooms[this.spawnRoom].controller?.level || 0;
+        this.targetHits = RCL_WALL_HITS[liveRoomRCL];
     }
 
     run() {
@@ -65,9 +70,14 @@ export default class Curator extends Worker {
                 {
                     filter: (struc) => (struc.structureType === STRUCTURE_WALL ||
                         struc.structureType === STRUCTURE_RAMPART) &&
-                        struc.hits < struc.hitsMax
+                        struc.hits < this.targetHits
                 }
             ) as Array<StructureRampart | StructureWall>;
+
+            if (repairableWalls.length === 0) {
+                this.conclude();
+                return false;
+            }
 
             liveObj = repairableWalls.sort((a, b) => (a.hits > b.hits) ? 1 : -1)[0];
 
@@ -170,7 +180,9 @@ export default class Curator extends Worker {
      */
     conclude() {
         delete this.memory.generation;
-        Chronicler.writeRemoteCurated(this.spawnRoom, this.assignedRoom, Game.time);
+        if (this.remote) {
+            Chronicler.writeRemoteCurated(this.spawnRoom, this.assignedRoom, Game.time);
+        }
         this.liveObj.suicide();
     }
 }

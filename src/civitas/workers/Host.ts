@@ -16,8 +16,10 @@ export default class Host extends Worker {
         this.idleSpot = this.supervisor.hostSpot;
         this.capacitorPaths = {};
     }
-    
+
     run(): boolean {
+        if (!this.idleSpot) this.idleSpot = this.supervisor.hostSpot;
+
         if (this.memory.generation !== undefined && (this.ticksToLive < 300 || this.memory.task == "renew" || this.memory.task == "renewFill")) {
             //start the loop by setting task to rewnewFill
             //this task will block spawning, but keep filling
@@ -54,7 +56,7 @@ export default class Host extends Worker {
 
     /**
      * Method to withdraw from storage, or if its empty, the terminal
-     * 
+     *
      * @returns if the task was executed
      */
     withdrawEnergy(): boolean {

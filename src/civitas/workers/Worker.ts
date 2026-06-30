@@ -4,12 +4,12 @@ import Civitas from '../Civitas';
 
 export interface WorkerMemory extends CreepMemory {
     fillTarget?: Id<AnyStoreStructure>;
-    pillageTarget?: Id<StructureStorage | StructureTerminal | Ruin>;
     buildTarget?: Id<ConstructionSite>;
 }
 export default class Worker extends Civitas {
     memory: WorkerMemory;
 
+    pillageTarget?: Id<StructureStorage | StructureTerminal | Ruin>;
     noPillage: boolean;             //if there is nothing to pillage
     constructor(creep: Creep) {
         super(creep);
@@ -33,7 +33,7 @@ export default class Worker extends Civitas {
     upgradeController(): boolean {
         let controller = Game.rooms[this.room].controller;
         if (controller === undefined) throw Error('Room has no controller');
-        
+
         if (this.pos.inRangeTo(controller, 3)) {
             this.liveObj.upgradeController(controller);
             let amount = Math.min(this.getActiveBodyParts(WORK), this.store.getUsedCapacity(RESOURCE_ENERGY))
@@ -199,9 +199,9 @@ export default class Worker extends Civitas {
      */
     pillage(): boolean {
         let liveObj: StructureStorage | StructureTerminal | Ruin | undefined;
-        if (this.memory.pillageTarget !== undefined) {
-            let tmpObj = Game.getObjectById(this.memory.pillageTarget);
-            if (tmpObj !== null && tmpObj.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+        if (this.pillageTarget !== undefined) {
+            let tmpObj = Game.getObjectById(this.pillageTarget);
+            if (tmpObj && tmpObj.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                 liveObj = tmpObj;
             }
         } else {
@@ -219,21 +219,24 @@ export default class Worker extends Civitas {
             if (liveObj === undefined && Game.rooms[this.room].find(FIND_RUINS).length > 0) {
                 let ruins = Game.rooms[this.room].find(FIND_RUINS);
                 for (let ruin of ruins) {
-                    if (ruin.structure.structureType == STRUCTURE_STORAGE && ruin.store.getUsedCapacity(RESOURCE_ENERGY) > 3000) {
-                        liveObj = ruin;
+                    if ((ruin.structure.structureType == STRUCTURE_STORAGE ||
+                        ruin.structure.structureType == STRUCTURE_TERMINAL) &&
+                        ruin.store.getUsedCapacity(RESOURCE_ENERGY) > this.store.getFreeCapacity()) {
+                            liveObj = ruin;
                     }
                 }
             }
         }
         if (liveObj === undefined) {
             this.noPillage = true;
+            this.pillageTarget = undefined;
             return false;
         }
-
+        this.pillageTarget = liveObj.id;
         if (this.pos.inRangeTo(liveObj, 1)) {
             this.liveObj.withdraw(liveObj, RESOURCE_ENERGY);
         } else this.liveObj.travelTo(liveObj);
-        
+
         return true;
     }
 

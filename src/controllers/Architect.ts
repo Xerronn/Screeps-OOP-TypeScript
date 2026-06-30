@@ -34,29 +34,36 @@ const STAMP_LAB: Stamp = [
 /**
  * A function to rotate a room stamp
  * @param stamp A room planning stamp
- * @param degrees The degrees to rotate it by
+ * @param rotations Number of 90 degree rotations to perform
  */
 function rotateStamp(stamp: Stamp, rotations: number): Stamp {
-    if (rotations == 0) return stamp;
     if (rotations < 0) {
-        throw new Error("Rotations must be a positive integer");
+        throw new Error("Rotations must be a non-negative integer");
     }
-    let n = Object.keys(stamp).length;
 
-    let rotated: Stamp = [[]];
-    for (let x = 0; x < n; x++) {
-        for (let y = 0; y < n; y++) {
-            let x_new = n - 1 - y;
-            let y_new = x;
+    let actualRotations = rotations % 4;
+    if (actualRotations === 0 || stamp.length === 0) return stamp;
 
-            if (rotated[x_new] == undefined) {
-                rotated[x_new] = [];
-            }
-            rotated[x_new][y_new] = stamp[x][y];
+    let current = stamp;
+
+    for (let r = 0; r < actualRotations; r++) {
+        const rows = current.length;
+        const cols = current[0].length;
+
+        let rotated: Stamp = [];
+        for (let i = 0; i < cols; i++) {
+            rotated.push(new Array(rows));
         }
+
+        for (let x = 0; x < rows; x++) {
+            for (let y = 0; y < cols; y++) {
+                rotated[y][rows - 1 - x] = current[x][y];
+            }
+        }
+        current = rotated;
     }
-    rotations -= 1;
-    return rotateStamp(rotated, rotations);
+
+    return current;
 }
 
 export default class Architect {
@@ -607,36 +614,28 @@ export default class Architect {
 
         let best = candidates.sort((a, b) => (a.score - (a.distance * .25) < b.score - (b.distance * .25)) ? 1 : -1)[0];
 
-        let topLeft = {
-            'x': Math.max(1, best.x - 5),
-            'y': Math.max(1, best.y - 5)
-        }
-        let topRight = {
-            'x': Math.min(49, best.x + 5),
-            'y': Math.max(1, best.y - 5)
-        }
-        let botLeft = {
-            'x': Math.max(1, best.x - 5),
-            'y': Math.min(49, best.y + 5)
-        }
-        let botRight = {
-            'x': Math.min(49, best.x + 5),
-            'y': Math.min(49, best.y + 5)
-        }
+        //figure out rotation - select rotation that places storage closest to centroid
+        let storageOffsets = [
+            { x: 0, y: 0 },  // Rotation 0
+            { x: 0, y: 2 },  // Rotation 1
+            { x: 2, y: 2 },  // Rotation 2
+            { x: 2, y: 0 }   // Rotation 3
+        ];
 
-        //figure out rotation
-        let corners = [topLeft, topRight, botLeft, botRight];
-        let scores = [];
+        let bestRotation = 0;
+        let bestDistance = 99;
 
-        for (let n = 0; n < corners.length; n++) {
-            scores[n] = 0;
-            for (let i = Math.max(1, corners[n].x - 5); i < Math.min(49, corners[n].x + 5); i++) {
-                for (let j = Math.max(1, corners[n].y - 5); j < Math.min(49, corners[n].y + 5); j++) {
-                    scores[n] += distanceMatrix.get(i, j);
-                }
+        for (let rot = 0; rot < storageOffsets.length; rot++) {
+            let storageX = best.x + storageOffsets[rot].x;
+            let storageY = best.y + storageOffsets[rot].y;
+            let distance = Architect.coordinateDistance(storageX, storageY, centroid.x, centroid.y);
+
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestRotation = rot;
             }
         }
-        let rotations = scores.indexOf(Math.max(...scores));
+        let rotations = bestRotation;
 
         return {
             'anchor': {

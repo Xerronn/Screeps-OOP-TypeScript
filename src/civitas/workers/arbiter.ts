@@ -45,6 +45,8 @@ export default class Arbiter extends Host {
     }
 
     run(): boolean {
+        if (!this.idleSpot) this.idleSpot = this.supervisor.arbiterSpot;
+
         if (this.ticksToLive < 2) this.evolve();
 
         if (this.returnToIdleSpot()) return true;
@@ -95,7 +97,7 @@ export default class Arbiter extends Host {
             this.depositTerminal(resType as ResourceConstant);
             return true;
         }
-        
+
         return false;
     }
 

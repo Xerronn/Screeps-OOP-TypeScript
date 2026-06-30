@@ -280,6 +280,7 @@ export default class Executive {
                 //         break;
                 //     }
                 // }
+                this.spawnCurator(this.room);
                 break;
             case 7:
                 //just turned rcl 7
@@ -293,12 +294,14 @@ export default class Executive {
                 break;
             case 7.2:
                 //everything is done building and storage has > 100,000 energy
+                this.spawnCurator(this.room);
                 this.spawnChemist();
                 break;
             case 8:
                 //TODO: lots and lots
                 break;
             case 8.1:
+                this.spawnCurator(this.room);
                 Architect.buildWorkshops(this.room);
                 break;
         }

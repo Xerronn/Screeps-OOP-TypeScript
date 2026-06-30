@@ -2,7 +2,7 @@
  * To start using Traveler, require it in main.js:
  * Example: var Traveler = require('Traveler.js');
  */
-import {SPAWN_PRIORITY_MAP} from "../administrators/Supervisor";
+import { SPAWN_PRIORITY_MAP } from "../controllers/Informant";
 
  export default class Traveler {
 
