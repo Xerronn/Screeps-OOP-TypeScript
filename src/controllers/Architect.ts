@@ -156,11 +156,12 @@ export default class Architect {
         let stamp = schema.main;
         let rotated = rotateStamp(STAMP_MAIN, stamp.rotations);
         let dimensions = rotated.length;
-        for (let x = 0; x < dimensions; x++) {
-            for (let y = 0; y < dimensions; y++) {
-                let building = rotated[x][y];
+        for (let y = 0; y < dimensions; y++) {
+            for (let x = 0; x < dimensions; x++) {
+                let building = rotated[y][x];
                 if (building === STRUCTURE_ROAD && !buildRoads) continue;
                 let pos = new RoomPosition(stamp.anchor.x + x, stamp.anchor.y + y, room);
+
                 pos.createConstructionSite(building);
             }
         }

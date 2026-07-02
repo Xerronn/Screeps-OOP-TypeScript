@@ -29,3 +29,4 @@
 - how to decom wrappers when there are a bunch of references to that object not just supervisor
 - replace old logic related to roads and containers with new logic referencing wrappers. (curator)
 - replace every memory id we can with a wrapper attribute
+- refactor memory setup a bit. maybe store all rooms in memory.rooms but have a remote marker. We can store container and link pos in each room resource memory instead of schematic
