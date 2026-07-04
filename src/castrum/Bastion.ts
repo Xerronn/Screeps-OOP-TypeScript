@@ -13,6 +13,7 @@ export default class Bastion extends Castrum {
 
     attacking: boolean;
     repairTarget?: Road | Container | Rampart;
+    repairStuck: number;
 
     constructor(supervisor: Supervisor, bastion: StructureTower) {
         super(supervisor, bastion);
@@ -20,6 +21,7 @@ export default class Bastion extends Castrum {
         this.liveObj = bastion;
         this.store = this.liveObj.store;
         this.attacking = false;
+        this.repairStuck = 0;
     }
 
     update(): boolean {
@@ -60,22 +62,25 @@ export default class Bastion extends Castrum {
 
     repair() {
         if (this.repairTarget) {
-            if (this.repairTarget.structureType === STRUCTURE_RAMPART) {
-                if (this.repairTarget.hits < 1000) {
+            if (this.repairTarget instanceof Rampart) {
+                if (this.hits < this.repairTarget.targetHits) {
                     this.liveObj.repair(this.repairTarget.liveObj);
+                    this.repairStuck++;
                     return;
                 }
             } else if (this.repairTarget.hits < this.repairTarget.hitsMax) {
-                this.liveObj.repair(this.repairTarget.liveObj);
+                this.repairStuck++;
                 return;
             }
+
+            this.repairStuck = 0;
             this.repairTarget = undefined;
-        } 
+        }
     }
 
     /**
      * Method to heal a creep, only when not attacking
-     * @param creep 
+     * @param creep
      */
     heal(creep: Creep) {
         if (this.attacking === false) {

@@ -5,10 +5,11 @@ import type Supervisor from 'administrators/Supervisor';
 export default class Road extends Castrum {
     id: Id<StructureRoad>;
     liveObj: StructureRoad;
+    remote: boolean;
 
     constructor(supervisor: Supervisor, road: StructureRoad) {
         super(supervisor, road);
-
+        this.remote = this.room !== this.supervisor.room;
     }
 
     update(): boolean {
@@ -22,7 +23,7 @@ export default class Road extends Castrum {
     }
 
     run() {
-        if (!this.hasVision) return;
+        if (!this.hasVision || this.remote) return;
         if (this.hits / this.hitsMax < 0.8) {
             this.supervisor.requestRepair(this);
         }

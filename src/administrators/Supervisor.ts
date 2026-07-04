@@ -387,7 +387,7 @@ export default class Supervisor {
 
     requestRepair(target: Road | Container | Rampart): void {
         for (let bastion of this.castrum[CASTRUM_TYPES.BASTION]) {
-            if (!bastion.repairTarget) {
+            if (!bastion.repairTarget || bastion.repairStuck > 50) {
                 bastion.repairTarget = target;
                 break;
             }

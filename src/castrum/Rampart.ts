@@ -32,7 +32,7 @@ export default class Rampart extends Castrum {
 
     run() {
         if (!this.hasVision) return;
-        if (this.hits < 1000 || (this.hits < this.targetHits && Math.floor(this.hits / this.targetHits) > 0.95)) {
+        if (this.hits < this.targetHits) {
             this.supervisor.requestRepair(this);
         }
     }
